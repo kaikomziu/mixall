@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pocketスタンプ管理 - MixAll</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<style>
+.stamp-grid { display:flex; flex-direction:column; gap:12px; }
+.stamp-group { border:1px solid var(--border); border-radius:12px; padding:12px; background:var(--panel-2); }
+.stamp-group h3 { margin:0 0 8px; }
+.stamp-item { display:flex; align-items:center; gap:12px; padding:8px 0; border-top:1px solid var(--border); }
+.stamp-item:first-of-type { border-top:0; }
+.stamp-item img { width:72px; height:72px; object-fit:contain; border-radius:8px; border:1px solid var(--border); background:var(--panel-2); }
+.stamp-item .name { font-size:0.75rem; margin-top:4px; word-break:break-all; }
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="Pocketスタンプ管理 - MixAll。MixAllのサービスページです。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Pocketスタンプ管理 - MixAll">
+  <meta property="og:description" content="Pocketスタンプ管理 - MixAll。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/Pocket/stamps">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="ぽけっとのチャット">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pocketスタンプ管理 - MixAll">
+  <meta name="twitter:description" content="Pocketスタンプ管理 - MixAll。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
+  <nav class="services">
+    <a href="/Ghost">Ghost</a>
+    <a href="/Pocket">ぽけっと</a>
+    <a href="/admin">運営ダッシュボード</a>
+  </nav>
+</header>
+
+<main>
+  <div id="gate" class="card" style="display:none;">
+    <h2>アクセスできません</h2>
+    <p class="muted">このページは運営または公認アカウントのみ利用できます。</p>
+  </div>
+
+  <div id="content" style="display:none;">
+    <div class="card">
+      <h2>スタンプを追加</h2>
+      <p class="muted">画像は高画質のままチャンク分割でアップロードされます(サイズ上限は実質ありません)。一覧表示用に軽量なサムネイルも自動生成します。</p>
+      <input type="text" id="packName" placeholder="スタンプ名（パック名）" />
+      <input type="text" id="packIcon" placeholder="スタンプアイコン（例: 😀）" maxlength="8" value="😀" />
+      <input type="text" id="packId" placeholder="パックID（同じIDで同じパックに追加）" />
+      <input type="text" id="stampName" placeholder="このパック内のスタンプ名" />
+      <label class="muted">パック価格（MixAllコイン・0で無料）<input type="number" id="stampPrice" min="0" max="100000" step="1" value="0" /></label>
+      <input type="file" id="stampFile" accept="image/png,image/gif,image/webp,image/jpeg" />
+      <div id="uploadStatus" class="muted"></div>
+      <div class="error" id="createError"></div>
+      <button id="createSubmit">スタンプを追加</button>
+    </div>
+
+    <div class="card">
+      <h2>スタンプ一覧</h2>
+      <div id="stampGrid" class="stamp-grid"><p class="muted">読み込み中...</p></div>
+    </div>
+  </div>
+</main>
+
+<script src="/js/auth.js"></script>
+<script src="/js/files.js"></script>
+<script>
+const session = Netrify.requireLogin();
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// 透過PNGはPNGのまま保持し、軽量GIFはアニメーションを保ったまま使用する
+function makeThumbnail(file) {
+  if (file.type === 'image/gif' && file.size <= 90000) {
+    return new Promise((resolve, reject) => { const reader=new FileReader(); reader.onload=()=>resolve(reader.result); reader.onerror=reject; reader.readAsDataURL(file); });
+  }
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const size = 160; const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, size, size);
+      const scale = Math.min(size / img.width, size / img.height); const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h); URL.revokeObjectURL(objectUrl);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = (error) => { URL.revokeObjectURL(objectUrl); reject(error); }; img.src = objectUrl;
+  });
+}
+
+async function init() {
+  const res = await fetch('/.netlify/functions/stamps?token=' + encodeURIComponent(session.token));
+  if (res.status === 401) { window.location.href = '/?next=' + encodeURIComponent(location.pathname); return; }
+  const data = await res.json();
+
+  if (!data.canManage) {
+    document.getElementById('gate').style.display = 'block';
+    return;
+  }
+  document.getElementById('content').style.display = 'block';
+  renderStamps(data.stamps);
+}
+
+async function loadStamps() {
+  const res = await fetch('/.netlify/functions/stamps?token=' + encodeURIComponent(session.token));
+  const data = await res.json();
+  renderStamps(data.stamps);
+}
+
+function renderStamps(stamps) {
+  const grid = document.getElementById('stampGrid');
+  if (!stamps || stamps.length === 0) {
+    grid.innerHTML = '<p class="muted">まだスタンプがありません。</p>';
+    return;
+  }
+  const groups = new Map();
+  stamps.forEach(s => { const id = s.packId || s.id; if (!groups.has(id)) groups.set(id, []); groups.get(id).push(s); });
+  grid.innerHTML = [...groups.entries()].map(([packId, items]) => {
+    const first = items[0];
+    return `<section class="stamp-group"><h3>${escapeHtml(first.packIcon || '😀')} ${escapeHtml(first.packName || 'スタンプ')} <span class="muted">(${escapeHtml(packId)})</span></h3>${items.map(s => `
+      <div class="stamp-item"><img src="${s.thumbnailDataUrl}" alt="${escapeHtml(s.name)}" /><div style="flex:1"><strong>${escapeHtml(s.name)}</strong><div class="muted">${Number(s.priceCoins || 0) > 0 ? `${Number(s.priceCoins)}コイン` : '無料'}</div></div><button type="button" class="ghost" data-del="${s.id}" style="font-size:0.7rem;padding:2px 6px;">削除</button></div>
+    `).join('')}</section>`;
+  }).join('');
+  grid.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('このスタンプを削除しますか?')) return;
+      await Netrify.api('/.netlify/functions/stamps', { action: 'deleteStamp', token: session.token, stampId: btn.dataset.del });
+      loadStamps();
+    };
+  });
+}
+
+document.getElementById('createSubmit').onclick = async () => {
+  const errEl = document.getElementById('createError');
+  const statusEl = document.getElementById('uploadStatus');
+  errEl.textContent = '';
+  const name = document.getElementById('stampName').value.trim();
+  const packName = document.getElementById('packName').value.trim();
+  const packIcon = document.getElementById('packIcon').value.trim() || '😀';
+  const packId = document.getElementById('packId').value.trim();
+  const file = document.getElementById('stampFile').files[0];
+  const priceCoins = Math.max(0, Math.min(100000, Math.floor(Number(document.getElementById('stampPrice').value) || 0)));
+  if (!packName) { errEl.textContent = 'スタンプ名（パック名）を入力してください'; return; }
+  if (!name) { errEl.textContent = 'パック内のスタンプ名を入力してください'; return; }
+  if (!file) { errEl.textContent = '画像を選択してください'; return; }
+
+  const submitButton = document.getElementById('createSubmit');
+  if (submitButton.disabled) return;
+  submitButton.disabled = true;
+  try {
+    statusEl.textContent = 'サムネイル生成中...';
+    const thumbnailDataUrl = await makeThumbnail(file);
+
+    statusEl.textContent = 'アップロード中... (0%)';
+    const manifest = await NetrifyFiles.uploadFile(file, session.token, (done, total) => {
+      statusEl.textContent = `アップロード中... (${Math.round(done / total * 100)}%)`;
+    });
+
+    await Netrify.api('/.netlify/functions/stamps', {
+      action: 'createStamp', token: session.token, name, packName, packIcon, packId, priceCoins, mimeType:file.type, fileId: manifest.fileId, thumbnailDataUrl
+    });
+
+    statusEl.textContent = '';
+    document.getElementById('stampName').value = '';
+    document.getElementById('packId').value = '';
+    document.getElementById('stampPrice').value = '0';
+    document.getElementById('stampFile').value = '';
+    loadStamps();
+  } catch (e) {
+    statusEl.textContent = '';
+    errEl.textContent = e.message;
+  } finally {
+    submitButton.disabled = false;
+  }
+};
+
+init();
+</script>
+</body>
+</html>

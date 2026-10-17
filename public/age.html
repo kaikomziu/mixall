@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>生年月日設定 - MixAll</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/settings.js"></script>
+
+  <meta name="description" content="生年月日設定 - MixAll。MixAllのサービスページです。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="生年月日設定 - MixAll">
+  <meta property="og:description" content="生年月日設定 - MixAll。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/age">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="MixAllログイン">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="生年月日設定 - MixAll">
+  <meta name="twitter:description" content="生年月日設定 - MixAll。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+</head>
+<body>
+  <header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div></header>
+  <main>
+    <section id="ageCheckNotice" class="card" style="max-width:680px;margin:32px auto" aria-live="polite">
+      <p id="ageCheckMessage">ログイン状態と生年月日データを確認しています…</p>
+      <p id="ageCheckError" class="error" role="alert"></p>
+      <button id="retryAgeCheck" type="button" hidden>再試行</button>
+    </section>
+    <section id="ageGateCard" class="card" hidden style="max-width:680px;margin:32px auto">
+      <h1>生年月日の設定</h1>
+      <p>生年月日が未登録のアカウントは、登録が完了するまでサイトを利用できません。年齢区分は生年月日から自動計算され、誕生日に更新されます。</p>
+      <p class="muted">ここで年齢を入力する事で機能が減ったりはせず年齢に適さないコンテンツ投稿を非表示にする為の選択欄です。</p>
+      <label for="birthDate">生年月日</label>
+      <input id="birthDate" type="date" required>
+      <p class="muted">生年月日は本人の申告情報です。運営・副運営が本人確認の補助情報として閲覧でき、閲覧操作は記録されます。ただし、生年月日の自己申告だけで本人確認が完了するものではありません。登録後、利用者自身では変更できません。誤りがある場合は運営へ相談してください。</p>
+      <div id="error" class="error" role="alert"></div>
+      <div id="status" class="muted" aria-live="polite"></div>
+      <button id="save" type="button">生年月日を登録して続ける</button>
+    </section>
+  </main>
+  <script src="/js/auth.js"></script>
+  <script>
+    const session = Netrify.getSession();
+    const params = new URLSearchParams(location.search);
+    const candidate = params.get('next') || '/';
+    const next = candidate.startsWith('/') && !candidate.startsWith('//') && !candidate.includes('\\') ? candidate : '/';
+    const input = document.getElementById('birthDate');
+    const button = document.getElementById('save');
+    const error = document.getElementById('error');
+    const status = document.getElementById('status');
+    const checkNotice = document.getElementById('ageCheckNotice');
+    const checkMessage = document.getElementById('ageCheckMessage');
+    const checkError = document.getElementById('ageCheckError');
+    const retryButton = document.getElementById('retryAgeCheck');
+    const ageGateCard = document.getElementById('ageGateCard');
+    const tokyoToday = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
+    input.max = tokyoToday;
+    const loginUrl = '/login/?next=' + encodeURIComponent('/age.html?next=' + next);
+    if (!session || !session.token) location.replace(loginUrl);
+    async function initialize() {
+      if (!session || !session.token) return;
+      retryButton.hidden = true;
+      checkError.textContent = '';
+      checkMessage.textContent = 'ログイン状態と生年月日データを確認しています…';
+      try {
+        const saved = await Netrify.api('/.netlify/functions/auth', { action:'getBirthDate', token:session.token });
+        if (saved.birthDate) {
+          // サーバーには登録済みでも、旧版のlocalStorageセッションには
+          // hasBirthDateが無い/falseのまま残ることがある。ここで必ず同期し、
+          // 次のページで年齢確認へ再リダイレクトされるループを止める。
+          Netrify.setSession({ ...session, age:saved.age, hasBirthDate:true });
+          location.replace(next);
+          return;
+        } else {
+          checkNotice.hidden = true;
+          ageGateCard.hidden = false;
+          status.textContent = '初回登録が必要です。生年月日を確認して登録してください。';
+        }
+      } catch (e) {
+        if (/401|ログインが必要/.test(e.message)) { location.replace(loginUrl); return; }
+        checkMessage.textContent = '生年月日データを確認できませんでした。年齢入力フォームは、サーバーの登録状況を確認できるまで表示しません。';
+        checkError.textContent = e.message;
+        retryButton.hidden = false;
+      }
+    }
+    retryButton.onclick = initialize;
+    button.onclick = async () => {
+      error.textContent = '';
+      if (!input.value) { error.textContent = '生年月日を入力してください。'; return; }
+      button.disabled = true;
+      try {
+        const result = await Netrify.api('/.netlify/functions/auth', { action:'setBirthDate', token:session.token, birthDate:input.value });
+        Netrify.setSession({ ...session, age:result.age, hasBirthDate:true });
+        location.replace(next);
+      } catch (e) {
+        if (/401|ログインが必要/.test(e.message)) { location.replace(loginUrl); return; }
+        error.textContent = e.message;
+        button.disabled = false;
+      }
+    };
+    initialize();
+  </script>
+</body>
+</html>

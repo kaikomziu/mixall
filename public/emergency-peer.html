@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll 端末間P2P</title><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/css/style.css"><style>
+body{max-width:900px;margin:0 auto;padding:18px}.hero{border:1px solid #d96b55;border-radius:16px;padding:20px;background:rgba(217,107,85,.14)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.peer-status{font-weight:700}.peer-status[data-kind=ok]{color:#16845b}.peer-status[data-kind=bad]{color:#b42318}.code{min-height:150px;font-family:monospace;font-size:.82rem}.peer-message{border:1px solid var(--border);border-radius:10px;padding:9px;margin:7px 0}.peer-message small{color:var(--muted);display:block}.note{border-left:4px solid #d96b55;padding:10px 12px;background:rgba(217,107,85,.1)}
+</style>
+  <meta property="og:title" content="MixAll 端末間P2P">
+  <meta property="og:description" content="MixAllのサービスと便利な機能をご紹介します。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mix-alls.netlify.app/emergency-peer">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head><body>
+<header class="top"><div class="brand">Mix<span>All</span></div><nav class="services"><a href="/emergency.html">緊急モード</a><a class="active" href="/emergency-peer.html">端末間P2P</a></nav></header>
+<main><section class="hero"><h1>端末間P2Pブリッジ</h1><p>WebRTC DataChannelで、近くの端末と直接データを交換します。Wi‑Fiルーターや端末のテザリングなど、両端末が同じローカルネットワークにいる場合に、外部APIなしで使える構成です。</p><p class="note">自動発見は行いません。最初の接続だけ、表示された接続コードを相手へコピーして渡します。HTMLファイル単体ではHTTPSやブラウザ権限の制約があるため、PWAとして事前に開いておくことを推奨します。</p><p id="peerStatus" class="peer-status">未接続</p></section>
+<section class="card"><h2>接続の作成側</h2><p>端末Aで「接続コードを作成」し、表示されたコードを端末Bへ渡してください。</p><button id="createOffer" type="button">接続コードを作成</button><textarea id="offerOutput" class="code" readonly placeholder="ここに接続コードが表示されます"></textarea><button id="copyOffer" type="button" class="secondary">コードをコピー</button><label>端末Bから受け取った回答コード<textarea id="answerInput" class="code" placeholder="回答コードを貼り付け"></textarea></label><button id="applyAnswer" type="button">回答コードを適用</button></section>
+<section class="card"><h2>接続を受ける側</h2><p>端末Bで端末Aの接続コードを貼り付け、「回答コードを作成」してください。</p><textarea id="offerInput" class="code" placeholder="接続コードを貼り付け"></textarea><button id="createAnswer" type="button">回答コードを作成</button><textarea id="answerOutput" class="code" readonly placeholder="ここに回答コードが表示されます"></textarea><button id="copyAnswer" type="button" class="secondary">回答コードをコピー</button></section>
+<section class="card"><h2>接続品質とバケツリレー</h2><p id="peerQuality" class="muted">まだ接続品質を測定していません。</p><p id="relayStatus" class="muted">受信したメッセージは重複を除外し、TTLが残っている場合だけ別の接続へ中継します。</p><button id="probeNow" type="button" class="secondary">疎通チェック</button><button id="persistMeshButton" type="button" class="secondary">候補・接続ログを端末に保持</button></section>
+<section class="card"><h2>端末間メッセージ</h2><form id="peerForm"><input id="peerAuthor" maxlength="80" placeholder="名前"><textarea id="peerText" maxlength="2000" placeholder="接続相手へ送るメッセージ"></textarea><button type="submit">P2P送信</button></form><div id="peerMessages"><p class="muted">接続後、ここに送受信履歴が表示されます。</p></div></section>
+<section class="card"><h2>この方式の範囲</h2><p>このページはWi‑Fi Directを操作するものではありません。WebRTCの直接データチャネルを使います。端末のWi‑Fi機能をONにしたり、近くの端末を自動検出したり、多段中継を自動設定したりはできません。中継したい場合は、各端末で別の相手との接続を作り、受け取った情報を手動で転送します。</p></section></main>
+<script src="/js/mesh-persistence.js"></script><script src="/js/emergency-peer.js"></script></body></html>

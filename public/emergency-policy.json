@@ -1,0 +1,12 @@
+{
+  "network": {
+    "downlinkMbps": 1.5,
+    "rttMs": 500
+  },
+  "dangerZones": [],
+  "weather": {
+    "endpoint": "",
+    "minAlertLevel": 3,
+    "intervalMs": 600000
+  }
+}

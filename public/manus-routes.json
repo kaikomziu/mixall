@@ -1,0 +1,116 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "title": "MixAll"
+    },
+    {
+      "path": "/reset-password/",
+      "title": "パスワード再設定"
+    },
+    {
+      "path": "/Mail/Inbox/",
+      "title": "Mail受信トレイ"
+    },
+    {
+      "path": "/Mail/Sent/",
+      "title": "Mail送信済み"
+    },
+    {
+      "path": "/Mail/All/",
+      "title": "Mailすべてのメール"
+    },
+    {
+      "path": "/Mail/Compose/",
+      "title": "Mail新規作成"
+    },
+    {
+      "path": "/Uch",
+      "title": "Uch"
+    },
+    {
+      "path": "/Uch/thread.html",
+      "title": "Uchスレッド"
+    },
+    {
+      "path": "/Pocket",
+      "title": "ぽけっと"
+    },
+    {
+      "path": "/Pocket/room.html",
+      "title": "ぽけっとルーム"
+    },
+    {
+      "path": "/Pocket/thread.html",
+      "title": "ぽけっとスレッド"
+    },
+    {
+      "path": "/Ghost/watch.html",
+      "title": "Ghost通常動画"
+    },
+    {
+      "path": "/Ghost/videos.html",
+      "title": "Ghost縦長動画"
+    },
+    {
+      "path": "/Language",
+      "title": "特殊言語辞書"
+    },
+    {
+      "path": "/Calendar",
+      "title": "共有カレンダー"
+    },
+    {
+      "path": "/Extensions",
+      "title": "拡張機能"
+    },
+    {
+      "path": "/Custom",
+      "title": "カスタム"
+    },
+    {
+      "path": "/Custom/builder.html",
+      "title": "3Dワールドビルダー"
+    },
+    {
+      "path": "/Custom/room.html",
+      "title": "3Dワールド"
+    },
+    {
+      "path": "/emergency.html",
+      "title": "MixAll緊急モード"
+    },
+    {
+      "path": "/emergency-peer.html",
+      "title": "MixAll端末間P2P"
+    },
+    {
+      "path": "/Tools",
+      "title": "ツールセンター"
+    },
+    {
+      "path": "/Tools?anon=:slug",
+      "title": "匿名メッセージ送信"
+    },
+    {
+      "path": "/Tools?room=:id",
+      "title": "一時チャットルーム"
+    },
+    {
+      "path": "/Tools?locker=:id",
+      "title": "期限付き共有ロッカー"
+    },
+    {
+      "path": "/Mail/",
+      "title": "Mail"
+    },
+    {
+      "path": "/Mail/Thread/:id",
+      "title": "Mail個別スレッド"
+    },
+    {
+      "path": "/r/:id",
+      "title": "恒久リダイレクト"
+    }
+  ]
+}

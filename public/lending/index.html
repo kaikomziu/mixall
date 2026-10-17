@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>貸し出しサーバー - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<style>
+textarea#htmlEditor { min-height: 240px; font-family: monospace; font-size: 0.85rem; }
+</style>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="MixAllで自分のミニサイトやゲームを作成して公開できます。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="サイト作成 - MixAll">
+  <meta property="og:description" content="MixAllで自分のミニサイトやゲームを作成して公開できます。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/lending/">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="MixAllサイト作成">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="サイト作成 - MixAll">
+  <meta name="twitter:description" content="MixAllで自分のミニサイトやゲームを作成して公開できます。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
+  <nav class="services">
+    <a href="/">トップへ</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card">
+    <h2>貸し出しサーバー</h2>
+    <p class="muted">
+      自分の識別子(スラッグ)でミニサイトを公開できます。公開URLは <code>/site-view/(識別子)</code> になります。
+      安全のため、公開したHTMLはサンドボックス化されたiframeの中で実行されます(このサイト本体のログイン情報にはアクセスできません)。<br>
+      運営・公認アカウントだけがCoin命令を保存できます。固定値は <code>Coin+100{bix.admin‹BoxMedia›}</code>、変数参照は <code>Coin+let amount{/[amount]‹BoxMedia›}</code> と記述します。参照先データには <code>{"amount":100,"email":"user@example.com"}</code> または <code>{"coins":100,"target":"user@example.com"}</code> を保存してください。実行者のメールアドレスを変数へ入れるには <code>mail?=/let myMail</code> と記述します。例えば <code>Coin+let workCoins{/[myMail]‹BoxMedia›}</code> では、サイトのデータキー <code>workCoins</code> の数値を実行者自身へ付与します。フラッシュ暗算のスコアをCoinにする場合は、スコア確定後のJavaScript内に <code>mail?=/let AAA;</code> と <code>Coin+let ${score}{/[AAA]‹BoxMedia›};</code> を記述します。公開側ではこの命令を安全な非同期Coin申請へ変換するため、画面処理を停止させません。
+    </p>
+
+    <input type="text" id="slugInput" placeholder="識別子 (英数字とハイフン、例: my-page)" />
+    <input type="text" id="titleInput" placeholder="サイトタイトル" />
+    <textarea id="htmlEditor" placeholder="&lt;h1&gt;こんにちは&lt;/h1&gt;
+自由にHTMLを書いてください"></textarea>
+    <div class="error" id="saveError"></div>
+    <div class="row">
+      <button id="saveSubmit">公開する</button>
+      <a id="previewLink" href="#" target="_blank"><button type="button" class="secondary">公開後にプレビューを開く</button></a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>自分のサイト一覧</h3>
+    <div id="siteList"><p class="muted">読み込み中...</p></div>
+  </div>
+
+  <div class="card">
+    <h3>サイトデータ (Netlify Blobs)</h3>
+    <p class="muted">サイトごとに分離されたデータをJSONまたはテキストとして保存できます。1件512KB、サイト合計5MB、最大200件です。</p>
+    <input type="text" id="dataSlug" placeholder="対象サイトの識別子 (例: my-page)" />
+    <input type="text" id="dataKey" placeholder="データキー (例: settings)" />
+    <select id="dataContentType"><option value="application/json">JSON</option><option value="text/plain">テキスト</option></select>
+    <textarea id="dataValue" placeholder='保存する値 (JSON例: {"theme":"dark"})'></textarea>
+    <label class="row muted"><input type="checkbox" id="dataPublic" style="width:auto;" /> 公開データにする (サイト内のGETから読めます)</label>
+    <div class="error" id="dataError"></div><button type="button" id="dataSave">データを保存</button>
+    <p class="muted">公開データの取得例: <code>/.netlify/functions/lending-data?slug=識別子&amp;key=キー&amp;public=1</code></p>
+    <div id="dataList" style="margin-top:12px;"><p class="muted">対象サイトを入力すると一覧が表示されます。</p></div>
+  </div>
+</main>
+
+<script src="/js/auth.js"></script>
+<script>
+const session = Netrify.requireLogin();
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadDataList() {
+  if (!session) return;
+  const slug = document.getElementById('dataSlug').value.trim();
+  const el = document.getElementById('dataList');
+  if (!slug) { el.innerHTML = '<p class="muted">対象サイトを入力すると一覧が表示されます。</p>'; return; }
+  try {
+    const res = await fetch('/.netlify/functions/lending-data?slug=' + encodeURIComponent(slug) + '&token=' + encodeURIComponent(session.token));
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'データ一覧を取得できません');
+    el.innerHTML = (data.data || []).map((item) => `<div class="bot-item"><span><strong>${escapeHtml(item.key)}</strong> <span class="muted">${escapeHtml(item.contentType)} · ${item.bytes} bytes · ${item.publicRead ? '公開' : '非公開'}</span></span><span class="row"><button type="button" class="ghost" data-data-load="${escapeHtml(item.key)}">取得</button><button type="button" class="ghost" data-data-delete="${escapeHtml(item.key)}">削除</button></span></div>`).join('') || '<p class="muted">保存されたデータはありません。</p>';
+    el.querySelectorAll('[data-data-load]').forEach((button) => button.onclick = async () => {
+      const result = await Netrify.api('/.netlify/functions/lending-data', { action:'getData', token:session.token, slug, key:button.dataset.dataLoad });
+      document.getElementById('dataKey').value = result.data.key;
+      document.getElementById('dataContentType').value = result.data.contentType || 'application/json';
+      document.getElementById('dataPublic').checked = result.data.publicRead === true;
+      document.getElementById('dataValue').value = typeof result.data.value === 'string' ? result.data.value : JSON.stringify(result.data.value, null, 2);
+    });
+    el.querySelectorAll('[data-data-delete]').forEach((button) => button.onclick = async () => { if (!confirm(`${button.dataset.dataDelete} を削除しますか？`)) return; await Netrify.api('/.netlify/functions/lending-data', { action:'deleteData', token:session.token, slug, key:button.dataset.dataDelete }); loadDataList(); });
+  } catch (e) { el.innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`; }
+}
+
+async function loadSites() {
+  if (!session) return;
+  const res = await fetch('/.netlify/functions/lending?token=' + encodeURIComponent(session.token));
+  const data = await res.json();
+  const el = document.getElementById('siteList');
+  if (!data.sites || data.sites.length === 0) {
+    el.innerHTML = '<p class="muted">まだサイトがありません。</p>';
+    return;
+  }
+  el.innerHTML = data.sites.map(s => `
+    <div class="bot-item">
+      <span><a href="/site-view/${encodeURIComponent(s.slug)}" target="_blank">/site-view/${escapeHtml(s.slug)}</a> — ${escapeHtml(s.title)}</span>
+      <span class="row">
+        <button type="button" class="ghost" data-edit="${s.slug}">編集</button>
+        <button type="button" class="ghost" data-run-coin="${s.slug}">Coin実行</button>
+        <button type="button" class="ghost" data-del="${s.slug}">削除</button>
+      </span>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.onclick = async () => {
+      const data2 = await Netrify.api('/.netlify/functions/lending', { action: 'getSite', token: session.token, slug: btn.dataset.edit });
+      document.getElementById('slugInput').value = data2.site.slug;
+      document.getElementById('titleInput').value = data2.site.title;
+      document.getElementById('htmlEditor').value = data2.site.html;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  });
+  el.querySelectorAll('[data-run-coin]').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('このサイトに保存されたCoin命令を実行しますか？')) return;
+      try { const result = await Netrify.api('/.netlify/functions/lending', { action:'runCoinProgram', token:session.token, slug:btn.dataset.runCoin }); alert((result.results || []).map((item) => item.ok ? `${item.target}: +${item.amount}` : `${item.target}: ${item.error}`).join('\\n')); }
+      catch (e) { alert(e.message); }
+    };
+  });
+  el.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('/site-view/' + btn.dataset.del + ' を削除しますか?')) return;
+      await Netrify.api('/.netlify/functions/lending', { action: 'deleteSite', token: session.token, slug: btn.dataset.del });
+      loadSites();
+    };
+  });
+}
+
+document.getElementById('dataSlug').addEventListener('change', loadDataList);
+document.getElementById('dataSave').onclick = async () => {
+  const err = document.getElementById('dataError'); err.textContent = '';
+  const slug = document.getElementById('dataSlug').value.trim(); const key = document.getElementById('dataKey').value.trim(); const raw = document.getElementById('dataValue').value;
+  if (!slug || !key || !raw) { err.textContent = 'サイト識別子、キー、値を入力してください'; return; }
+  let value = raw;
+  if (document.getElementById('dataContentType').value === 'application/json') { try { value = JSON.parse(raw); } catch { err.textContent = 'JSONの形式が不正です'; return; } }
+  try { await Netrify.api('/.netlify/functions/lending-data', { action:'saveData', token:session.token, slug, key, value, contentType:document.getElementById('dataContentType').value, publicRead:document.getElementById('dataPublic').checked }); loadDataList(); } catch(e) { err.textContent = e.message; }
+};
+
+  document.getElementById('saveSubmit').onclick = async () => {
+  const errEl = document.getElementById('saveError');
+  errEl.textContent = '';
+  const slug = document.getElementById('slugInput').value.trim();
+  const title = document.getElementById('titleInput').value.trim();
+  const html = document.getElementById('htmlEditor').value;
+  if (!slug) { errEl.textContent = '識別子を入力してください'; return; }
+
+  try {
+    const data = await Netrify.api('/.netlify/functions/lending', { action: 'saveSite', token: session.token, slug, title, html });
+    document.getElementById('previewLink').href = '/site-view/' + encodeURIComponent(data.site.slug);
+    loadSites();
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+};
+
+loadSites();
+loadDataList();
+</script>
+</body>
+</html>

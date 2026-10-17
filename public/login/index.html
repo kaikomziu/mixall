@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ログイン - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="MixAllアカウントへログインします。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="ログイン - MixAll">
+  <meta property="og:description" content="MixAllアカウントへログインします。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/login/">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="MixAllログイン">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ログイン - MixAll">
+  <meta name="twitter:description" content="MixAllアカウントへログインします。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Mix<span>All</span></div>
+  <nav class="services">
+    <a href="/Uch" class="active">Uch (掲示板)</a>
+    <a href="/Pocket">ぽけっと</a>
+    <a href="/Ghost">Ghost</a>
+    <a href="/Mail">Mail</a>
+    <a href="/lending">貸し出しサーバー</a>
+    <a href="/Custom">カスタム</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card" id="loggedOutView">
+    <h2 id="authHeading">ログイン</h2>
+    <p class="muted">
+      実際の電話番号やメールアドレスは不要です。<code>@bix.3erver</code> 形式の疑似メールアドレスとパスワードだけでご利用いただけます。
+      パスワードを忘れた場合は、本人確認後に運営へリセットを依頼できます。
+    </p>
+
+    <div class="row" style="margin-bottom: 14px;">
+      <a class="button" data-auth-mode="login" href="/login/">ログイン</a>
+      <a class="button secondary" data-auth-mode="register" href="/register/">新規登録</a>
+    </div>
+
+    <div id="loginForm">
+      <input type="text" id="loginEmail" placeholder="例: taro01@bix.3erver" />
+      <input type="password" id="loginPassword" placeholder="パスワード" />
+      <div class="error" id="loginError"></div>
+      <button id="loginSubmit">ログインする</button>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+      <div class="row">
+        <input type="text" id="regEmail" placeholder="例: taro01@bix.3erver" style="flex:1;" />
+        <button type="button" id="regSuggest" class="ghost">自動生成</button>
+      </div>
+      <div class="muted" id="emailAvailability" style="margin-bottom:10px;"></div>
+      <input type="text" id="regDisplayName" placeholder="表示名 (あとから変更可能)" />
+      <label for="regBirthDate">生年月日</label>
+      <input type="date" id="regBirthDate" required />
+      <p class="muted">ここで生年月日を入力する事で機能が減ったりはせず年齢に適さないコンテンツ投稿を非表示にする為の選択欄です。年齢は生年月日から算出され、誕生日に自動更新されます。</p>
+      <p class="muted">生年月日は本人の申告情報として保存され、運営・副運営が本人確認の補助情報として閲覧できます。ただし、申告された生年月日だけで本人確認が完了するものではありません。</p>
+      <input type="password" id="regPassword" placeholder="パスワード (6文字以上)" />
+      <label class="row muted" style="margin-bottom:10px;">
+        <input type="checkbox" id="humanCheck" style="width:auto;" />
+        私はロボットではありません (簡易人間判定)
+      </label>
+      <div class="error" id="regError"></div>
+      <button id="regSubmit">アカウント作成</button>
+    </div>
+  </div>
+
+  <div class="card" id="loggedInView" style="display:none;">
+    <h2>ようこそ、<span id="welcomeName"></span> さん</h2>
+    <p class="muted"><span id="welcomeEmail"></span> でログイン中です。</p>
+    <div class="row">
+      <a href="/Uch"><button>Uch</button></a>
+      <a href="/Pocket"><button class="secondary">ぽけっと</button></a>
+      <a href="/Ghost"><button class="secondary">Ghost</button></a>
+      <a href="/Mail"><button class="secondary">Mail</button></a>
+      <a href="/Webhook"><button class="secondary">Webhook</button></a>
+      <a href="/lending"><button class="secondary">貸し出しサーバー</button></a>
+      <a href="/age.html"><button class="ghost">生年月日・年齢区分</button></a>
+      <a id="adminLink" href="/admin" style="display:none;"><button class="ghost">運営ダッシュボード</button></a>
+      <button id="logoutBtn" class="ghost">ログアウト</button>
+    </div>
+  </div>
+
+  <div class="card" id="deviceCard" style="display:none;">
+    <h3>ログイン中のデバイス</h3>
+    <p class="muted">身に覚えのない端末があれば、その端末だけをログアウトできます。パスワードそのものは保存・表示されません。</p>
+    <div id="deviceList"><p class="muted">読み込み中...</p></div>
+  </div>
+
+  <div class="card" id="passwordCard" style="display:none;">
+    <h3>パスワード変更</h3>
+    <input type="password" id="currentPassword" placeholder="現在のパスワード" />
+    <input type="password" id="newPassword" placeholder="新しいパスワード (6文字以上)" />
+    <div class="error" id="passwordError"></div>
+    <div class="muted" id="passwordSuccess" style="margin-bottom:10px;"></div>
+    <button id="passwordSubmit">パスワードを変更</button>
+  </div>
+
+  <div class="card" id="deleteAccountCard" style="display:none; border-color:#b42318;">
+    <h3>アカウント削除</h3>
+    <p class="muted">削除するとログイン中の全端末からログアウトされ、アカウントを復元できません。続行するにはパスワードと確認文字列 <code>DELETE</code> が必要です。</p>
+    <input type="password" id="deleteAccountPassword" placeholder="現在のパスワード" />
+    <input type="text" id="deleteAccountConfirm" placeholder="DELETE と入力" />
+    <div class="error" id="deleteAccountError"></div>
+    <button id="deleteAccountSubmit" class="ghost">アカウントを完全に削除</button>
+  </div>
+
+  <div class="card" id="webhookEntryCard">
+    <h3>外部連携</h3>
+    <p class="muted">ログイン中のアカウントで、MailまたはPocketへ投稿するWebhookを発行・管理できます。</p>
+    <a class="button" href="/Webhook">Webhookを管理</a>
+  </div>
+
+  <div class="card" id="stampEntryCard">
+    <h3>Pocketスタンプ</h3>
+    <p class="muted">Pocketのチャットで使えるスタンプを確認できます。運営・公認アカウントはここから追加・管理できます。</p>
+    <a class="button" href="/Pocket/stamps.html">スタンプを開く</a>
+  </div>
+
+  <div class="card">
+    <h3>現在の機能</h3>
+    <p class="muted">
+      Uch(AI・時報・参加者一覧・スレ管理)、ぽけっと(個人/グループチャット・ロール・削除監査)、Ghost(X風タイムライン・画像/作品/動画/短尺・タグ・検索・フォロー)、Mail(受信/送信・検索・返信)、貸し出しサーバー(/site-view/識別子)を利用できます。運営・公認アカウントは色付きで表示され、通報と運営監査にも対応しています。
+    </p>
+  </div>
+</main>
+
+<script src="/js/auth.js"></script>
+<script>
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const authMode = window.location.pathname.toLowerCase().startsWith('/register') ? 'register' : 'login';
+const authParams = new URLSearchParams(window.location.search);
+if (authMode === 'login' && authParams.get('register') === '1') {
+  authParams.delete('register');
+  const query = authParams.toString();
+  window.location.replace('/register/' + (query ? '?' + query : '') + window.location.hash);
+}
+loginForm.style.display = authMode === 'login' ? 'block' : 'none';
+registerForm.style.display = authMode === 'register' ? 'block' : 'none';
+document.getElementById('authHeading').textContent = authMode === 'register' ? '新規登録' : 'ログイン';
+document.querySelectorAll('[data-auth-mode]').forEach((link) => { link.className = link.dataset.authMode === authMode ? 'button' : 'button secondary'; });
+
+async function loadDevices() {
+  const s = Netrify.getSession();
+  if (!s) return;
+  const el = document.getElementById('deviceList');
+  try {
+    const data = await Netrify.listSessions();
+    el.innerHTML = data.sessions.length ? data.sessions.map((device) => `
+      <div class="bot-item">
+        <span><strong>${escapeHtml(device.deviceLabel)}</strong><br><span class="muted">最終利用: ${new Date(device.lastSeenAt || device.createdAt).toLocaleString('ja-JP')} ${device.current ? ' · この端末' : ''}</span></span>
+        <button type="button" class="ghost" data-revoke-session="${escapeHtml(device.sessionId || '')}">${device.current ? 'この端末をログアウト' : 'ログアウト'}</button>
+      </div>`).join('') : '<p class="muted">有効なセッションはありません。</p>';
+    el.querySelectorAll('[data-revoke-session]').forEach((button) => {
+      button.onclick = async () => {
+        if (!confirm('この端末をログアウトしますか？')) return;
+        await Netrify.revokeSession(button.dataset.revokeSession);
+        if (!Netrify.getSession()) { renderSession(); return; }
+        loadDevices();
+      };
+    });
+  } catch (e) {
+    el.innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderSession() {
+  const s = Netrify.getSession();
+  document.getElementById('loggedOutView').style.display = s ? 'none' : 'block';
+  document.getElementById('loggedInView').style.display = s ? 'block' : 'none';
+  document.getElementById('passwordCard').style.display = s ? 'block' : 'none';
+  document.getElementById('deleteAccountCard').style.display = s && !s.isAdmin ? 'block' : 'none';
+  document.getElementById('deviceCard').style.display = s ? 'block' : 'none';
+  if (s) loadDevices();
+  if (s) {
+    document.getElementById('welcomeName').textContent = s.displayName || s.email;
+    document.getElementById('welcomeEmail').textContent = s.email + (s.isOfficial ? ' · 公認アカウント' : '');
+    document.getElementById('adminLink').style.display = s.isAdmin ? 'inline-block' : 'none';
+  }
+}
+
+document.getElementById('loginSubmit').onclick = async () => {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  try {
+    await Netrify.login({ email, password });
+    renderSession();
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get('next');
+    if (next) window.location.href = next;
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+};
+
+document.getElementById('regSuggest').onclick = async () => {
+  const email = await Netrify.suggestEmail();
+  document.getElementById('regEmail').value = email;
+  document.getElementById('emailAvailability').textContent = '✓ このアドレスは使用可能です';
+};
+
+document.getElementById('regEmail').addEventListener('blur', async (e) => {
+  const val = e.target.value.trim();
+  if (!val) return;
+  const availEl = document.getElementById('emailAvailability');
+  try {
+    const ok = await Netrify.checkEmail(val);
+    availEl.textContent = ok ? '✓ このアドレスは使用可能です' : '✗ このアドレスは既に使われています';
+  } catch {
+    availEl.textContent = '';
+  }
+});
+
+document.getElementById('regSubmit').onclick = async () => {
+  const email = document.getElementById('regEmail').value;
+  const password = document.getElementById('regPassword').value;
+  const displayName = document.getElementById('regDisplayName').value;
+  const birthDate = document.getElementById('regBirthDate').value;
+  const humanCheck = document.getElementById('humanCheck').checked;
+  const errEl = document.getElementById('regError');
+  errEl.textContent = '';
+  try {
+    await Netrify.register({ email, password, displayName, humanCheck, birthDate });
+    renderSession();
+    const next = new URLSearchParams(window.location.search).get('next');
+    if (next) window.location.href = next;
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+};
+
+document.getElementById('logoutBtn').onclick = async () => {
+  const button = document.getElementById('logoutBtn');
+  button.disabled = true;
+  try { await Netrify.logout(); } catch (_) { /* ローカルログアウトはauth.jsのfinallyで実行 */ }
+  window.location.href = '/login/';
+};
+
+document.getElementById('deleteAccountSubmit').onclick = async () => {
+  const error = document.getElementById('deleteAccountError'); error.textContent='';
+  const s = Netrify.getSession(); if (!s || s.isAdmin) return;
+  if (document.getElementById('deleteAccountConfirm').value.trim() !== 'DELETE') { error.textContent='DELETE と入力してください'; return; }
+  if (!confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。')) return;
+  try { await Netrify.api('/.netlify/functions/auth',{action:'deleteAccount',token:s.token,password:document.getElementById('deleteAccountPassword').value,confirm:'DELETE'}); Netrify.clearSession(); alert('アカウントを削除しました。'); renderSession(); } catch(e) { error.textContent=e.message; }
+};
+
+document.getElementById('passwordSubmit').onclick = async () => {
+  const currentPassword = document.getElementById('currentPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  const errEl = document.getElementById('passwordError');
+  const okEl = document.getElementById('passwordSuccess');
+  errEl.textContent = '';
+  okEl.textContent = '';
+  try {
+    await Netrify.changePassword({ currentPassword, newPassword });
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    okEl.textContent = '✓ パスワードを変更しました';
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+};
+
+renderSession();
+</script>
+</body>
+</html>

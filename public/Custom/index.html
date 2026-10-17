@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>カスタム - MixAll</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<style>
+.avatar-preview { width:120px; height:120px; margin: 0 auto 12px; }
+.avatar-row { display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; }
+.avatar-controls { flex:1; min-width:220px; }
+.swatch-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.swatch { width:28px; height:28px; border-radius:50%; border:2px solid transparent; cursor:pointer; }
+.swatch.selected { border-color: var(--accent); }
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="Three.jsの3Dゲームワールドを作成し、アセットやプログラムを使って遊べます。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Custom 3Dワールド - MixAll">
+  <meta property="og:description" content="Three.jsの3Dゲームワールドを作成し、アセットやプログラムを使って遊べます。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/Custom/">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="Custom 3Dゲーム">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Custom 3Dワールド - MixAll">
+  <meta name="twitter:description" content="Three.jsの3Dゲームワールドを作成し、アセットやプログラムを使って遊べます。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
+  <nav class="services">
+    <a href="/Uch">Uch</a>
+    <a href="/Pocket">ぽけっと</a>
+    <a href="/Ghost">Ghost</a>
+    <a href="/Custom" class="active">カスタム</a>
+    <a href="/">トップへ</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card">
+    <h2>すぐにゲームへ入る</h2>
+    <p class="muted">キャラクター設定は不要です。標準キャラクターでそのままワールドに参加できます。</p>
+    <a class="button" href="#roomList">公開ワールドを選ぶ</a>
+  </div>
+  <div class="card">
+    <h2>3Dワールドを作る</h2><p class="muted">アセットをドラッグで配置し、Studio風のプログラムブロックで動かす3Dゲームを作れます。</p><p><a class="secondary" href="/Custom/builder.html">3Dゲームを作る（ワールドスタジオ）</a></p>
+    <input type="text" id="roomName" placeholder="ワールド名" />
+    <div class="row" style="margin-bottom:10px;">
+      <label class="muted"><input type="radio" name="visibility" value="public" checked style="width:auto;" /> パブリック(誰でも参加可)</label>
+      <label class="muted"><input type="radio" name="visibility" value="private" style="width:auto;" /> プライベート(パスワード制)</label>
+    </div>
+    <input type="password" id="roomPassword" placeholder="パスワード(プライベートの場合)" style="display:none;" />
+    <div class="error" id="createError"></div>
+    <button id="createSubmit">ワールドを作成して入る</button>
+  </div>
+
+  <div class="card">
+    <h2>ワールド一覧</h2>
+    <div id="roomList"><p class="muted">読み込み中...</p></div>
+  </div>
+</main>
+
+<script src="/js/auth.js"></script>
+<script>
+const session = Netrify.requireLogin();
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// --- ワールド作成 ---
+document.querySelectorAll('input[name="visibility"]').forEach(r => {
+  r.onchange = () => { document.getElementById('roomPassword').style.display = r.value === 'private' && r.checked ? 'block' : 'none'; };
+});
+
+document.getElementById('createSubmit').onclick = async () => {
+  const errEl = document.getElementById('createError');
+  errEl.textContent = '';
+  const name = document.getElementById('roomName').value.trim();
+  const visibility = document.querySelector('input[name="visibility"]:checked').value;
+  const password = document.getElementById('roomPassword').value;
+  try {
+    const data = await Netrify.api('/.netlify/functions/custom', { action: 'createRoom', token: session.token, name, visibility, password });
+    window.location.href = '/Custom/room.html?id=' + encodeURIComponent(data.room.id);
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+};
+
+// --- ワールド一覧 ---
+async function loadRooms() {
+  const res = await fetch('/.netlify/functions/custom?token=' + encodeURIComponent(session.token));
+  const data = await res.json();
+  const el = document.getElementById('roomList');
+  if (!data.rooms || data.rooms.length === 0) {
+    el.innerHTML = '<p class="muted">まだワールドがありません。最初の1つを作ってみましょう。</p>';
+    return;
+  }
+  el.innerHTML = data.rooms.map(r => `
+    <div class="thread-list-item">
+      <div>
+        <div class="title">${escapeHtml(r.name)} ${r.visibility === 'private' ? '🔒' : ''}</div>
+        <div class="meta">プレイ中: ${r.playerCount}人</div>
+      </div>
+      <button type="button" class="secondary" data-join="${r.id}" data-private="${r.visibility === 'private'}">入る</button>
+      ${(r.ownerEmail === session.email || session.isAdmin || session.isDeputyAdmin) ? `<button type="button" class="ghost" data-delete-room="${r.id}">削除</button>` : ''}
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-join]').forEach(btn => {
+    btn.onclick = async () => {
+      const roomId = btn.dataset.join;
+      let password;
+      if (btn.dataset.private === 'true') {
+        password = prompt('このワールドのパスワードを入力してください');
+        if (password === null) return;
+      }
+      try {
+        await Netrify.api('/.netlify/functions/custom', { action: 'joinRoom', token: session.token, roomId, password });
+        window.location.href = '/Custom/room.html?id=' + encodeURIComponent(roomId);
+      } catch (e) {
+        alert(e.message);
+      }
+    };
+  });
+  el.querySelectorAll('[data-delete-room]').forEach(btn => {
+    btn.onclick = async () => {
+      const room = data.rooms.find(item => item.id === btn.dataset.deleteRoom);
+      if (!room || !confirm(`「${room.name}」を削除しますか？このルームには入れなくなります。`)) return;
+      btn.disabled = true;
+      try {
+        await Netrify.api('/.netlify/functions/custom', { action:'deleteRoom', token:session.token, roomId:room.id });
+        await loadRooms();
+      } catch (error) {
+        btn.disabled = false;
+        alert(error.message);
+      }
+    };
+  });
+}
+
+loadRooms();
+setInterval(loadRooms, 8000);
+</script>
+</body>
+</html>

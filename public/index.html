@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MixAll（ミックスオール）ホーム</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/mixall-nav.js" defer></script>
+<style>
+.home-hero { text-align:center; padding:28px 18px; background:linear-gradient(135deg,rgba(91,140,255,.18),rgba(112,78,190,.16)); }
+.home-hero h1 { margin:0 0 8px; font-size:clamp(2rem,7vw,3.8rem); }
+.home-hero p { max-width:680px; margin:0 auto 18px; }
+.home-actions { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+.feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+.feature-grid a { color:inherit; text-decoration:none; }
+.feature-grid .card { height:100%; transition:transform .15s,border-color .15s; }
+.feature-grid .card:hover { transform:translateY(-2px); border-color:var(--accent); }
+</style>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="Uch掲示板、ぽけっとチャット、Ghost、Creator Studio、Custom 3Dワールドなどをまとめたコミュニティサービス。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="MixAll（ミックスオール）">
+  <meta property="og:description" content="Uch掲示板、ぽけっとチャット、Ghost、Creator Studio、Custom 3Dワールドなどをまとめたコミュニティサービス。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="Ghostのフィード">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MixAll（ミックスオール）">
+  <meta name="twitter:description" content="Uch掲示板、ぽけっとチャット、Ghost、Creator Studio、Custom 3Dワールドなどをまとめたコミュニティサービス。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Mix<span>All</span></div>
+  <nav class="services">
+    <a href="/" class="active">ホーム</a><a href="/Uch">Uch</a><a href="/Pocket">ぽけっと</a><a href="/Ghost">Ghost</a><a href="/Create">スタジオ</a><a href="/Mail">Mail</a><a href="/Custom">Custom</a>
+  </nav>
+</header>
+<main>
+  <section class="card home-hero">
+    <h1>Mix<span style="color:var(--accent)">All</span></h1>
+    <p class="muted">掲示板、通話、SNS、3Dワールドをひとつにまとめたコミュニティサービスです。</p>
+    <div class="home-actions"><a class="button" href="/login/">ログイン</a><a class="button secondary" href="/register/">新規登録</a><a class="button secondary" href="#services">サービスを見る</a><a class="button secondary" href="/emergency.html">緊急モード</a></div>
+    <p id="homeWelcome" class="muted" style="margin-top:14px"></p>
+  </section>
+  <section id="services" class="feature-grid">
+    <a href="/Uch"><div class="card"><h2>Uch</h2><p class="muted">名前と匿名IDで参加できる掲示板。画像添付、メンション、AI・botに対応。</p></div></a>
+    <a href="/Pocket"><div class="card"><h2>ぽけっと</h2><p class="muted">固定P2P IDによる音声・ビデオ通話と、個人・グループチャット。</p></div></a>
+    <a href="/Ghost"><div class="card"><h2>Ghost</h2><p class="muted">テキスト、画像、作品、動画、縦長動画を投稿できるSNS。</p></div></a>
+    <a href="/Create"><div class="card"><h2>クリエイタースタジオ</h2><p class="muted">絵・写真・文字を自由に描画・編集。画像としても、動きをつけた動画としても書き出せます。</p></div></a>
+    <a href="/Custom"><div class="card"><h2>Custom</h2><p class="muted">Three.jsの3Dワールドを作成・公開し、ドラッグ配置したアセットをStudio風ブロックで動かせます。</p></div></a>
+    <a href="/Mail"><div class="card"><h2>Mail</h2><p class="muted">サイト内アカウント同士で送受信できるメール。</p></div></a>
+    <a href="/lending"><div class="card"><h2>サイト作成</h2><p class="muted">ゲームやページを作成して公開できるホスティング機能。</p></div></a>
+    <a href="/Tools"><div class="card"><h2>ツールセンター</h2><p class="muted">匿名メッセージ、AI相談、画像変換、読書本棚など、毎日に使える道具をまとめています。</p></div></a>
+  </section>
+  <section class="card"><h2>アカウント設定</h2><p class="muted">表示名、パスワード、ログイン端末、アカウント削除などは専用画面で管理します。</p><a class="button secondary" href="/account/">アカウント設定を開く</a></section>
+</main>
+<script src="/js/auth.js"></script>
+<script>
+const session = Netrify.getSession();
+if (session) document.getElementById('homeWelcome').textContent = `${session.displayName || session.email} さん、ログイン中です。アカウント設定は専用画面から開けます。`;
+</script>
+</body>
+</html>

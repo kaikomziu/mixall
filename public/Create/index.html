@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#11141b"><title>クリエイタースタジオ | MixAll</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/settings.js"></script><script src="/js/auth.js"></script>
+<style>
+:root{--studio-bg:var(--bg);--studio-panel:var(--panel);--studio-panel2:var(--panel-2);--studio-line:var(--border);--studio-text:var(--text);--studio-muted:var(--text-dim);--studio-blue:var(--accent);--studio-purple:#ad7bff;--studio-green:var(--accent-2);--studio-yellow:#f5c65b}
+body{background:var(--studio-bg);color:var(--studio-text);overflow-x:hidden;padding-bottom:75px}.studio-head .settings-widget{margin-left:auto;flex:none}
+.studio{max-width:1800px;margin:auto;padding:16px 18px 30px}
+.studio-head{display:flex;align-items:center;gap:14px;margin:0 auto 14px;padding:10px 14px;background:#191e27;border:1px solid #303846;border-radius:16px}
+.brand-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#6c82ff,#ad7bff);font-size:1.3125rem;font-weight:900;color:white;flex:none}
+.head-title{min-width:0;flex:1}.head-title h1{font-size:1.0625rem;margin:0}.head-title p{font-size:0.75rem;color:#a3adbd;margin:4px 0 0}
+.project-name{background:#202633!important;border:1px solid #303846!important;color:#fff!important;width:min(240px,22vw)!important;margin:0!important;padding:9px 11px!important}
+.head-actions{display:flex;gap:7px;align-items:center}.studio button{border:1px solid #394354;background:#272e3b;color:#f4f6fa;border-radius:10px;padding:9px 12px;font-size:0.8125rem;font-weight:650}.studio button:hover{filter:brightness(1.13)}.studio button.primary{background:linear-gradient(130deg,#657aff,#9770f5);border-color:transparent;color:#fff}.studio button.green{background:#173d38;border-color:#286e60;color:#8af0d2}.studio button.subtle{background:transparent}.studio button:disabled{opacity:.55;cursor:wait}.icon-button{width:38px;padding:8px!important}
+.howto{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:0 0 12px;border:1px solid #2d3441;border-radius:13px;background:#171b23;color:#bdc5d2;font-size:0.75rem;overflow-x:auto;white-space:nowrap}.howto b{color:#f3f5fa}.howto .step{display:flex;gap:7px;align-items:center}.step-num{display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#2b3450;color:#a9b6ff;font-weight:800;flex:none}.step-arrow{color:#657082}
+.editor-grid{display:grid;grid-template-columns:250px minmax(360px,1fr) 310px;gap:12px;align-items:stretch}.panel{background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:15px;overflow:hidden;min-width:0}.panel-head{padding:12px 14px 10px;border-bottom:1px solid #2c3340;display:flex;align-items:center;justify-content:space-between;gap:8px}.panel-head h2{font-size:0.8125rem;margin:0;letter-spacing:.02em}.panel-head small{font-size:0.6875rem;color:#98a3b5}.panel-body{padding:12px}
+.side-panel{height:min(700px,calc(100vh - 205px));min-height:560px;display:flex;flex-direction:column}.side-scroll{overflow:auto;min-height:0}.section-label{font-size:0.625rem;color:#9ba6b7;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin:2px 0 8px}.asset-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.asset-buttons button{font-size:0.75rem;padding:10px 6px}.asset-buttons button span{display:block;font-size:1.0625rem;margin-bottom:3px}.media-hint{font-size:.625rem;color:#8f9aab;line-height:1.45;margin:8px 0 0}.dropzone{margin-top:8px;border:1px dashed #4a5669;border-radius:11px;padding:12px;text-align:center;color:#abb5c5;font-size:0.6875rem;background:#1c222c}.dropzone.dragover{border-color:#91a0ff;background:#242b3b}.mini-row{display:flex;align-items:center;gap:8px;margin:9px 0;font-size:0.6875rem;color:#b9c1cf}.mini-row label{width:58px;flex:none}.mini-row input[type=range]{flex:1;min-width:0;accent-color:#8a8fff}.mini-row output{width:36px;text-align:right;color:#f0f2f7;font-variant-numeric:tabular-nums}
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.tool{padding:7px 3px!important;font-size:0.6875rem!important;background:#222834!important;border-color:#333c4c!important}.tool.active{background:#3a4168!important;border-color:#8b91ff!important;color:#fff}.tool .toolicon{font-size:1rem;display:block;margin-bottom:3px}.color-row{display:flex;gap:6px;align-items:center}.color-row input[type=color]{width:34px;height:30px;padding:2px;border:1px solid #445064;background:#202633;border-radius:7px}.swatch{width:20px;height:20px;border-radius:50%;border:2px solid #ffffff55;cursor:pointer}
+.layer-list{display:flex;flex-direction:column;gap:5px}.layer-row{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:9px;background:#202631;border:1px solid transparent;cursor:pointer;min-width:0}.layer-row.selected{border-color:#8290ff;background:#292f43}.layer-row .layer-icon{width:25px;text-align:center}.layer-row .layer-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:0.6875rem}.layer-row .layer-vis{background:none!important;border:0!important;color:#adb8c8!important;padding:3px!important;font-size:0.8125rem}.layer-row .layer-del{background:none!important;border:0!important;color:#ff9d9d!important;padding:3px!important;font-size:0.75rem}.layer-footer{display:flex;gap:6px;margin-top:8px}.layer-footer button{flex:1;font-size:0.6875rem;padding:7px 5px}
+.center-col{min-width:0;display:grid;grid-template-rows:minmax(380px,1fr) auto;gap:12px}.stage-panel{display:flex;flex-direction:column;min-height:0}.stage-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid #2d3441}.stage-toolbar .stage-status{font-size:0.6875rem;color:#9faabd;margin-left:auto}.stage-toolbar button{padding:6px 9px;font-size:0.6875rem}.stage-wrap{position:relative;display:grid;place-items:center;min-height:300px;flex:1;padding:16px;background:radial-gradient(ellipse at center,#222733 0,#171b23 75%);overflow:hidden}.canvas-frame{position:relative;width:min(100%,920px);aspect-ratio:16/9;background-color:#fff;background-image:linear-gradient(45deg,#e7eaf0 25%,transparent 25%),linear-gradient(-45deg,#e7eaf0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e7eaf0 75%),linear-gradient(-45deg,transparent 75%,#e7eaf0 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;box-shadow:0 18px 55px #0008;border:1px solid #ffffff40;overflow:hidden;touch-action:none}.canvas-frame canvas{display:block;width:100%;height:100%;touch-action:none}.canvas-overlay{position:absolute;inset:0;pointer-events:none;border:1px solid #fff4}.stage-empty[hidden]{display:none}.stage-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#49515f;padding:20px;pointer-events:none}.stage-empty strong{display:block;color:#434b59;font-size:1.125rem;margin-bottom:6px}.stage-empty span{font-size:0.75rem}
+.timeline{background:#191e27;border:1px solid #303846;border-radius:15px;overflow:hidden}.timeline-head{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid #2d3441}.timeline-head h2{font-size:0.75rem;margin:0}.timeline-controls{display:flex;gap:5px}.timeline-controls button{padding:6px 9px;font-size:0.6875rem}.time-readout{font-size:0.6875rem;color:#b6c0cf;font-variant-numeric:tabular-nums;margin-left:auto}.timeline-body{padding:11px 14px 13px}.timeline-ruler{height:22px;position:relative;margin:0 3px 3px;color:#8e9aab;font-size:0.5625rem;border-bottom:1px solid #333b48}.timeline-ruler span{position:absolute;bottom:4px;transform:translateX(-50%)}.playhead-row{display:flex;align-items:center;gap:9px}.playhead-row input{flex:1;accent-color:#9d82ff}.playhead-row span{font-size:0.625rem;color:#adb6c4}.track-list{display:flex;flex-direction:column;gap:4px;margin-top:8px}.track{height:20px;position:relative;background:#202631;border-radius:5px;overflow:hidden}.track-name{position:absolute;left:7px;top:3px;z-index:2;font-size:0.5625rem;color:#d8dce4;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.track-effect{position:absolute;top:2px;bottom:2px;border-radius:4px;background:linear-gradient(90deg,#7462d9,#7f93ff);opacity:.8}
+.right-panel{height:min(700px,calc(100vh - 205px));min-height:560px;display:flex;flex-direction:column}.target-select{width:100%;background:#232a36!important;color:#fff!important;border-color:#384354!important;padding:8px!important;font-size:0.6875rem!important;margin:0 0 8px!important}.block-help{font-size:0.625rem;line-height:1.5;color:#9ea9ba;margin:0 0 10px}.block-palette{display:grid;grid-template-columns:1fr 1fr;gap:6px}.block-palette button{padding:8px 7px;text-align:left;font-size:0.625rem;border:0;box-shadow:inset 3px 0 #fff4;background:#3f64be;color:#fff;line-height:1.35}.block-palette button span{display:block;font-size:0.5625rem;opacity:.75;margin-top:3px}.block-palette .looks{background:#8752bc}.block-palette .motion{background:#397ab4}.block-palette .filter{background:#328777}.block-palette .wait{background:#b4822d}.program-head{display:flex;justify-content:space-between;align-items:center;margin:13px 0 7px;font-size:0.625rem;color:#bac3d1}.program-head button{padding:4px 7px;font-size:0.625rem}.program-stack{display:flex;flex-direction:column;gap:5px;min-height:130px;padding:8px;border-radius:10px;background:#141820;border:1px dashed #394354;overflow-y:auto;flex:1}.program-hat{display:inline-flex;align-items:center;align-self:flex-start;padding:8px 13px 10px;background:#d6a62b;color:#211900;border-radius:14px 14px 8px 8px;font-size:0.625rem;font-weight:800;position:relative}.program-hat::after{content:"";position:absolute;left:17px;bottom:-6px;width:14px;height:7px;background:inherit;clip-path:polygon(0 0,100% 0,50% 100%)}.program-empty{color:#748094;font-size:0.6875rem;text-align:center;padding:22px 8px;line-height:1.7}.program-block{position:relative;border:0!important;border-radius:7px!important;color:#fff;padding:7px 8px!important;display:flex;align-items:center;gap:5px;min-height:38px;font-size:0.625rem!important;cursor:grab;box-shadow:0 2px 5px #0003}.program-block.motion{background:#397ab4}.program-block.looks{background:#8752bc}.program-block.filter{background:#328777}.program-block.wait{background:#b4822d}.program-block input{width:48px!important;margin:0!important;padding:4px!important;border:0!important;border-radius:5px!important;background:#ffffff24!important;color:#fff!important;font-size:0.625rem!important;text-align:center}.program-block + .program-block::before{content:"";position:absolute;top:-6px;left:17px;width:14px;height:7px;background:inherit;clip-path:polygon(0 100%,100% 100%,50% 0);z-index:2}.program-block .remove-block{margin-left:auto;background:#ffffff20!important;border:0!important;padding:3px 5px!important;font-size:0.6875rem!important}.program-tip{font-size:0.625rem;color:#929eaf;margin-top:8px;line-height:1.5}.block-drop-hint{height:4px;border-radius:4px;background:#b7a3ff;margin:2px 0;display:none}.program-stack.dragging .block-drop-hint{display:block}.program-stack.dragover{outline:2px solid #b5a0ff;outline-offset:2px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);opacity:0;transition:.2s;pointer-events:none;background:#252d3b;border:1px solid #455168;border-radius:10px;padding:10px 15px;color:#fff;font-size:0.75rem;z-index:60}.toast.show{transform:translate(-50%,0);opacity:1}.modal-backdrop{position:fixed;inset:0;background:#05070bbd;display:none;place-items:center;z-index:50;padding:16px}.modal-backdrop.open{display:grid}.modal{width:min(560px,100%);background:#1b202a;border:1px solid #3a4352;border-radius:16px;padding:18px}.modal h2{font-size:1.0625rem;margin:0 0 9px}.modal p{font-size:0.75rem;color:#b0bac9;line-height:1.65}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+@media(max-width:1100px){.editor-grid{grid-template-columns:220px minmax(340px,1fr)}.right-panel{grid-column:1/-1;height:auto;min-height:0}.right-panel .panel-body{display:grid;grid-template-columns:1fr 1fr;gap:12px}.right-panel .side-scroll{display:contents}.block-palette{grid-template-columns:repeat(3,1fr)}.program-stack{min-height:150px}}
+@media(max-width:720px){body{padding-bottom:76px}.studio{padding:8px 8px 20px}.studio-head{flex-wrap:wrap;padding:9px;gap:8px}.brand-mark{width:36px;height:36px}.head-title{flex:1 1 55%}.head-title h1{font-size:0.9375rem}.head-title p{font-size:0.625rem}.project-name{order:3;width:100%!important}.head-actions{gap:5px}.head-actions button{padding:7px 8px;font-size:0.6875rem}.howto{padding:8px 10px;font-size:0.625rem}.editor-grid{display:flex;flex-direction:column;gap:9px}.center-col{order:0;display:flex;flex-direction:column;gap:9px}.stage-panel{min-height:290px}.stage-wrap{min-height:230px;padding:10px}.stage-toolbar{padding:7px;gap:4px}.stage-toolbar button{padding:5px 7px;font-size:0.625rem}.timeline-head{padding:8px}.timeline-body{padding:8px 10px 10px}.panel-head{padding:10px 12px}.side-panel{height:auto;min-height:0}.side-scroll{max-height:360px;overflow:auto}.right-panel{order:2;min-height:0}.right-panel .panel-body{display:block}.block-palette{grid-template-columns:repeat(3,1fr)}.program-stack{min-height:130px;max-height:260px}.panel-body{padding:10px}.toast{bottom:85px}.layer-list{max-height:190px;overflow:auto}}
+
+.program-scripts{display:flex;gap:5px;overflow-x:auto;padding:2px 0 7px}.script-tab{white-space:nowrap;flex:none;border-radius:999px!important;padding:6px 9px!important;font-size:.6875rem!important;background:var(--studio-panel2)!important;color:var(--studio-muted)!important}.script-tab.active{background:#3b4566!important;border-color:#9aa3ff!important;color:#fff!important}.message-script-add{display:flex;gap:5px;margin:0 0 7px}.message-script-add input{min-width:0;flex:1;margin:0!important;padding:6px 8px!important;font-size:.6875rem!important;background:var(--studio-panel2)!important;color:var(--studio-text)!important;border:1px solid var(--studio-line)!important;border-radius:8px!important}.message-script-add button{flex:none;padding:6px 8px!important;font-size:.625rem!important}.block-palette .event{background:#bf8b28;color:#fff}.program-hat.message{gap:6px}.program-hat.message input{width:110px;max-width:45vw;padding:3px 5px;border:1px solid #ffffff55;border-radius:5px;background:#ffffff24;color:inherit;font-size:inherit}
+html[data-theme="light"] body{background:var(--bg);color:var(--text)}
+html[data-theme="light"] .studio-head,html[data-theme="light"] .panel,html[data-theme="light"] .timeline{background:var(--panel);border-color:var(--border)}
+html[data-theme="light"] .howto{background:var(--panel-2);border-color:var(--border);color:var(--text-dim)}html[data-theme="light"] .howto b{color:var(--text)}
+html[data-theme="light"] .studio button:not(.primary):not(.green){background:var(--panel-2);color:var(--text);border-color:var(--border)}html[data-theme="light"] .studio button.subtle{background:transparent}
+html[data-theme="light"] .studio .tool{background:var(--panel-2)!important;color:var(--text)!important;border-color:var(--border)!important}html[data-theme="light"] .studio .tool.active{background:#dce4ff!important;color:#1c2b56!important;border-color:var(--accent)!important}
+html[data-theme="light"] .project-name,html[data-theme="light"] .target-select,html[data-theme="light"] .studio textarea,html[data-theme="light"] .message-script-add input,html[data-theme="light"] .mini-row input:not([type=range]){background:var(--panel-2)!important;color:var(--text)!important;border-color:var(--border)!important}
+html[data-theme="light"] .layer-row,html[data-theme="light"] .track,html[data-theme="light"] .program-stack,html[data-theme="light"] .dropzone{background:var(--panel-2);border-color:var(--border);color:var(--text)}html[data-theme="light"] .layer-row.selected{background:#e4eaff;border-color:var(--accent)}
+html[data-theme="light"] .stage-wrap{background:radial-gradient(ellipse at center,#eef0f4 0,#e0e3e9 75%)}html[data-theme="light"] .canvas-overlay{border-color:#00000012}
+html[data-theme="light"] .head-title p,html[data-theme="light"] .panel-head small,html[data-theme="light"] .section-label,html[data-theme="light"] .block-help,html[data-theme="light"] .program-tip,html[data-theme="light"] .time-readout,html[data-theme="light"] .stage-status,html[data-theme="light"] .timeline-ruler,html[data-theme="light"] .playhead-row span,html[data-theme="light"] .program-head,html[data-theme="light"] .mini-row,html[data-theme="light"] .program-empty{color:var(--text-dim)!important}
+html[data-theme="light"] .settings-panel,html[data-theme="light"] .modal{color:var(--text);background:var(--panel);border-color:var(--border)}html[data-theme="light"] .modal p{color:var(--text-dim)}html[data-theme="light"] .track-name{color:var(--text)!important}html[data-theme="light"] .layer-row .layer-vis{color:var(--text-dim)!important}
+@media(max-width:1100px){.studio-head{flex-wrap:wrap}.studio-head .head-actions{flex-wrap:wrap}.studio-head .settings-widget{margin-left:auto}}
+</style>
+
+  <meta name="description" content="絵・写真・文字を編集し、ブロックプログラムで動きをつけて動画を書き出せるスタジオ。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Creator Studio - MixAll">
+  <meta property="og:description" content="絵・写真・文字を編集し、ブロックプログラムで動きをつけて動画を書き出せるスタジオ。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/Create/">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/09-studio-video-edit.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/09-studio-video-edit.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="Creator Studioの動画編集">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Creator Studio - MixAll">
+  <meta name="twitter:description" content="絵・写真・文字を編集し、ブロックプログラムで動きをつけて動画を書き出せるスタジオ。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/09-studio-video-edit.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<div class="studio">
+<header class="studio-head">
+  <div class="brand-mark">✦</div>
+  <div class="head-title"><h1>クリエイタースタジオ</h1><p>絵も写真も、描いて動かして自由に編集</p></div>
+  <input id="projectName" class="project-name" type="text" maxlength="50" value="はじめての作品" aria-label="プロジェクト名">
+  <div class="head-actions"><button id="newProject" class="subtle" title="新しい作品">新規</button><button id="saveProject" title="端末に保存">保存</button><button id="openSaved" class="subtle" title="端末に保存した作品を開く">端末の作品</button><button id="exportProject" class="subtle" title="作品データを書き出す">作品JSON</button><button id="importProject" class="subtle" title="作品データを読み込む">読み込み</button><input id="projectFile" type="file" accept="application/json,.json" hidden><button id="exportPng" class="green">PNG</button><button id="exportVideo" class="primary">動画を書き出す</button></div>
+</header>
+<div class="howto" aria-label="簡単な使い方"><span class="step"><span class="step-num">1</span><b>素材を追加</b>写真・文字・手描き</span><span class="step-arrow">›</span><span class="step"><span class="step-num">2</span><b>スプライトを選ぶ</b></span><span class="step-arrow">›</span><span class="step"><span class="step-num">3</span><b>ブロックをつなぐ</b></span><span class="step-arrow">›</span><span class="step"><span class="step-num">4</span><b>再生・書き出し</b></span></div>
+<div class="editor-grid">
+  <aside class="panel side-panel">
+    <div class="panel-head"><h2>素材とお絵かき</h2><small id="layerCount">0素材</small></div>
+    <div class="panel-body side-scroll">
+      <div class="section-label">素材を追加</div>
+      <div class="asset-buttons">
+        <button id="addImage"><span>▧</span>写真・絵</button><button id="addBg"><span>▨</span>背景色に適用</button>
+        <button id="addVideo"><span>▶</span>動画を読み込む</button><button id="addAudio"><span>♫</span>音声を読み込む</button>
+      </div>
+      <input id="imageFiles" type="file" accept="image/*" multiple hidden>
+      <input id="videoFiles" type="file" accept="video/*" multiple hidden>
+      <input id="audioFiles" type="file" accept="audio/*" multiple hidden>
+      <p class="media-hint">動画はイン点・アウト点でカット、音声はトリミング・音量・フェードを設定できます。</p>
+      <textarea id="textInput" rows="2" placeholder="文字を入力して「文字を追加」" style="margin:8px 0 6px;min-height:54px;font-size:0.6875rem"></textarea><div class="asset-buttons"><button id="addText"><span>T</span>文字を追加</button><select id="shapeKind" aria-label="追加する図形" style="margin:0;padding:8px;font-size:0.6875rem"><option value="star">星</option><option value="circle">丸</option><option value="rect">四角</option></select></div>
+      <div id="dropzone" class="dropzone">写真をここにドロップ<br>または「写真・絵」を押す</div>
+      <hr style="border:0;border-top:1px solid #303846;margin:14px 0">
+      <div class="section-label">ペン</div>
+      <div class="tools" id="drawingTools">
+        <button class="tool active" data-tool="select"><span class="toolicon">↖</span>選択</button><button class="tool" data-tool="pen"><span class="toolicon">✎</span>ペン</button><button class="tool" data-tool="marker"><span class="toolicon">▰</span>マーカー</button><button class="tool" data-tool="crayon"><span class="toolicon">✳</span>クレヨン</button><button class="tool" data-tool="eraser"><span class="toolicon">▱</span>消しゴム</button>
+      </div>
+      <div class="mini-row"><label for="brushSize">太さ</label><input id="brushSize" type="range" min="1" max="80" value="10"><output id="brushSizeOut">10</output></div>
+      <div class="mini-row"><label for="brushOpacity">濃さ</label><input id="brushOpacity" type="range" min="5" max="100" value="100"><output id="brushOpacityOut">100%</output></div>
+      <div class="mini-row color-row"><label>色</label><input id="brushColor" type="color" value="#26314d"><span class="swatch" style="background:#202633" data-color="#202633"></span><span class="swatch" style="background:#f35c7a" data-color="#f35c7a"></span><span class="swatch" style="background:#ffc857" data-color="#ffc857"></span><span class="swatch" style="background:#4fd1b5" data-color="#4fd1b5"></span><span class="swatch" style="background:#718cff" data-color="#718cff"></span><span class="swatch" style="background:#fff" data-color="#ffffff"></span></div>
+      <p style="font-size:0.625rem;color:#8f9aab;margin:5px 0 12px">キャンバスをなぞると描けます。スマホは指でもOK。</p>
+      <hr style="border:0;border-top:1px solid #303846;margin:12px 0">
+      <div class="section-label">選択中の素材</div><div id="inspector"></div>
+      <hr style="border:0;border-top:1px solid #303846;margin:12px 0">
+      <div class="section-label">レイヤー <span style="float:right">上が手前</span></div>
+      <div id="layerList" class="layer-list"></div>
+      <div class="layer-footer"><button id="moveLayerUp" class="subtle">↑ 前へ</button><button id="moveLayerDown" class="subtle">↓ 後ろへ</button><button id="deleteLayer" class="subtle">削除</button></div>
+    </div>
+  </aside>
+  <section class="center-col">
+    <div class="panel stage-panel">
+      <div class="panel-head"><h2>ステージ <small style="color:#95a0b1;font-weight:400">1280 × 720</small></h2><small>見たまま編集</small></div>
+      <div class="stage-toolbar"><button id="undo" class="subtle" title="元に戻す">↶ 元に戻す</button><button id="redo" class="subtle" title="やり直す">↷ やり直し</button><button id="clearDraw" class="subtle" title="手描きレイヤーを消去">手描きを消去</button><span class="stage-status" id="stageStatus">準備完了</span></div>
+      <div class="stage-wrap"><div class="canvas-frame"><canvas id="stage" width="1280" height="720" aria-label="作品ステージ"></canvas><div class="canvas-overlay"></div><div id="stageEmpty" class="stage-empty"><div><strong>ここから作品づくり</strong><span>写真を追加するか、ペンで描きはじめよう</span></div></div></div></div>
+    </div>
+    <section class="timeline">
+      <div class="timeline-head"><h2>タイムライン</h2><div class="timeline-controls"><button id="playBtn" class="primary">▶ 再生</button><button id="stopBtn">■ 停止</button><button id="durationBtn" class="subtle">長さ <span id="durationLabel">10</span>秒</button></div><div class="time-readout"><span id="currentTime">0.0</span> / <span id="totalTime">10.0</span> 秒</div></div>
+      <div class="timeline-body"><div id="timelineRuler" class="timeline-ruler"></div><div class="playhead-row"><span>0</span><input id="playhead" type="range" min="0" max="10" step="0.05" value="0" aria-label="再生位置"><span id="durationEnd">10秒</span></div><div id="tracks" class="track-list"></div></div>
+    </section>
+  </section>
+  <aside class="panel right-panel">
+    <div class="panel-head"><h2>ブロックプログラム</h2><small>スプライトごとにプログラム</small></div>
+    <div class="panel-body side-scroll">
+      <div>
+        <select id="targetSelect" class="target-select" aria-label="プログラム対象のスプライト（素材）"><option value="">素材を選択...</option></select>
+        <p class="block-help">絵・写真・文字などのスプライトごとに個別のスクリプトを編集。同じメッセージを受信するスクリプトは同時に始まります。</p>
+        <div class="section-label">ブロックを追加</div>
+        <div class="block-palette">
+          <button class="motion" data-block="move">↔ 動かす<span>横・縦に移動</span></button>
+          <button class="looks" data-block="fade">◐ うすくする<span>透明度を変える</span></button>
+          <button class="looks" data-block="zoom">⊕ 大きさを変える<span>拡大・縮小</span></button>
+          <button class="motion" data-block="rotate">⟳ 回転する<span>くるっと回す</span></button>
+          <button class="motion" data-block="shake">〰 ゆらす<span>ぷるぷる動く</span></button>
+          <button class="filter" data-block="blur">◌ ぼかす<span>ふわっと見せる</span></button>
+          <button class="filter" data-block="gray">◐ 色を変える<span>色を抜く</span></button>
+          <button class="wait" data-block="wait">◷ 待つ<span>間をあける</span></button>
+          <button class="event" data-block="broadcast">📣 メッセージを送る<span>受信スクリプトを同時実行</span></button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;min-height:210px;height:100%">
+        <div class="program-head"><span id="programTitle">プログラム</span><button id="clearProgram" class="subtle">このスクリプトを消去</button></div>
+        <div id="programScripts" class="program-scripts" aria-label="選択した素材のスクリプト"></div>
+        <div class="message-script-add"><input id="newMessageName" type="text" maxlength="40" placeholder="メッセージ名 (例: エフェクト開始)" aria-label="受信メッセージ名"><button id="addMessageScript" type="button" class="subtle">＋受信スクリプト</button></div>
+        <div id="programStack" class="program-stack"><div class="program-empty">素材を選んでブロックを追加すると<br>ここにつながっていきます。<br><br>上から下へ順番に動きます。</div></div>
+        <div class="program-tip">ブロックをつないで動きを設定。作品はPNG画像やWebM動画に書き出せます。</div>
+      </div>
+    </div>
+  </aside>
+</div>
+</div>
+<div id="toast" class="toast" role="status"></div>
+<div id="savedModal" class="modal-backdrop"><section class="modal"><h2>端末に保存した作品</h2><p>このブラウザー内に保存された作品です。</p><div id="savedList" style="max-height:50vh;overflow:auto"></div><div class="modal-actions"><button id="closeSaved" class="subtle">閉じる</button></div></section></div>
+<div id="durationModal" class="modal-backdrop"><section class="modal"><h2>動画の長さ</h2><p>ブロックの動きも含めた動画の長さを設定します。</p><div class="mini-row"><label for="durationInput">秒数</label><input id="durationInput" type="range" min="3" max="60" value="10"><output id="durationInputOut">10秒</output></div><div class="modal-actions"><button id="cancelDuration" class="subtle">キャンセル</button><button id="saveDuration" class="primary">設定</button></div></section></div>
+<script src="/js/creative-studio.js"></script><script src="/js/mixall-nav.js" defer></script>
+</body></html>

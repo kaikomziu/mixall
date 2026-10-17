@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ghost年齢監査 - MixAll運営</title>
+  <link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+  <style>.audit-list{max-height:560px;overflow:auto}.audit-item{padding:12px 0;border-bottom:1px solid var(--border)}.audit-meta{font-size:.85rem;color:var(--text-dim);white-space:pre-wrap}.signature{font-family:ui-monospace,monospace;overflow-wrap:anywhere}.review-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.review-controls select{max-width:230px}.audit-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.audit-stat{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:12px}.audit-stat strong{display:block;font-size:1.2rem}.audit-warning{border-left:3px solid var(--accent);padding-left:10px}</style>
+
+  <meta name="description" content="Ghost年齢監査 - MixAll運営。MixAllのサービスページです。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Ghost年齢監査 - MixAll運営">
+  <meta property="og:description" content="Ghost年齢監査 - MixAll運営。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/admin/ghost-age">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="MixAllログイン">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ghost年齢監査 - MixAll運営">
+  <meta name="twitter:description" content="Ghost年齢監査 - MixAll運営。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top"><div class="brand"><a href="/admin" style="color:inherit">Mix<span>All</span> 運営</a></div><nav class="services"><a href="/admin">ダッシュボード</a><a href="/Ghost">Ghost</a></nav></header>
+<main>
+  <section class="card">
+    <div class="row" style="justify-content:space-between;align-items:center"><div><h1>Ghost年齢適合監査</h1><p class="muted">月1回のGemini監査は15分ごとの小分け処理で進行します。AIが読めない大きな画像・動画は「要確認」として13歳未満には表示しません。</p></div><button id="refresh" type="button">更新</button></div>
+    <p class="audit-warning muted">検出語句・画像は年齢区分の早期検出用シグネチャとして各50件まで保存します。これは13歳未満への表示制御であり、13歳以上のGhost投稿をサイト全体から削除する禁止リストではありません。AI判定は誤り得るため、必要に応じて運営が個別に確認してください。</p>
+    <div id="state" class="audit-stats"><p class="muted">読み込み中...</p></div><div id="error" class="error"></div>
+  </section>
+  <section class="card"><h2>早期検出シグネチャ</h2><h3>語句</h3><div id="terms" class="audit-list"><p class="muted">読み込み中...</p></div><h3>画像指紋（SHA-256）</h3><div id="images" class="audit-list"><p class="muted">読み込み中...</p></div></section>
+  <section class="card"><h2>監査・要確認履歴</h2><p class="muted">「要確認」は、AIが一部メディアを確認できなかった投稿です。投稿リンクから目視確認した後、年齢カテゴリを確定できます。</p><div id="reviews" class="audit-list"><p class="muted">読み込み中...</p></div></section>
+</main>
+<script src="/js/auth.js"></script>
+<script>
+const session=Netrify.requireLogin();
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const categoryLabel={inm:'淫夢系',sexual:'性的',other:'その他の年齢不適切'};
+async function load(){
+  const error=document.getElementById('error');error.textContent='';
+  try{
+    const response=await fetch('/.netlify/functions/ghost?ageAudit=1&token='+encodeURIComponent(session.token));
+    const data=await response.json();if(!response.ok)throw new Error(data.error||'監査情報を読み込めません');
+    const s=data.state;
+    document.getElementById('state').innerHTML=s?[
+      `<div class="audit-stat"><span>対象月</span><strong>${esc(s.month||'—')}</strong></div>`,
+      `<div class="audit-stat"><span>状態</span><strong>${esc(s.status||'—')}</strong></div>`,
+      `<div class="audit-stat"><span>処理済み / 対象</span><strong>${Number(s.cursor||0)} / ${Number(s.total||0)}</strong></div>`,
+      `<div class="audit-stat"><span>再試行待ち</span><strong>${Number(s.retryCount||0)}</strong></div>`,
+      `<div class="audit-stat"><span>開始 / 完了</span><strong style="font-size:.9rem">${esc(s.startedAt?new Date(s.startedAt).toLocaleString('ja-JP'):'—')}<br>${esc(s.completedAt?new Date(s.completedAt).toLocaleString('ja-JP'):'—')}</strong></div>`
+    ].join(''):'<p class="muted">初回の定期実行を待っています。Functionの設定後、最大15分以内に開始します。</p>';
+    document.getElementById('terms').innerHTML=(data.terms||[]).map(row=>`<div class="audit-item"><strong class="signature">${esc(row.term)}</strong><div class="audit-meta">区分: ${esc((row.categories||[]).map(c=>categoryLabel[c]||c).join('、')||'—')} · 例: ${(row.examplePostIds||[]).map(id=>`<a href="/Ghost/post.html?id=${encodeURIComponent(id)}">${esc(id)}</a>`).join(', ')}</div></div>`).join('')||'<p class="muted">まだ検出語句はありません。</p>';
+    document.getElementById('images').innerHTML=(data.images||[]).map(row=>`<div class="audit-item"><strong class="signature">${esc(row.sha256)}</strong><div class="audit-meta">区分: ${esc((row.categories||[]).map(c=>categoryLabel[c]||c).join('、')||'—')} · 例: ${(row.examplePostIds||[]).map(id=>`<a href="/Ghost/post.html?id=${encodeURIComponent(id)}">${esc(id)}</a>`).join(', ')}</div></div>`).join('')||'<p class="muted">まだ検出画像はありません。</p>';
+    document.getElementById('reviews').innerHTML=(data.reviews||[]).map(row=>{
+      const categories=(row.categories||[]).map(c=>categoryLabel[c]||c).join('、')||'なし';
+      const reviewable=row.targetType==='post'&&row.postId&&row.status==='needs_manual';
+      return `<div class="audit-item"><strong>${esc(row.title||'（タイトルなし）')}</strong> · ${esc(row.status||'—')}<div class="audit-meta">投稿ID: ${esc(row.postId||'—')} · 区分: ${esc(categories)} · 監査: ${esc(row.reviewedAt?new Date(row.reviewedAt).toLocaleString('ja-JP'):'—')}<br>${esc(row.reason||row.error||'')} · 画像確認 ${Number(row.imagesReviewed||0)}件 · コメント未確認 ${Number(row.commentsPending||0)}件</div>${row.postId?`<a href="/Ghost/post.html?id=${encodeURIComponent(row.postId)}">投稿を確認</a>`:''}${reviewable?`<div class="review-controls"><select data-categories="${esc(row.postId)}"><option value="">安全（年齢不適切なし）</option><option value="inm">淫夢系</option><option value="sexual">性的</option><option value="inm,sexual">淫夢系・性的</option><option value="other">その他の年齢不適切</option><option value="sexual,other">性的・その他</option></select><button type="button" data-review="${esc(row.postId)}">目視確認を保存</button></div>`:''}</div>`;
+    }).join('')||'<p class="muted">監査履歴はまだありません。</p>';
+    document.querySelectorAll('[data-review]').forEach(button=>button.onclick=async()=>{
+      const postId=button.dataset.review,select=document.querySelector(`[data-categories="${CSS.escape(postId)}"]`);
+      const categories=select.value?select.value.split(','):[];
+      if(!confirm('選択した年齢区分で、この投稿の目視確認結果を保存しますか？'))return;
+      button.disabled=true;
+      try{await Netrify.api('/.netlify/functions/ghost',{action:'manualAgeReview',token:session.token,targetType:'post',postId,categories});await load();}
+      catch(e){alert(e.message);button.disabled=false;}
+    });
+  }catch(e){error.textContent=e.message;}
+}
+document.getElementById('refresh').onclick=load;load();
+</script>
+</body></html>

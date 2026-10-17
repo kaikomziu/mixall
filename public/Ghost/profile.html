@@ -1,0 +1,32 @@
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ghostプロフィール</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="Ghostプロフィール。MixAllのサービスページです。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Ghostプロフィール">
+  <meta property="og:description" content="Ghostプロフィール。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/profile">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="Ghostのフィード">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ghostプロフィール">
+  <meta name="twitter:description" content="Ghostプロフィール。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Ghost/search.html">検索</a><a href="/Ghost/live.html">ライブ</a><a href="/">トップへ</a></nav></header><main><div class="card" id="profile"><p class="muted">読み込み中...</p></div><div class="card"><h3>このユーザーの投稿</h3><div id="posts"><p class="muted">プロフィールを読み込んでいます。</p></div></div></main><script src="/js/auth.js"></script><script>const params=new URLSearchParams(location.search);const handle=params.get('handle')||(params.get('me')==='1'?'me':location.pathname.split('/').pop());const session=Netrify.requireLogin();function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}async function load(){const res=await fetch('/.netlify/functions/ghost?profile='+encodeURIComponent(handle)+(session?'&token='+encodeURIComponent(session.token):''));const data=await res.json();if(!res.ok){document.getElementById('profile').innerHTML='<p class="error">'+esc(data.error||'見つかりません')+'</p>';return;}const p=data.profile;document.title='@'+p.handle+' - Ghost';document.getElementById('profile').innerHTML='<h1 style="margin-bottom:4px">'+esc(p.displayName)+'</h1><p class="muted">@'+esc(p.handle)+'</p><p class="ghost-text-content">'+esc(p.bio)+'</p><div class="row"><span>投稿 '+p.postCount+'</span><span>フォロー '+p.followingCount+'</span><span>フォロワー '+p.followersCount+'</span></div>';const posts=await fetch('/.netlify/functions/ghost?authorHandle='+encodeURIComponent(p.handle)+'&limit=100&token='+encodeURIComponent(session.token));const list=await posts.json();const canFollow=session && p.handle && p.handle !== (session.ghostHandle||'');
+if(canFollow){const followBtn=document.createElement('button');followBtn.type='button';followBtn.className='ghost';followBtn.dataset.following=String(Boolean(p.following));followBtn.textContent=p.following?'フォロー中':'フォロー';followBtn.onclick=async()=>{const r=await fetch('/.netlify/functions/ghost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'followAccount',token:session.token,targetHandle:p.handle,follow:followBtn.dataset.following!=='true'})});const d=await r.json();if(r.ok){followBtn.dataset.following=String(d.following);followBtn.textContent=d.following?'フォロー中':'フォロー';}};document.getElementById('profile').appendChild(followBtn);}
+const copyBtn=document.createElement('button');copyBtn.type='button';copyBtn.className='ghost';copyBtn.textContent='プロフィールリンクをコピー';copyBtn.onclick=()=>navigator.clipboard.writeText(location.origin+'/Ghost/@'+encodeURIComponent(p.handle)).then(()=>copyBtn.textContent='コピーしました');document.getElementById('profile').appendChild(copyBtn);if(session&&((handle==='me')||(session.ghostHandle&&handle===session.ghostHandle))){const editBtn=document.createElement('button');editBtn.type='button';editBtn.className='ghost';editBtn.textContent='名前・IDを変更';editBtn.onclick=()=>location.href='/Ghost?profileSettings=1';document.getElementById('profile').appendChild(editBtn);}
+document.getElementById('posts').innerHTML=(list.posts||[]).map(x=>'<article class="card"><p class="ghost-text-content">'+esc(x.text||x.description||'')+'</p>'+(x.isLive?'<a class="secondary" href="/Ghost/live.html?id='+encodeURIComponent(x.id)+'">🔴 ライブ配信中 — 視聴</a>':'')+((x.media||[]).map(m=>(m.kind==='image'||m.kind==='imageBlob')?'<img src="'+(m.mediaUrl||m.dataUrl)+'" alt="" style="max-width:100%;border-radius:8px">':m.kind==='videoBlob'?'<video src="'+m.mediaUrl+'" controls playsinline style="width:100%;max-height:70vh"></video>':m.kind==='videoFile'?'<video src="'+m.dataUrl+'" controls playsinline style="width:100%;max-height:70vh"></video>':m.kind==='videoUrl'?'<video src="'+esc(m.url)+'" controls playsinline style="width:100%;max-height:70vh"></video>':'').join(''))+'<button type="button" class="ghost" data-copy-post="'+esc(x.id)+'">投稿リンクをコピー</button></article>').join('')||'<p class="muted">投稿はありません。</p>';document.querySelectorAll('[data-copy-post]').forEach(b=>b.onclick=()=>navigator.clipboard.writeText(location.origin+'/Ghost/post/'+encodeURIComponent(b.dataset.copyPost)).then(()=>b.textContent='コピーしました'));}load();</script><script src="/js/ghost-nav.js"></script>
+</body></html>

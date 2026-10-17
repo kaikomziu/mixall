@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Webhook | MixAll</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/settings.js"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="Webhook | MixAll。MixAllのサービスページです。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Webhook | MixAll">
+  <meta property="og:description" content="Webhook | MixAll。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/Webhook/">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="MixAllサイト作成">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Webhook | MixAll">
+  <meta name="twitter:description" content="Webhook | MixAll。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <div class="brand">Mix<span>All</span></div>
+  <nav class="services">
+    <a href="/">アカウント</a><a href="/Uch">Uch</a><a href="/Pocket">ぽけっと</a><a href="/Ghost">Ghost</a><a href="/Mail">Mail</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h2>Webhook</h2>
+    <p class="muted">外部サービスから、あなたのアカウントとしてMailまたはPocketへ投稿できます。Webhookの秘密鍵は発行時に一度だけ表示されます。</p>
+    <div id="error" class="error"></div>
+    <div id="secretBox" class="card" style="display:none;border-color:var(--accent);">
+      <h3>秘密鍵を保存してください</h3>
+      <p class="muted">この秘密鍵は今回だけ表示されます。画面を閉じると再表示できません。漏えいした場合は直ちに削除または再発行してください。</p>
+      <code id="secret" style="display:block;word-break:break-all;white-space:pre-wrap;margin:10px 0;"></code>
+      <button id="copySecret" type="button">秘密鍵をコピー</button>
+      <button id="closeSecret" type="button" class="secondary">閉じる</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Webhookを追加</h3>
+    <div class="row">
+      <input id="name" type="text" maxlength="80" placeholder="名前（例: 通知連携）" style="flex:1">
+      <select id="type"><option value="mail">Mail</option><option value="pocket">Pocket</option></select>
+      <button id="create" type="button">追加</button>
+    </div>
+    <p class="muted">Mailは既存アカウント宛て、PocketはWebhook所有者が参加しているルーム宛てに送信できます。</p>
+  </div>
+  <div class="card">
+    <h3>発行済みWebhook</h3>
+    <div id="list"><p class="muted">読み込み中...</p></div>
+  </div>
+  <div class="card">
+    <h3>使い方</h3>
+    <p class="muted">エンドポイントへPOSTし、JSON本文そのものを秘密鍵でHMAC-SHA-256計算した16進文字列を <code>X-MixAll-Signature</code> ヘッダーへ設定してください。Mail・Pocketへ送信する本文は、送信先と本文をJSONで指定してください。</p>
+  </div>
+</main>
+<script src="/js/auth.js"></script>
+<script>
+const session = Netrify.requireLogin();
+const errorEl = document.getElementById('error');
+const listEl = document.getElementById('list');
+const secretBox = document.getElementById('secretBox');
+const secretEl = document.getElementById('secret');
+function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function showError(error) { errorEl.textContent = error ? error.message || String(error) : ''; }
+async function api(action, extra = {}) { return Netrify.api('/.netlify/functions/webhooks', { action, token: session.token, ...extra }); }
+function showSecret(value) { secretEl.textContent = value; secretBox.style.display = 'block'; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+async function load() {
+  try {
+    showError(null);
+    const data = await api('list');
+    listEl.innerHTML = data.webhooks.length ? data.webhooks.map((item) => `
+      <div class="admin-item">
+        <strong>${escapeHtml(item.name)}</strong> <span class="muted">${item.type === 'mail' ? 'Mail' : 'Pocket'} · ${item.enabled ? '有効' : '停止中'}</span>
+        <div class="meta">ID: ${escapeHtml(item.id)}<br>Endpoint: <code>${escapeHtml(location.origin + item.endpoint)}</code><br>発行: ${escapeHtml(new Date(item.createdAt).toLocaleString('ja-JP'))}</div>
+        <div class="row">
+          <button type="button" class="secondary" data-toggle="${escapeHtml(item.id)}" data-enabled="${item.enabled}">${item.enabled ? '停止' : '有効化'}</button>
+          <button type="button" class="secondary" data-rotate="${escapeHtml(item.id)}">秘密鍵を再発行</button>
+          <button type="button" class="ghost" data-delete="${escapeHtml(item.id)}">削除</button>
+        </div>
+      </div>`).join('') : '<p class="muted">Webhookはまだありません。</p>';
+    listEl.querySelectorAll('[data-toggle]').forEach((button) => button.onclick = async () => {
+      try { await api('toggle', { id: button.dataset.toggle, enabled: button.dataset.enabled !== 'true' }); await load(); } catch (e) { showError(e); }
+    });
+    listEl.querySelectorAll('[data-rotate]').forEach((button) => button.onclick = async () => {
+      if (!confirm('秘密鍵を再発行しますか？旧秘密鍵は直ちに無効になります。')) return;
+      try { const data = await api('rotate', { id: button.dataset.rotate }); showSecret(data.secret); await load(); } catch (e) { showError(e); }
+    });
+    listEl.querySelectorAll('[data-delete]').forEach((button) => button.onclick = async () => {
+      if (!confirm('このWebhookを削除しますか？')) return;
+      try { await api('delete', { id: button.dataset.delete }); await load(); } catch (e) { showError(e); }
+    });
+  } catch (e) { showError(e); listEl.innerHTML = '<p class="error">読み込みに失敗しました。</p>'; }
+}
+document.getElementById('create').onclick = async () => {
+  try {
+    const button = document.getElementById('create'); button.disabled = true; showError(null);
+    const data = await api('create', { type: document.getElementById('type').value, name: document.getElementById('name').value });
+    document.getElementById('name').value = ''; showSecret(data.secret); await load();
+  } catch (e) { showError(e); } finally { document.getElementById('create').disabled = false; }
+};
+document.getElementById('copySecret').onclick = async () => { try { await navigator.clipboard.writeText(secretEl.textContent); alert('秘密鍵をコピーしました。'); } catch (_) { alert('コピーできませんでした。表示された秘密鍵を安全に保存してください。'); } };
+document.getElementById('closeSecret').onclick = () => { secretEl.textContent = ''; secretBox.style.display = 'none'; };
+load();
+</script>
+</body>
+</html>

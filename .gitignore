@@ -1,0 +1,8 @@
+node_modules/
+.env
+.netlify/
+build/
+*.zip
+backup-input/
+supabase/.temp/
+supabase/functions/mixall-api/index.js

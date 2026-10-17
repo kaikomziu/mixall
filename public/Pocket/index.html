@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<style>.unread-badge{display:inline-flex;min-width:22px;height:22px;align-items:center;justify-content:center;padding:0 6px;border-radius:999px;background:var(--danger);color:#fff;font-size:.75rem;font-weight:700;margin-left:8px}.room-row{display:flex;justify-content:space-between;gap:10px;align-items:center}.room-row>div:first-child{min-width:0}</style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ぽけっと - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="MixAllの個人・グループチャットと音声・ビデオ通話。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="ぽけっと - MixAll">
+  <meta property="og:description" content="MixAllの個人・グループチャットと音声・ビデオ通話。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/Pocket/">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="ぽけっとのチャット">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ぽけっと - MixAll">
+  <meta name="twitter:description" content="MixAllの個人・グループチャットと音声・ビデオ通話。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
+  <nav class="services">
+    <a href="/Uch">Uch</a>
+    <a href="/Pocket" class="active">ぽけっと</a>
+    <a href="/Pocket/stamps.html">スタンプ管理</a>
+    <a href="/">トップへ</a>
+  </nav>
+</header>
+
+<main>
+  <div class="card">
+    <h2>新しいチャット</h2>
+    <div class="row" style="margin-bottom: 12px;">
+      <button id="tabDm">個人チャット</button>
+      <button id="tabGroup" class="secondary">グループチャット</button>
+    </div>
+
+    <div id="dmForm">
+      <input type="text" id="dmTarget" placeholder="相手のアドレス (例: taro01@bix.3erver)" />
+    </div>
+
+    <div id="groupForm" style="display:none;">
+      <input type="text" id="groupTitle" placeholder="グループ名" />
+      <textarea id="groupMembers" placeholder="招待するアドレス (改行またはカンマ区切りで複数指定可)"></textarea>
+    </div>
+
+    <div class="error" id="createError"></div>
+    <button id="createSubmit">作成する</button>
+  </div>
+
+  <div class="card">
+    <h2>チャット一覧</h2>
+    <div id="roomList"><p class="muted">読み込み中...</p></div>
+  </div>
+</main>
+
+<script src="/js/auth.js"></script>
+<script>
+const session = Netrify.requireLogin();
+
+const tabDm = document.getElementById('tabDm');
+const tabGroup = document.getElementById('tabGroup');
+tabDm.onclick = () => { document.getElementById('dmForm').style.display='block'; document.getElementById('groupForm').style.display='none'; tabDm.className=''; tabGroup.className='secondary'; };
+tabGroup.onclick = () => { document.getElementById('dmForm').style.display='none'; document.getElementById('groupForm').style.display='block'; tabGroup.className=''; tabDm.className='secondary'; };
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadRooms() {
+  if (!session) return;
+  const res = await fetch('/.netlify/functions/pocket?token=' + encodeURIComponent(session.token));
+  const data = await res.json();
+  const el = document.getElementById('roomList');
+  if (!data.rooms || data.rooms.length === 0) {
+    el.innerHTML = '<p class="muted">まだチャットがありません。</p>';
+    return;
+  }
+  el.innerHTML = data.rooms.map(r => `
+    <a class="thread-list-item" href="/Pocket/room.html?id=${encodeURIComponent(r.id)}" style="color:inherit;">
+      <div class="room-row"><div>
+        <div class="title">${escapeHtml(r.title || (r.type === 'dm' ? '個人チャット' : 'グループ'))}</div>
+        <div class="meta">${r.lastMessage ? escapeHtml(r.lastMessage.authorName) + ': ' + escapeHtml(r.lastMessage.text || '').slice(0,40) : 'まだメッセージがありません'}</div>
+      </div>${r.unreadCount ? `<span class="unread-badge" aria-label="未読${r.unreadCount}件">${r.unreadCount > 99 ? '99+' : r.unreadCount}</span>` : ''}</div>
+    </a>
+  `).join('');
+}
+
+document.getElementById('createSubmit').onclick = async () => {
+  const errEl = document.getElementById('createError');
+  errEl.textContent = '';
+  const isDm = document.getElementById('dmForm').style.display !== 'none';
+  try {
+    let data;
+    if (isDm) {
+      const target = document.getElementById('dmTarget').value.trim();
+      if (!target) { errEl.textContent = '相手のアドレスを入力してください'; return; }
+      data = await Netrify.api('/.netlify/functions/pocket', {
+        action: 'createRoom', token: session.token, type: 'dm', memberEmails: [target]
+      });
+    } else {
+      const title = document.getElementById('groupTitle').value.trim();
+      const members = document.getElementById('groupMembers').value.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
+      data = await Netrify.api('/.netlify/functions/pocket', {
+        action: 'createRoom', token: session.token, type: 'group', title, memberEmails: members
+      });
+    }
+    window.location.href = '/Pocket/room.html?id=' + encodeURIComponent(data.room.id);
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+};
+
+loadRooms();
+setInterval(loadRooms, 8000); // 常時更新
+</script>
+</body>
+</html>

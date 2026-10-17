@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mixall-pages",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve-local.mjs", "5173", "/mixall"],
+      "port": 5173
+    }
+  ]
+}

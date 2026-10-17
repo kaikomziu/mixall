@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Ghost ショート動画</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/settings.js"></script>
+  <style>
+    :root { color-scheme:dark; }
+    html,body { width:100%; height:100%; margin:0; overflow:hidden; background:#000; color:#fff; }
+    body { padding:0 !important; }
+    .top,.ghost-bottom-nav { display:none !important; }
+    .shorts-app { position:fixed; inset:0; overflow:hidden; background:#000; }
+    .shorts-scroll { position:absolute; inset:0; height:100%; overflow-x:hidden; overflow-y:auto; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; touch-action:pan-y; scroll-snap-type:y mandatory; scrollbar-width:none; background:#000; }
+    .shorts-scroll::-webkit-scrollbar { display:none; }
+    .short-card { position:relative; width:min(100vw,500px); height:100vh; height:100dvh; min-height:100vh; min-height:100dvh; margin:0 auto; padding:0; border:0; border-radius:0; overflow:hidden; background:#050505; color:#fff; scroll-snap-align:start; scroll-snap-stop:always; isolation:isolate; }
+    .short-media { position:absolute; inset:0; z-index:0; width:100%; height:100%; }
+    .short-media video,.short-media iframe { display:block; pointer-events:none; width:100%; height:100%; border:0; object-fit:cover; background:#000; }
+    .short-shade { position:absolute; inset:0; z-index:1; pointer-events:none; background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,transparent 22%,transparent 48%,rgba(0,0,0,.14) 62%,rgba(0,0,0,.82) 100%); }
+    .short-top { position:fixed; z-index:1000; top:env(safe-area-inset-top,0); left:0; right:0; height:56px; display:flex; align-items:center; gap:14px; padding:0 16px; color:#fff; pointer-events:none; text-shadow:0 1px 5px #000; }
+    .short-top a,.short-top button { pointer-events:auto; min-width:44px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; color:inherit; text-decoration:none; border:0; background:transparent; font:inherit; font-size:18px; cursor:pointer; }
+    .short-top .short-heading { font-size:20px; font-weight:700; }
+    .short-top .short-exit { font-size:27px; border-radius:50%; background:rgba(0,0,0,.48); }
+    .short-top .short-count { margin-left:auto; font-size:13px; opacity:.85; }
+    .short-actions { position:absolute; z-index:5; right:12px; bottom:calc(148px + env(safe-area-inset-bottom,0)); display:flex; flex-direction:column; align-items:center; gap:18px; }
+    .short-action { display:flex; min-width:48px; flex-direction:column; align-items:center; gap:2px; color:#fff; border:0; padding:0; background:transparent; font:inherit; cursor:pointer; text-shadow:0 1px 4px #000; -webkit-tap-highlight-color:transparent; text-decoration:none; }
+    .short-action .symbol { font-size:30px; line-height:1; filter:drop-shadow(0 1px 3px #000); }
+    .short-action .count { min-height:17px; font-size:12px; font-weight:600; }
+    .short-action.liked .symbol { color:#ff4d73; }
+    .short-meta { position:absolute; z-index:5; left:18px; right:82px; bottom:calc(28px + env(safe-area-inset-bottom,0)); color:#fff; text-shadow:0 1px 5px #000; }
+    .short-author { font-size:15px; font-weight:700; margin-bottom:9px; overflow-wrap:anywhere; }
+    .short-author-link { color:#fff; text-decoration:none; padding:4px 0; }
+    .short-author-link:hover,.short-comment-author a:hover { text-decoration:underline; }
+    .short-title { display:block; max-width:100%; margin:0; padding:0; border:0; background:transparent; color:#fff; text-align:left; font:inherit; font-size:17px; font-weight:750; line-height:1.35; cursor:pointer; text-shadow:0 1px 5px #000; }
+    .short-title::after { content:'  ▾'; font-size:13px; opacity:.8; }
+    .short-title[aria-expanded="true"]::after { content:'  ▴'; }
+    .short-description { max-height:23dvh; overflow:auto; margin-top:9px; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(0,0,0,.66); font-size:14px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .short-description[hidden] { display:none !important; }
+    .short-link { display:inline-block; margin-top:9px; color:#fff; border-radius:999px; padding:7px 12px; background:rgba(30,30,30,.62); border:1px solid rgba(255,255,255,.24); text-decoration:none; font-size:12px; }
+    .short-empty { width:min(100vw,500px); height:100%; margin:0 auto; display:grid; align-content:center; justify-items:center; text-align:center; padding:24px; box-sizing:border-box; color:#fff; }
+    .short-empty p { color:#bbb; }
+    .short-play { position:absolute; z-index:6; left:50%; top:50%; transform:translate(-50%,-50%); display:none; border:0; border-radius:50%; width:68px; height:68px; color:#fff; background:rgba(0,0,0,.45); font-size:30px; cursor:pointer; }
+    .short-play.visible { display:block; }
+    .short-error { color:#fff; padding:30px; text-align:center; }
+    .short-sheet-backdrop { position:fixed; inset:0; z-index:2000; display:none; align-items:flex-end; background:rgba(0,0,0,.52); }
+    .short-sheet-backdrop.open { display:flex; }
+    .short-sheet { width:min(100%,560px); max-height:min(78dvh,760px); margin:0 auto; display:flex; flex-direction:column; overflow:hidden; color:var(--text); background:var(--panel); border-radius:22px 22px 0 0; padding-bottom:env(safe-area-inset-bottom,0); box-shadow:0 -10px 40px rgba(0,0,0,.3); transform:translateY(100%); transition:transform .24s ease; }
+    .short-sheet-backdrop.open .short-sheet { transform:translateY(0); }
+    .short-sheet-grabber { width:42px; height:5px; margin:9px auto 4px; border-radius:99px; background:#d7d7d7; flex:none; }
+    .short-sheet-header { display:flex; align-items:center; gap:12px; min-height:54px; padding:0 18px; border-bottom:1px solid var(--border); }
+    .short-sheet-header h2 { margin:0; font-size:18px; }
+    .short-sheet-header .sheet-close { margin-left:auto; border:0; background:transparent; font-size:26px; color:var(--text); padding:6px 10px; cursor:pointer; }
+    .short-sheet-body { flex:1; min-height:0; overflow:auto; padding:12px 18px; overscroll-behavior:contain; }
+    .short-comment { padding:12px 0; border-bottom:1px solid var(--border); white-space:pre-wrap; overflow-wrap:anywhere; }
+    .short-comment-children { margin:8px 0 0 12px; padding-left:12px; border-left:2px solid #e5e5e5; }
+    .short-comment-author a { color:inherit; text-decoration:none; }
+    .short-comment-reply { margin-top:8px; padding:5px 11px !important; background:#eee !important; color:#222 !important; font-size:13px !important; }
+    .replying-to { flex-basis:100%; color:#666; font-size:13px; }
+    .replying-to button { margin-left:8px; padding:2px 8px !important; background:#eee !important; color:#333 !important; }
+    .short-comment-author { display:block; color:#666; font-size:13px; margin-bottom:6px; }
+    .short-sheet-footer { flex:none; display:flex; align-items:stretch; gap:8px; padding:10px 14px calc(12px + env(safe-area-inset-bottom,0)); border-top:1px solid var(--border); }
+    .short-sheet-footer .language-input-wrap { flex:1; min-width:0; margin:0; align-items:stretch; }
+    .short-sheet-footer .language-editor { min-width:0; min-height:44px; max-height:100px; padding:10px 12px; border-radius:22px; background:#f2f2f2; color:#111; }
+    .short-sheet-footer .language-input-btn { flex:none; padding:4px 6px; font-size:11px; }
+    .short-sheet-footer > button { flex:none; min-width:58px; }
+    .short-sheet-footer .language-picker { top:auto; bottom:100%; right:0; }
+    .short-sheet-footer textarea { flex:1; min-height:44px; max-height:100px; resize:vertical; margin:0; border-radius:22px; color:#111; background:#f2f2f2; }
+    .short-sheet-footer button,.short-sheet-body button { border:0; border-radius:999px; padding:10px 15px; background:#171717; color:#fff; font:inherit; cursor:pointer; }
+    .bookmark-choice { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 2px; border-bottom:1px solid #eee; }
+    .bookmark-choice button { min-width:84px; }
+    .short-sheet-body .bookmark-create { display:flex; gap:8px; margin-top:14px; }
+    .bookmark-create input { flex:1; min-width:0; margin:0; color:#111; background:#f2f2f2; }
+    .short-sheet-status { padding:14px 0; color:#555; }
+    @media (prefers-reduced-motion:reduce) { .short-sheet { transition:none; } }
+    @media (min-width:700px) { .short-top { left:50%; right:auto; width:min(500px,100%); transform:translateX(-50%); } }
+  </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+  <meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc">
+  <script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+  <meta name="description" content="MixAll Ghostの縦長ショート動画フィード。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Ghostショート動画 - MixAll">
+  <meta property="og:description" content="MixAll Ghostの縦長ショート動画フィード。">
+  <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/videos">
+  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/03-ghost-video-vertical.jpg?v=20261012-2">
+  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/03-ghost-video-vertical.jpg?v=20261012-2">
+  <meta property="og:image:alt" content="Ghostの縦長ショート動画">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ghostショート動画 - MixAll">
+  <meta name="twitter:description" content="MixAll Ghostの縦長ショート動画フィード。">
+  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/03-ghost-video-vertical.jpg?v=20261012-2">
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+  <main class="shorts-app">
+    <div id="feed" class="shorts-scroll" aria-label="ショート動画フィード" aria-live="polite">
+      <div class="short-empty"><h1>ショート動画</h1><p>動画を読み込み中...</p></div>
+    </div>
+  </main>
+  <div class="short-top">
+    <a class="short-exit" href="/Ghost" aria-label="ショート動画を終了してGhostへ戻る" title="閉じる">×</a>
+    <span class="short-heading">ショート</span>
+    <span id="shortCount" class="short-count"></span>
+    <button id="soundToggle" type="button" aria-label="音声をオンにする" title="音声をオンにする">🔇</button>
+  </div>
+  <div id="sheetBackdrop" class="short-sheet-backdrop" aria-hidden="true">
+    <section class="short-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="short-sheet-grabber"></div>
+      <header class="short-sheet-header"><h2 id="sheetTitle">コメント</h2><button type="button" class="sheet-close" aria-label="閉じる">×</button></header>
+      <div id="sheetBody" class="short-sheet-body"></div>
+      <form id="commentForm" class="short-sheet-footer" hidden><div id="replyingTo" class="replying-to" hidden></div><textarea id="commentInput" rows="1" maxlength="1000" placeholder="コメントを追加..."></textarea><button type="submit">送信</button></form>
+    </section>
+  </div>
+  <script src="/js/auth.js"></script>
+  <script>
+    const feed = document.getElementById('feed');
+    const session = Netrify.requireLogin();
+    const seenStorageKey = 'ghost-shorts-seen-v1';
+    let activeCard = null;
+    let muted = true;
+    let observer = null;
+    let clips = [];
+    let clipsById = new Map();
+    let seenClipIds = new Set();
+    let repeatSequence = 0;
+    let bookmarkLists = [{id:'saved',name:'保存済み',count:0}];
+    const sheetBackdrop = document.getElementById('sheetBackdrop');
+    const sheetBody = document.getElementById('sheetBody');
+    let sheetPostId = null;
+    let replyParentCommentId = null;
+    try { seenClipIds = new Set(JSON.parse(localStorage.getItem(seenStorageKey) || '[]')); } catch (_) {}
+
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+    }
+    function youtubeId(url) {
+      const match = String(url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]+)/);
+      return match ? match[1] : '';
+    }
+    function clipTitle(clip) {
+      const text = clip.post.description || clip.post.text || '';
+      return clip.post.title || text.split('\n')[0].trim().slice(0,100) || 'ショート動画';
+    }
+    function clipDescription(clip) {
+      const text = clip.post.description || clip.post.text || '';
+      if (clip.post.title) return text;
+      const firstLine = text.split('\n')[0].trim();
+      return text.trim() === firstLine ? text : text.split('\n').slice(1).join('\n').trim();
+    }
+    function videoMarkup(clip) {
+      const media = clip.media;
+      if (media.kind === 'videoUrl') {
+        const id = youtubeId(media.url);
+        if (id) {
+          const src = `https://www.youtube.com/embed/${encodeURIComponent(id)}?enablejsapi=1&autoplay=1&mute=${muted ? 1 : 0}&playsinline=1&controls=0&loop=1&playlist=${encodeURIComponent(id)}&origin=${encodeURIComponent(location.origin)}`;
+          return `<iframe class="short-embed" data-youtube="${esc(id)}" title="ショート動画" src="${src}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+        }
+        return `<video class="short-video" src="${esc(media.url)}" playsinline webkit-playsinline loop muted preload="metadata"></video>`;
+      }
+      const src = media.kind === 'videoBlob' ? media.mediaUrl : media.dataUrl;
+      return `<video class="short-video" src="${esc(src || '')}" playsinline webkit-playsinline loop muted preload="metadata"></video>`;
+    }
+    function cardMarkup(clip) {
+      const post = clip.post;
+      const likes = Array.isArray(post.likes) ? post.likes : [];
+      const liked = Boolean(session && likes.includes(session.email));
+      const title = clipTitle(clip);
+      const description = clipDescription(clip);
+      const creator = post.authorProfile?.displayName || post.authorName || 'Ghost';
+      const creatorHtml=post.authorProfile?.handle ? `<a class="short-author-link" href="/Ghost/profile.html?handle=${encodeURIComponent(post.authorProfile.handle)}">@${esc(post.authorProfile.handle)}</a>` : `<span>${esc(creator)}</span>`;
+      return `<article class="short-card" data-post="${esc(post.id)}" data-clip-id="${esc(clip.clipId)}">
+        <div class="short-media">${videoMarkup(clip)}</div><div class="short-shade"></div>
+        <button type="button" class="short-play" aria-label="再生">▶</button>
+        <div class="short-actions">
+          <button type="button" class="short-action ${liked?'liked':''}" data-like="${esc(post.id)}" aria-label="いいね"><span class="symbol">${liked?'♥':'♡'}</span><span class="count">${likes.length}</span></button>
+          <button type="button" class="short-action" data-comments="${esc(post.id)}" aria-label="コメントを見る"><span class="symbol">▢</span><span class="count">${(post.comments||[]).length || 'コメント'}</span></button>
+          <button type="button" class="short-action" data-save="${esc(post.id)}" aria-label="保存先を選ぶ"><span class="symbol">♧</span><span class="count">保存</span></button>
+          <button type="button" class="short-action" data-share="${esc(post.id)}" aria-label="共有"><span class="symbol">↗</span><span class="count">共有</span></button>
+        </div>
+        <div class="short-meta">
+          <div class="short-author">${creatorHtml}</div>
+          <button type="button" class="short-title" aria-expanded="false">${esc(title)}</button>
+          <div class="short-description" hidden>${esc(description || '概要はありません。')}</div>
+          <a class="short-link" href="/Ghost/post.html?id=${encodeURIComponent(post.id)}">▶ 投稿詳細・コメント</a>
+        </div>
+      </article>`;
+    }
+    function makeCard(clip) {
+      const holder = document.createElement('div');
+      holder.innerHTML = cardMarkup(clip);
+      return holder.firstElementChild;
+    }
+    function pauseCard(card) {
+      if (!card) return;
+      card.querySelectorAll('video').forEach(video => video.pause());
+      card.querySelectorAll('iframe[data-youtube]').forEach(frame => frame.contentWindow?.postMessage(JSON.stringify({ event:'command', func:'pauseVideo', args:[] }), 'https://www.youtube.com'));
+    }
+    function playCard(card) {
+      if (!card) return;
+      card.querySelectorAll('video').forEach(video => {
+        video.muted = muted;
+        const promise = video.play();
+        const playButton = card.querySelector('.short-play');
+        if (promise?.then) promise.then(() => playButton?.classList.remove('visible')).catch(() => playButton?.classList.add('visible'));
+      });
+      card.querySelectorAll('iframe[data-youtube]').forEach(frame => {
+        const id=frame.dataset.youtube; const targetMute=muted?'1':'0';
+        const url=new URL(frame.src); const currentMute=url.searchParams.get('mute');
+        if(currentMute!==targetMute){url.searchParams.set('mute',targetMute);url.searchParams.set('autoplay','1');frame.src=url.toString();}
+        else { frame.contentWindow?.postMessage(JSON.stringify({ event:'command', func:muted?'mute':'unMute', args:[] }), 'https://www.youtube.com'); frame.contentWindow?.postMessage(JSON.stringify({ event:'command', func:'playVideo', args:[] }), 'https://www.youtube.com'); }
+      });
+    }
+    function tagScore(a, b) {
+      const left = new Set(a || []);
+      let common = 0;
+      for (const tag of (b || [])) if (left.has(tag)) common += 1;
+      return common;
+    }
+    function compareRecommendations(activeClip, a, b) {
+      const scoreDifference = tagScore(activeClip.tags, b.tags) - tagScore(activeClip.tags, a.tags);
+      if (scoreDifference) return scoreDifference;
+      const seenDifference = Number(seenClipIds.has(a.clipId)) - Number(seenClipIds.has(b.clipId));
+      if (seenDifference) return seenDifference;
+      return new Date(b.post.createdAt || 0) - new Date(a.post.createdAt || 0);
+    }
+    function rememberSeen(clipId) {
+      seenClipIds.add(clipId);
+      while (seenClipIds.size > 500) seenClipIds.delete(seenClipIds.values().next().value);
+      try { localStorage.setItem(seenStorageKey, JSON.stringify([...seenClipIds])); } catch (_) {}
+    }
+    function recommendAfter(active) {
+      if (!active) return;
+      const activeClip = clipsById.get(active.dataset.clipId);
+      if (!activeClip) return;
+      const cards = Array.from(feed.querySelectorAll('.short-card'));
+      const activeIndex = cards.indexOf(active);
+      if (activeIndex < 0) return;
+      let future = cards.slice(activeIndex + 1);
+      const presentIds = new Set(future.map(card => card.dataset.clipId));
+      const skippedUnseen = clips.filter(clip => clip.clipId !== activeClip.clipId && !seenClipIds.has(clip.clipId) && !presentIds.has(clip.clipId));
+      for (const clip of skippedUnseen) future.push(makeCard(clip));
+      if (!future.length) {
+        let choices = clips.filter(clip => clip.clipId !== activeClip.clipId);
+        if (!choices.length) choices = [activeClip];
+        choices.sort((a,b) => compareRecommendations(activeClip,a,b));
+        future = choices.map(clip => {
+          const source = cards.find(card => card.dataset.clipId === clip.clipId);
+          const repeated = source ? source.cloneNode(true) : makeCard(clip);
+          repeatSequence += 1;
+          repeated.dataset.repeat = String(repeatSequence);
+          return repeated;
+        });
+      }
+      future.sort((a,b) => {
+        const ca = clipsById.get(a.dataset.clipId), cb = clipsById.get(b.dataset.clipId);
+        return ca && cb ? compareRecommendations(activeClip,ca,cb) : 0;
+      });
+      const fragment = document.createDocumentFragment();
+      future.forEach(card => fragment.appendChild(card));
+      feed.appendChild(fragment);
+      future.forEach(card => observer?.observe(card));
+    }
+    function observeCards() {
+      observer = new IntersectionObserver(entries => {
+        const visible = entries.filter(entry => entry.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible && visible.intersectionRatio >= 0.6 && visible.target !== activeCard) {
+          pauseCard(activeCard);
+          activeCard = visible.target;
+          rememberSeen(activeCard.dataset.clipId);
+          playCard(activeCard);
+          const index = Array.from(feed.querySelectorAll('.short-card')).indexOf(activeCard);
+          document.getElementById('shortCount').textContent = `${index + 1} / ${feed.querySelectorAll('.short-card').length}`;
+          recommendAfter(activeCard);
+        }
+      }, { root:feed, threshold:[0.25,0.6,0.85] });
+      feed.querySelectorAll('.short-card').forEach(card => observer.observe(card));
+    }
+    async function loadShorts() {
+      try {
+        const response = await fetch('/.netlify/functions/ghost?channel=short&limit=100' + (session ? '&token=' + encodeURIComponent(session.token) : ''));
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || '動画を読み込めませんでした');
+        clips = [];
+        for (const post of data.posts || []) {
+          (post.media || []).forEach((media, itemIndex) => {
+            if (!['videoFile','videoBlob','videoUrl'].includes(media.kind)) return;
+            const captionTags = [...String(post.description || post.text || '').matchAll(/#([\p{L}\p{N}_-]{1,40})/gu)].map(match => match[1].toLowerCase());
+            const tags = [...new Set([...(Array.isArray(post.tags) ? post.tags.map(tag => String(tag).toLowerCase()) : []), ...captionTags])];
+            clips.push({ clipId:`${post.id}:${itemIndex}`, post, media, itemIndex, tags });
+          });
+        }
+        clipsById = new Map(clips.map(clip => [clip.clipId,clip]));
+        if (!clips.length) {
+          feed.innerHTML = '<div class="short-empty"><h1>ショート動画</h1><p>まだ縦長動画がありません。</p><a class="short-link" href="/Ghost/compose.html">動画を投稿する</a></div>';
+          return;
+        }
+        feed.innerHTML = clips.map(cardMarkup).join('');
+        observeCards();
+        document.getElementById('shortCount').textContent=`1 / ${clips.length}`;
+      } catch (error) {
+        feed.innerHTML = `<div class="short-empty"><h1>ショート動画</h1><p class="short-error">${esc(error.message)}</p><button class="short-link" data-reload>再読み込み</button></div>`;
+      }
+    }
+
+    feed.addEventListener('click', async event => {
+      const title = event.target.closest('.short-title');
+      if (title) {
+        const panel = title.nextElementSibling;
+        const expanded = title.getAttribute('aria-expanded') === 'true';
+        title.setAttribute('aria-expanded', String(!expanded)); panel.hidden = expanded; return;
+      }
+      const reload = event.target.closest('[data-reload]');
+      if (reload) { loadShorts(); return; }
+      const playButton = event.target.closest('.short-play');
+      if (playButton) { const video=playButton.closest('.short-card')?.querySelector('video'); if(video) video.play().catch(()=>{}); return; }
+      const video = event.target.closest('video.short-video');
+      if (video) return;
+      const cardTap = event.target.closest('.short-card');
+      if (cardTap && !event.target.closest('button,a,textarea,input')) {
+        const videoEl=cardTap.querySelector('video'); if(videoEl) { if(videoEl.paused) videoEl.play().catch(()=>{}); else videoEl.pause(); } return;
+      }
+      const comments = event.target.closest('[data-comments]');
+      if (comments) { openComments(comments.dataset.comments); return; }
+      const like = event.target.closest('[data-like]');
+      if (like) {
+        const current=Netrify.requireLogin(); if(!current) return;
+        try { const result=await Netrify.api('/.netlify/functions/ghost',{action:'likePost',token:current.token,postId:like.dataset.like}); feed.querySelectorAll(`[data-like="${CSS.escape(like.dataset.like)}"]`).forEach(button=>{button.classList.toggle('liked',result.liked);button.querySelector('.symbol').textContent=result.liked?'♥':'♡';button.querySelector('.count').textContent=result.likes;}); }
+        catch(error){alert(error.message);} return;
+      }
+      const save = event.target.closest('[data-save]');
+      if (save) { const current=Netrify.requireLogin(); if(!current) return; await openBookmarkPicker(save.dataset.save); return; }
+      const share = event.target.closest('[data-share]');
+      if (share) {
+        const url=location.origin+'/Ghost/post.html?id='+encodeURIComponent(share.dataset.share);
+        try { await navigator.clipboard.writeText(url); share.querySelector('.count').textContent='コピー済み'; }
+        catch(_) { location.href=url; } return;
+      }
+    });
+    document.getElementById('soundToggle').addEventListener('click', event => {
+      muted = !muted;
+      event.currentTarget.textContent = muted ? '🔇' : '🔊';
+      event.currentTarget.setAttribute('aria-label', muted ? '音声をオンにする' : '音声をミュートする');
+      event.currentTarget.classList.toggle('sound-on', !muted);
+      if (activeCard) {
+        activeCard.querySelectorAll('video').forEach(video => { video.muted=muted; if (!muted) video.play().catch(()=>{}); });
+        activeCard.querySelectorAll('iframe[data-youtube]').forEach(frame => {
+          const id=frame.dataset.youtube; const source=`https://www.youtube.com/embed/${encodeURIComponent(id)}?enablejsapi=1&autoplay=1&mute=${muted?1:0}&playsinline=1&controls=0&loop=1&playlist=${encodeURIComponent(id)}&origin=${encodeURIComponent(location.origin)}`;
+          if (frame.src !== source) frame.src=source;
+        });
+      }
+    });
+
+    function openSheet(title, content, footer=false) {
+      document.getElementById('sheetTitle').textContent=title;
+      sheetBody.innerHTML=content;
+      document.getElementById('commentForm').hidden=!footer;
+      sheetBackdrop.classList.add('open'); sheetBackdrop.setAttribute('aria-hidden','false');
+      document.body.style.overflow='hidden';
+    }
+    function closeSheet() {
+      sheetBackdrop.classList.remove('open'); sheetBackdrop.setAttribute('aria-hidden','true');
+      document.getElementById('commentForm').hidden=true;
+      document.body.style.overflow=''; sheetPostId=null; replyParentCommentId=null; document.getElementById('replyingTo').hidden=true; document.getElementById('commentInput').placeholder='コメントを追加...';
+    }
+    async function loadBookmarkLists() {
+      const current=Netrify.getSession(); if(!current) throw new Error('ログインが必要です');
+      const response=await fetch('/.netlify/functions/ghost?bookmarks=1&listsOnly=1&token='+encodeURIComponent(current.token));
+      const data=await response.json(); if(!response.ok) throw new Error(data.error||'保存先を読み込めません');
+      bookmarkLists=data.lists||[{id:'saved',name:'保存済み',count:0}]; return bookmarkLists;
+    }
+    async function openBookmarkPicker(postId) {
+      openSheet('保存先を選択','<div class="short-sheet-status">保存先を読み込み中...</div>');
+      try {
+        const lists=await loadBookmarkLists();
+        sheetBody.innerHTML=lists.map(list=>`<div class="bookmark-choice"><span><strong>${esc(list.name)}</strong><br><small>${list.count||0}件</small></span><button type="button" data-save-list="${esc(list.id)}">保存</button></div>`).join('')+'<form class="bookmark-create" id="bookmarkCreate"><input maxlength="40" placeholder="新しいリスト名" aria-label="新しいリスト名"><button type="submit">作成</button></form><a class="short-link" href="/Ghost/bookmarks.html">ブックマーク一覧を開く</a>';
+        sheetBody.querySelectorAll('[data-save-list]').forEach(button=>button.addEventListener('click',async()=>{
+          const current=Netrify.requireLogin(); if(!current)return;
+          button.disabled=true;
+          try { await Netrify.api('/.netlify/functions/ghost',{action:'bookmarkPost',token:current.token,postId,listId:button.dataset.saveList,save:true}); button.textContent='保存済み'; button.classList.add('saved'); }
+          catch(error){button.disabled=false;alert(error.message);}
+        }));
+        sheetBody.querySelector('#bookmarkCreate').addEventListener('submit',async event=>{
+          event.preventDefault(); const input=event.currentTarget.querySelector('input'); const name=input.value.trim(); if(!name)return;
+          try { const current=Netrify.requireLogin(); if(!current)return; await Netrify.api('/.netlify/functions/ghost',{action:'createBookmarkList',token:current.token,name}); await openBookmarkPicker(postId); }
+          catch(error){alert(error.message);}
+        });
+      } catch(error) { sheetBody.innerHTML=`<p class="short-sheet-status">${esc(error.message)}</p>`; }
+    }
+    function renderCommentTree(comments, parentId=null, depth=0) {
+      const children=comments.filter(comment=>(comment.parentCommentId||null)===parentId);
+      if(!children.length)return '';
+      return children.map(comment=>{
+        const name=comment.authorProfile?.displayName || comment.authorName || 'ユーザー';
+        const handle=comment.authorProfile?.handle;
+        const identity=handle?`<a href="/Ghost/profile.html?handle=${encodeURIComponent(handle)}">@${esc(handle)}</a>`:esc(name);
+        return `<article class="short-comment" data-comment-id="${esc(comment.id)}"><span class="short-comment-author">${identity} · ${new Date(comment.createdAt).toLocaleString('ja-JP')}</span><div>${NetrifyLanguage.renderText(comment.text||'')}</div>${Netrify.getSession()?`<button type="button" class="short-comment-reply" data-reply-comment="${esc(comment.id)}" data-reply-name="${esc(name)}">返信</button>`:''}${depth<30?`<div class="short-comment-children">${renderCommentTree(comments,comment.id,depth+1)}</div>`:''}</article>`;
+      }).join('');
+    }
+    function bindReplyButtons() {
+      sheetBody.querySelectorAll('[data-reply-comment]').forEach(button=>button.addEventListener('click',()=>{
+        replyParentCommentId=button.dataset.replyComment;
+        const bar=document.getElementById('replyingTo');bar.innerHTML=`返信先: ${esc(button.dataset.replyName)} <button type="button" id="cancelReply">解除</button>`;bar.hidden=false;
+        document.getElementById('commentInput').placeholder='返信を入力...';document.getElementById('commentInput').focus();
+        document.getElementById('cancelReply').onclick=()=>{replyParentCommentId=null;bar.hidden=true;bar.textContent='';document.getElementById('commentInput').placeholder='コメントを追加...';};
+      }));
+    }
+    async function openComments(postId) {
+      sheetPostId=postId; openSheet('コメント','<div class="short-sheet-status">コメントを読み込み中...</div>',true);
+      document.getElementById('commentForm').hidden=!Netrify.getSession();
+      try {
+        const current=Netrify.getSession(); const query='/.netlify/functions/ghost?post='+encodeURIComponent(postId)+(current?'&token='+encodeURIComponent(current.token):'');
+        const response=await fetch(query); const data=await response.json(); if(!response.ok)throw new Error(data.error||'コメントを読み込めません');
+        const comments=data.post.comments||[];
+        sheetBody.innerHTML=renderCommentTree(comments)||'<p class="short-sheet-status">まだコメントがありません。</p>';
+        NetrifyLanguage.refresh();
+        bindReplyButtons();
+        const card=feed.querySelector(`.short-card[data-post="${CSS.escape(postId)}"]`);
+        if(card)card.querySelector('[data-comments] .count').textContent=String(comments.length);
+      } catch(error) { sheetBody.innerHTML=`<p class="short-sheet-status">${esc(error.message)}</p>`; }
+    }
+    document.querySelector('.sheet-close').addEventListener('click',closeSheet);
+    sheetBackdrop.addEventListener('click',event=>{if(event.target===sheetBackdrop)closeSheet();});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&sheetBackdrop.classList.contains('open'))closeSheet();});
+    document.getElementById('commentForm').addEventListener('submit',async event=>{
+      event.preventDefault(); const current=Netrify.requireLogin(); if(!current||!sheetPostId)return;
+      const input=document.getElementById('commentInput'); const text=input.value.trim(); if(!text)return;
+      try { await Netrify.api('/.netlify/functions/ghost',{action:'addComment',token:current.token,postId:sheetPostId,text,parentCommentId:replyParentCommentId}); input.value=''; replyParentCommentId=null; document.getElementById('replyingTo').hidden=true; document.getElementById('replyingTo').textContent=''; input.placeholder='コメントを追加...'; await openComments(sheetPostId); }
+      catch(error){alert(error.message);}
+    });
+    document.addEventListener('visibilitychange', () => { if(document.hidden) pauseCard(activeCard); else playCard(activeCard); });
+    loadShorts();
+  </script>
+  <nav class="short-bottom-nav" aria-label="Ghostショートメニュー"><a href="/Ghost"><strong>⌂</strong><span>ホーム</span></a><a href="/Ghost/videos.html"><strong>▶</strong><span>ショート</span></a><a class="plus" href="/Ghost/compose.html"><strong>＋</strong><span>投稿</span></a><a href="/Ghost/watch.html"><strong>▣</strong><span>登録チャンネル</span></a><a href="/Ghost/profile.html?me=1"><strong>●</strong><span>マイページ</span></a></nav>
+  <script src="/js/ghost-nav.js"></script>
+</body>
+</html>
