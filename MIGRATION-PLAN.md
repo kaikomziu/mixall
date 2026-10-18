@@ -20,9 +20,13 @@
 - 友人コードのバグ修正: language-input.js の `editor is not defined`
 - `.github/workflows/pages.yml`（mainへのpushで自動公開）、`supabase/cron.sql`（pg_cronで定期実行）
 
+## 公開済み（2026-10-18）
+- サイト: https://kaikomziu.github.io/mixall/ （リポジトリ kaikomziu/mixall、main への push で自動公開）
+- API: Edge Function `mixall-api`（`npx supabase functions deploy mixall-api --project-ref kifnzvktwbomxthzvvgy --no-verify-jwt --use-api`、CLIログインは通常のPowerShellで）
+- `node server/remote-check.mjs` で本番の送受信・端末配送・受領削除を確認済み。pg_cron 登録済み（`supabase/cron.sql`）
+- 友人の秘密情報入りの元履歴は手元の `netlify-history` ブランチにだけある（push しない）
+
 ## 残り
-1. Supabase CLIにログインしてもらう → `mixall-api` をデプロイ → 本番DBで動作確認 → `supabase/cron.sql` を適用
-2. GitHubリポジトリ `kaikomziu/mixall` を作成して公開（**ユーザーOK後**）。最初のコミット（友人の秘密情報入り）は含めず、新しい履歴で push する
-3. 友人のバックアップZIPを入手 → 取り込み
+3. 友人のバックアップZIPを入手 → `MIXALL_MIGRATION_SECRET`（mixall-config の値）を使って取り込み → 取り込み後はその値を消す
 4. Gemini APIキー（運営画面またはconfig）・必要なら x.gd キーを設定
 5. 未確認: 運営画面の各機能・Custom・通話/ライブ（P2P）・Tools などの本番での動作、APK（public/downloads）の中身
