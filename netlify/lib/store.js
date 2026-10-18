@@ -64,7 +64,7 @@ function postgresBackend() {
     async set(s, k, v) {
       const text = JSON.stringify(v === undefined ? null : v);
       await sql`insert into public.mixall_kv (store, key, value, bytes, updated_at)
-        values (${s}, ${k}, ${text}::jsonb, ${Buffer.byteLength(text, 'utf8')}, now())
+        values (${s}, ${k}, ${sql.json(v === undefined ? null : v)}, ${Buffer.byteLength(text, 'utf8')}, now())
         on conflict (store, key) do update set value = excluded.value, bytes = excluded.bytes, updated_at = now()`;
     },
     async del(s, k) { await sql`delete from public.mixall_kv where store = ${s} and key = ${k}`; },
