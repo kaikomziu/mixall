@@ -21,6 +21,11 @@
 - Ghostライブのチャットは配信中だけサーバーにあり、終了してアーカイブになるときに本文を消す。
 - 投票（集計が必要）と添付ファイルの実体はサーバーに残る。新しい端末では、使い始める前のメッセージ本文は表示されない。
 
+### Googleドライブ連携（任意）
+- 連携した人だけ、端末のチャット本文を Googleドライブのアプリ専用フォルダ（appDataFolder、スコープ `drive.appdata`）にも保存する。`public/js/google-drive-sync.js`。アカウント設定画面に連携カードが出る。
+- ブラウザとGoogleの間だけで通信し、Googleのトークンは MixAll のサーバーへ送らない。ファイルは MixAll アカウントごとに `mixall-chat-<ハッシュ>.json`。
+- 有効化: Google Cloud で OAuth クライアントID（ウェブアプリ、承認済みJavaScript生成元 `https://kaikomziu.github.io`）を作り、GitHub リポジトリの Actions 変数 `MIXALL_GOOGLE_CLIENT_ID` に登録して再デプロイ。
+
 ### よく使うコマンド
 ```
 npm install

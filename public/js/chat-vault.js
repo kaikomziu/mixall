@@ -62,8 +62,10 @@
     });
   })();
 
-  async function putRecords(records) {
+  async function putRecords(records, source) {
     for (const record of records) cache.set(record.msgId, record);
+    // Googleドライブ同期（google-drive-sync.js）などへ変更を知らせる
+    if (records.length) { try { window.dispatchEvent(new CustomEvent('mixall-vault-changed', { detail: { source: source || 'local', count: records.length } })); } catch (_) { /* ignore */ } }
     const db = await openDb();
     if (!db || !records.length) return;
     await new Promise((resolve) => {
@@ -78,18 +80,28 @@
     });
   }
 
+  // 削除は「削除済み」の印（tombstone）として残す。Googleドライブ側のコピーにも削除を伝えるため。
   async function deleteRecords(ids) {
-    for (const id of ids) cache.delete(id);
-    const db = await openDb();
-    if (!db || !ids.length) return;
-    await new Promise((resolve) => {
-      try {
-        const tx = db.transaction(STORE, 'readwrite');
-        for (const id of ids) tx.objectStore(STORE).delete(id);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => resolve();
-      } catch (_) { resolve(); }
+    const tombstones = ids.map((id) => {
+      const prev = cache.get(id);
+      return { msgId: String(id), channel: prev && prev.channel, convId: prev && prev.convId, owner: prev && prev.owner, kind: 'message', deleted: true, fields: {}, meta: {}, updatedAt: Date.now() };
     });
+    await putRecords(tombstones);
+  }
+
+  // トークンからMixAllアカウント（メールアドレス）を引く。端末内の本文をアカウントごとに分けるため。
+  function ownerForToken(token) {
+    if (!token) return null;
+    try {
+      const current = JSON.parse(safeGet('netrify_session') || 'null');
+      if (current && current.token === token) return current.email || null;
+      const accounts = JSON.parse(safeGet('netrify_accounts') || '[]');
+      const hit = accounts.find((a) => a && a.token === token);
+      return hit ? hit.email : null;
+    } catch (_) { return null; }
+  }
+  function currentEmail() {
+    try { return (JSON.parse(safeGet('netrify_session') || 'null') || {}).email || null; } catch (_) { return null; }
   }
 
   // ---- サーバーから届いた本文を保存 ----
@@ -98,10 +110,12 @@
 
   async function storeVault(vault, token) {
     if (!vault || !Array.isArray(vault.items)) return;
+    const owner = ownerForToken(token) || currentEmail();
     const records = vault.items.filter((item) => item && item.msgId).map((item) => {
       const prev = cache.get(item.msgId);
       return {
         msgId: String(item.msgId),
+        owner: owner || (prev && prev.owner) || null,
         channel: item.channel,
         convId: item.convId,
         kind: item.kind || 'message',
@@ -122,7 +136,9 @@
     if (Array.isArray(node)) { for (const child of node) hydrate(child, depth + 1); return; }
     if (node.vault === true && node.id) {
       const record = cache.get(String(node.id));
-      if (node.deleted) {
+      if (record && record.deleted) {
+        if ('text' in node && !node.text) node.text = '';
+      } else if (node.deleted) {
         if (record) deletedSeen.push(String(node.id));
       } else if (record) {
         Object.assign(node, record.fields);
@@ -146,7 +162,7 @@
   async function rememberLiveComments(body) {
     const comments = Array.isArray(body && body.comments) ? body.comments : [];
     const records = comments.filter((c) => c && c.id && c.isLiveChat && c.text && !c.vault).map((c) => ({
-      msgId: String(c.id), channel: 'ghost-live', convId: String(body.postId || ''), kind: 'message',
+      msgId: String(c.id), owner: currentEmail(), channel: 'ghost-live', convId: String(body.postId || ''), kind: 'message',
       fields: { text: c.text }, meta: { authorEmail: c.authorEmail, authorName: c.authorName, createdAt: c.createdAt }, updatedAt: Date.now()
     }));
     if (records.length) await putRecords(records);
@@ -273,19 +289,23 @@
   }
 
   // 端末の本文を書き出し／読み込み（機種変更時の引き継ぎ用）
-  async function exportAll() {
+  // owner を指定すると、そのアカウントの分（とアカウント不明の古い分）だけを書き出す
+  async function exportAll(owner) {
     await ready;
-    return { format: 'mixall-chat-vault', version: 1, exportedAt: new Date().toISOString(), items: Array.from(cache.values()) };
+    const items = Array.from(cache.values()).filter((r) => !owner || !r.owner || r.owner === owner);
+    return { format: 'mixall-chat-vault', version: 1, owner: owner || null, exportedAt: new Date().toISOString(), items };
   }
-  async function importAll(data) {
+  // 取り込みは「新しい方を残す」マージ。戻り値は端末側で更新された件数。
+  async function importAll(data, source) {
     if (!data || data.format !== 'mixall-chat-vault' || !Array.isArray(data.items)) throw new Error('MixAllのチャット書き出しファイルではありません');
     await ready;
-    const records = data.items.filter((r) => r && r.msgId && r.fields).map((r) => ({ ...r, msgId: String(r.msgId) }));
-    await putRecords(records);
+    const records = data.items.filter((r) => r && r.msgId && r.fields).map((r) => ({ ...r, msgId: String(r.msgId) }))
+      .filter((r) => { const prev = cache.get(r.msgId); return !prev || Number(r.updatedAt || 0) > Number(prev.updatedAt || 0); });
+    await putRecords(records, source || 'import');
     return records.length;
   }
 
-  window.MixAllChatVault = { ready, pull, exportAll, importAll, deviceId, count: () => cache.size, text: textOf };
+  window.MixAllChatVault = { ready, pull, exportAll, importAll, deviceId, currentEmail, count: () => Array.from(cache.values()).filter((r) => !r.deleted).length, text: textOf };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(pull, 300));
   else setTimeout(pull, 300);
 })();

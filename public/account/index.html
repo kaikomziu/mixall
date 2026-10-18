@@ -144,6 +144,9 @@
     <div class="admin-actions"><button type="button" id="sendRecoveryVerification">確認コードを送信</button></div>
   </div>
 
+  <!-- 中身は /js/google-drive-sync.js が描画する（ログイン中だけ表示） -->
+  <div class="card" id="driveSyncCard" style="display:none;"></div>
+
   <div class="card" id="deleteAccountCard" style="display:none; border-color:#b42318;">
     <h3>アカウント削除</h3>
     <p class="muted">削除するとログイン中の全端末からログアウトされ、アカウントを復元できません。続行するにはパスワードと確認文字列 <code>DELETE</code> が必要です。</p>

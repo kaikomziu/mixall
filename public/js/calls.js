@@ -98,7 +98,10 @@
     panel.querySelector('#shareScreen').onclick = async () => { const peer = activeCall && peers.get(activeCall.id); if (!peer || !navigator.mediaDevices.getDisplayMedia) return; try { const screen = await navigator.mediaDevices.getDisplayMedia({ video:true }); let sender = peer.pc.getSenders().find((item) => item.track?.kind === 'video'); if (!sender) { const transceiver = peer.pc.addTransceiver('video', { direction:'sendrecv' }); sender = transceiver.sender; } await sender.replaceTrack(screen.getVideoTracks()[0]); localVideo.srcObject = screen; screen.getVideoTracks()[0].onended = () => { const camera = peer.stream.getVideoTracks()[0]; if (camera) { sender.replaceTrack(camera); localVideo.srcObject = peer.stream; } }; } catch (e) { status.textContent = e.message; } };
     setInterval(() => { if (callStartedAt && !win.hidden) timer.textContent = `通話時間 ${Math.floor((Date.now() - callStartedAt) / 60000)}:${String(Math.floor((Date.now() - callStartedAt) / 1000) % 60).padStart(2, '0')}`; }, 1000);
     document.addEventListener('click', enableSound, { capture:true, once:true });
-    setInterval(poll, 1500); poll();
+    // 通話中・呼び出し中だけ1.5秒ごと。待ち受け中は5秒（タブが裏にあるときは20秒）にしてAPI呼び出し回数を抑える。
+    const nextPollDelay = () => ((!win.hidden || callStartedAt) ? 1500 : (document.hidden ? 20000 : 5000));
+    const pollLoop = async () => { try { await poll(); } catch (_) { /* 次の周期で再試行 */ } setTimeout(pollLoop, nextPollDelay()); };
+    pollLoop();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
