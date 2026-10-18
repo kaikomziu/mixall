@@ -21,6 +21,18 @@ const ORDER = ['ACCOUNTS', 'OFFICIAL_ACCOUNTS', 'ADMIN_SECRETS'];
 const byStore = new Map();
 let manifest = null;
 for (const file of files) {
+  // 旧形式: 1つのJSON（{ format:'netrify-data-backup', stores:{ ストア名:[{key,value}] } }）
+  if (file.toLowerCase().endsWith('.json')) {
+    const data = JSON.parse(readFileSync(file, 'utf8'));
+    if (data.format !== 'netrify-data-backup' || !data.stores) throw new Error(`${file}: MixAllのJSONバックアップではありません`);
+    manifest = manifest || data;
+    for (const [name, entries] of Object.entries(data.stores)) {
+      if (!Array.isArray(entries)) continue;
+      if (!byStore.has(name)) byStore.set(name, []);
+      byStore.get(name).push(...entries);
+    }
+    continue;
+  }
   const zip = unzipSync(new Uint8Array(readFileSync(file)));
   const names = Object.keys(zip);
   const manifestName = names.find((n) => n === 'backup/manifest.json') || names.find((n) => n === 'manifest.json');
