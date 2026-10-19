@@ -3,12 +3,12 @@
 <script src="/js/mixall-nav.js" defer></script>
 <script src="/js/language-input.js"></script>
 
-  <meta name="description" content="MixAll Ghostの投稿・タグ・アカウントを検索します。">
+  <meta name="description" content="MixAll + Ghostの投稿・タグ・アカウントを検索します。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll">
+  <meta property="og:site_name" content="MixAll +">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Ghost検索 - MixAll">
-  <meta property="og:description" content="MixAll Ghostの投稿・タグ・アカウントを検索します。">
+  <meta property="og:title" content="Ghost検索 - MixAll +">
+  <meta property="og:description" content="MixAll + Ghostの投稿・タグ・アカウントを検索します。">
   <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/search">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/06-ghost-search.jpg?v=20261012-2">
   <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/06-ghost-search.jpg?v=20261012-2">
@@ -17,13 +17,13 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ghost検索 - MixAll">
-  <meta name="twitter:description" content="MixAll Ghostの投稿・タグ・アカウントを検索します。">
+  <meta name="twitter:title" content="Ghost検索 - MixAll +">
+  <meta name="twitter:description" content="MixAll + Ghostの投稿・タグ・アカウントを検索します。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/06-ghost-search.jpg?v=20261012-2">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="/manifest.webmanifest">
-</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Ghost">ホーム</a><a href="/Ghost/search.html" class="active">検索</a><a href="/">トップへ</a></nav></header><main><div class="card"><h2>Ghost検索</h2><div class="row"><input id="q" type="search" placeholder="投稿、タグ、Ghost IDを検索" style="flex:1"><button id="go">検索</button></div></div><div class="card"><h3>アカウント</h3><div id="accounts"><p class="muted">検索してください。</p></div></div><div class="card"><h3>投稿</h3><div id="posts"><p class="muted">検索してください。</p></div></div></main><script src="/js/auth.js"></script><script>const session=Netrify.requireLogin();const q=new URLSearchParams(location.search).get('q')||'';document.getElementById('q').value=q;function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}async function search(){const value=document.getElementById('q').value.trim();history.replaceState({},'',value?'?q='+encodeURIComponent(value):location.pathname);const [a,p]=await Promise.all([fetch('/.netlify/functions/ghost?accounts=1&q='+encodeURIComponent(value)).then(r=>r.json()),fetch('/.netlify/functions/ghost?limit=100&q='+encodeURIComponent(value)+'&token='+encodeURIComponent(session.token)).then(r=>r.json())]);document.getElementById('accounts').innerHTML=(a.accounts||[]).filter(x=>x.handle).map(x=>'<a class="admin-item" href="/Ghost/profile.html?handle='+encodeURIComponent(x.handle)+'" style="display:block;color:inherit"><strong>'+esc(x.displayName)+'</strong><span class="muted"> @'+esc(x.handle)+'</span></a>').join('')||'<p class="muted">該当アカウントはありません。</p>';document.getElementById('posts').innerHTML=(p.posts||[]).map(x=>'<a class="admin-item" href="/Ghost/post.html?id='+encodeURIComponent(x.id)+'" style="display:block;color:inherit;text-decoration:none"><strong>'+esc(x.authorProfile?.displayName||'')+'</strong><p class="ghost-text-content">'+esc(x.text||'')+'</p>'+((x.tags||[]).length?'<div class="ghost-tags">'+x.tags.map(t=>'<span>#'+esc(t)+'</span>').join(' ')+'</div>':'')+'</a>').join('')||'<p class="muted">該当投稿はありません。</p>';}document.getElementById('go').onclick=search;document.getElementById('q').onkeydown=e=>{if(e.key==='Enter')search();};if(q)search();</script><script src="/js/ghost-nav.js"></script>
+</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Ghost">ホーム</a><a href="/Ghost/search.html" class="active">検索</a><a href="/">トップへ</a></nav></header><main><div class="card"><h2>Ghost検索</h2><div class="row"><input id="q" type="search" placeholder="投稿、タグ、Ghost IDを検索" style="flex:1"><button id="go">検索</button></div></div><div class="card"><h3>アカウント</h3><div id="accounts"><p class="muted">検索してください。</p></div></div><div class="card"><h3>投稿</h3><div id="posts"><p class="muted">検索してください。</p></div></div></main><script src="/js/auth.js"></script><script>const session=Netrify.requireLogin();const q=new URLSearchParams(location.search).get('q')||'';document.getElementById('q').value=q;function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}async function search(){const value=document.getElementById('q').value.trim();history.replaceState({},'',value?'?q='+encodeURIComponent(value):location.pathname);const [a,p]=await Promise.all([fetch('/.netlify/functions/ghost?accounts=1&q='+encodeURIComponent(value)).then(r=>r.json()),fetch('/.netlify/functions/ghost?limit=100&q='+encodeURIComponent(value)+'&token='+encodeURIComponent(session.token)).then(r=>r.json())]);document.getElementById('accounts').innerHTML=(a.accounts||[]).filter(x=>x.handle).map(x=>'<a class="admin-item" href="/Ghost/profile.html?handle='+encodeURIComponent(x.handle)+'" style="display:block;color:inherit"><strong>'+esc(x.displayName)+'</strong><span class="muted"> @'+esc(x.handle)+'</span></a>').join('')||'<p class="muted">該当アカウントはありません。</p>';document.getElementById('posts').innerHTML=(p.posts||[]).map(x=>'<a class="admin-item" href="/Ghost/post.html?id='+encodeURIComponent(x.id)+'" style="display:block;color:inherit;text-decoration:none"><strong>'+esc(x.authorProfile?.displayName||'')+'</strong><p class="ghost-text-content">'+esc(x.text||'')+'</p>'+((x.tags||[]).length?'<div class="ghost-tags">'+x.tags.map(t=>'<span>#'+esc(t)+'</span>').join(' ')+'</div>':'')+'</a>').join('')||'<p class="muted">該当投稿はありません。</p>';}document.getElementById('go').onclick=search;document.getElementById('q').onkeydown=e=>{if(e.key==='Enter')search();};if(q)search();</script><script src="/js/ghost-nav.js"></script>
 </body></html>

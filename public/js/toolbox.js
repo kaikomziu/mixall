@@ -135,7 +135,7 @@
       if(!window.fflate?.zipSync||!window.fflate?.strToU8)throw new Error('ZIPライブラリを読み込めません。ページを再読み込みしてください。');
       const result=await api('siteSource',{url:raw});
       const entries=Object.create(null);
-      entries['README.txt']=window.fflate.strToU8(`MixAll 公開サイトソース取得\nサイト: ${result.origin}${result.entryPath||'/'}\nファイル数: ${result.fileCount}\n合計サイズ: ${result.totalBytes} bytes\n\nこのZIPは入力URLから公開配信された同一HTTPSオリジンの静的応答を保存したものです。サーバー側ソース、認証保護領域、外部ドメインの素材は含みません。\n`);
+      entries['README.txt']=window.fflate.strToU8(`MixAll + 公開サイトソース取得\nサイト: ${result.origin}${result.entryPath||'/'}\nファイル数: ${result.fileCount}\n合計サイズ: ${result.totalBytes} bytes\n\nこのZIPは入力URLから公開配信された同一HTTPSオリジンの静的応答を保存したものです。サーバー側ソース、認証保護領域、外部ドメインの素材は含みません。\n`);
       for(const file of result.files||[]){
         const segments=String(file.path||'').split('/');
         if(!segments.length||segments.some(part=>!part||part==='.'||part==='..'||part.includes('\\')||/[\u0000-\u001f\u007f]/.test(part)))continue;

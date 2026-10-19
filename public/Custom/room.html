@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>3Dワールド - MixAll</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/calls.js" defer></script><script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script><script src="/js/mixall-nav.js" defer></script><style>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>3Dワールド - MixAll +</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/calls.js" defer></script><script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script><script src="/js/mixall-nav.js" defer></script><style>
 body{padding-bottom:18px}.game-main{max-width:1250px;margin:auto;padding:12px}.world-card{position:relative;overflow:hidden}.world-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.world-head h2{margin:0}.world-stage{position:relative;width:100%;height:min(72vh,760px);min-height:470px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#101827;touch-action:none}.world-stage canvas{width:100%;height:100%;display:block;touch-action:none}.world-hint{font-size:.75rem;color:var(--text-dim);line-height:1.5}.world-actions{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0}.touchpad{position:absolute;left:16px;bottom:16px;width:148px;height:148px;border:1px solid #ffffff70;border-radius:50%;background:#101827aa;box-shadow:0 4px 24px #0006;touch-action:none;user-select:none;z-index:3}.touchpad .stick-base{position:absolute;inset:0;display:grid;place-items:center;color:#e2e9ff;font-size:.65rem;text-shadow:0 1px 4px #000}.touchpad .stick-thumb{position:absolute;left:50%;top:50%;width:58px;height:58px;transform:translate(-50%,-50%);border-radius:50%;border:2px solid #ffffffc0;background:#758cffb8;box-shadow:0 4px 16px #0008;pointer-events:none}.jump-button{position:absolute;right:20px;bottom:28px;z-index:3;width:76px;height:76px;border-radius:50%;background:#5b8cffd9;border:2px solid #ffffffaa;color:white;font-weight:800;touch-action:none}.hud{position:absolute;left:16px;top:14px;z-index:2;padding:7px 10px;border-radius:9px;background:#0c111bbd;color:white;font-size:.7rem;pointer-events:none}.speech{position:absolute;left:50%;top:15%;z-index:2;transform:translateX(-50%);max-width:min(80%,500px);padding:8px 12px;border-radius:15px;background:#fff;color:#202633;box-shadow:0 3px 14px #0005;font-size:.8rem;display:none;pointer-events:none}.player-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}.player-item small{color:var(--text-dim)}.error-text{color:#ffaaaa;min-height:1em}
 @media(max-width:700px){.game-main{padding:7px}.world-stage{height:calc(78vh - 20px);min-height:460px}.touchpad{width:132px;height:132px;left:12px;bottom:12px}.touchpad .stick-thumb{width:52px;height:52px}.jump-button{right:14px;bottom:20px;width:70px;height:70px}.world-actions button{padding:7px 9px;font-size:.72rem}}
 </style>
-  <meta name="description" content="3Dワールド - MixAll。MixAllのサービスページです。">
+  <meta name="description" content="3Dワールド - MixAll +。MixAll +のサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll">
+  <meta property="og:site_name" content="MixAll +">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="3Dワールド - MixAll">
-  <meta property="og:description" content="3Dワールド - MixAll。MixAllのサービスページです。">
+  <meta property="og:title" content="3Dワールド - MixAll +">
+  <meta property="og:description" content="3Dワールド - MixAll +。MixAll +のサービスページです。">
   <meta property="og:url" content="https://mix-alls.netlify.app/Custom/room">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
   <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
@@ -17,8 +17,8 @@ body{padding-bottom:18px}.game-main{max-width:1250px;margin:auto;padding:12px}.w
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="3Dワールド - MixAll">
-  <meta name="twitter:description" content="3Dワールド - MixAll。MixAllのサービスページです。">
+  <meta name="twitter:title" content="3Dワールド - MixAll +">
+  <meta name="twitter:description" content="3Dワールド - MixAll +。MixAll +のサービスページです。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -26,7 +26,7 @@ body{padding-bottom:18px}.game-main{max-width:1250px;margin:auto;padding:12px}.w
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="/manifest.webmanifest">
 </head><body>
-<header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Custom">ワールド一覧</a><a href="/Custom/builder.html">ワールドを作る</a></nav></header>
+<header class="top"><div class="brand"><a href="/" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Custom">ワールド一覧</a><a href="/Custom/builder.html">ワールドを作る</a></nav></header>
 <main class="game-main"><section class="card world-card"><div class="world-head"><h2 id="roomName">読み込み中...</h2><button id="leaveBtn" class="ghost" type="button">退出</button></div><div class="world-stage" id="worldStage"><canvas id="world3d"></canvas><div class="hud" id="positionHud">ロード中...</div><div class="speech" id="speech"></div><div class="touchpad" id="touchpad" aria-label="移動パッド"><div class="stick-base">移動</div><div class="stick-thumb" id="stickThumb"></div></div><button class="jump-button" id="jump" type="button">JUMP</button></div><div class="world-actions"><button class="secondary" id="resetCamera" type="button">視点をリセット</button><span class="world-hint">左下スティックで移動・ジャンプ。スティック外を1本指で視点回転、2本指で拡大縮小。WASD / 矢印キー / Space も使えます。</span></div><div id="roomError" class="error-text"></div></section>
 <section class="card"><h3>ワールドにいる人</h3><div id="playerList"><p class="muted">読み込み中...</p></div></section><section class="card"><h3>チャット</h3><div id="chatList" style="max-height:200px;overflow-y:auto;margin-bottom:10px"></div><div class="row"><input id="chatInput" placeholder="メッセージを入力" style="flex:1"><button id="chatSend" type="button">送信</button></div></section></main>
 <script src="/js/auth.js"></script><script src="/js/custom-runtime.js"></script><script src="/js/avatar.js"></script><script>

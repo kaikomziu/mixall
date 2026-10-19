@@ -126,7 +126,7 @@
   function groupIsActive(group) { return (group.items || []).some(itemIsActive); }
   const nav = document.createElement('nav');
   nav.className = 'mixall-bottom-nav';
-  nav.setAttribute('aria-label', 'MixAllメニュー');
+  nav.setAttribute('aria-label', 'MixAll +メニュー');
   function renderNavigation() {
     nav.innerHTML = Object.entries(groups).map(([key, group]) => `<button type="button" class="mixall-nav-trigger${groupIsActive(group) ? ' active' : ''}" data-nav-group="${key}" aria-controls="mixall-nav-panel" aria-expanded="false" aria-label="${group.label}メニュー" title="${group.label}">${makeIcon(group.icon)}<span>${group.label}</span></button>`).join('');
     nav.style.setProperty('--mixall-nav-count', String(Object.keys(groups).length));

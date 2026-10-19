@@ -89,7 +89,7 @@
     await putRecords(tombstones);
   }
 
-  // トークンからMixAllアカウント（メールアドレス）を引く。端末内の本文をアカウントごとに分けるため。
+  // トークンからMixAll +アカウント（メールアドレス）を引く。端末内の本文をアカウントごとに分けるため。
   function ownerForToken(token) {
     if (!token) return null;
     try {
@@ -297,7 +297,7 @@
   }
   // 取り込みは「新しい方を残す」マージ。戻り値は端末側で更新された件数。
   async function importAll(data, source) {
-    if (!data || data.format !== 'mixall-chat-vault' || !Array.isArray(data.items)) throw new Error('MixAllのチャット書き出しファイルではありません');
+    if (!data || data.format !== 'mixall-chat-vault' || !Array.isArray(data.items)) throw new Error('MixAll +のチャット書き出しファイルではありません');
     await ready;
     const records = data.items.filter((r) => r && r.msgId && r.fields).map((r) => ({ ...r, msgId: String(r.msgId) }))
       .filter((r) => { const prev = cache.get(r.msgId); return !prev || Number(r.updatedAt || 0) > Number(prev.updatedAt || 0); });

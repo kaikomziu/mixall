@@ -2,14 +2,14 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MixAll 緊急モード</title>
+<title>MixAll + 緊急モード</title>
 <link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/css/style.css">
 <style>
 body{max-width:900px;margin:0 auto;padding:18px}.emergency-hero{border:1px solid #d96b55;border-radius:16px;padding:22px;background:linear-gradient(135deg,rgba(217,107,85,.2),rgba(91,140,255,.12))}.status{font-weight:700}.status[data-kind=offline]{color:#d96b55}.status[data-kind=online]{color:#5dbb8a}.status[data-kind=error]{color:#d96b55}.emergency-actions,.emergency-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.emergency-message{border:1px solid var(--border);border-radius:12px;padding:12px;margin:8px 0}.emergency-message div{display:flex;justify-content:space-between;gap:10px}.emergency-message small{color:var(--muted)}textarea{min-height:100px}.warning{border-left:4px solid #d96b55;padding:10px 12px;background:rgba(217,107,85,.1)}body[data-low-power=true] *{animation:none!important;transition:none!important}body[data-low-power=true] .network-note{opacity:.7}
 </style>
 
-  <meta property="og:title" content="MixAll 緊急モード">
-  <meta property="og:description" content="MixAllのサービスと便利な機能をご紹介します。">
+  <meta property="og:title" content="MixAll + 緊急モード">
+  <meta property="og:description" content="MixAll +のサービスと便利な機能をご紹介します。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://mix-alls.netlify.app/emergency">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
@@ -18,9 +18,9 @@ body{max-width:900px;margin:0 auto;padding:18px}.emergency-hero{border:1px solid
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
 </head>
 <body>
-<header class="top"><div class="brand">Mix<span>All</span></div><nav class="services"><a href="/">通常ホーム</a><a class="active" href="/emergency.html">緊急モード</a></nav></header>
+<header class="top"><div class="brand"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></div><nav class="services"><a href="/">通常ホーム</a><a class="active" href="/emergency.html">緊急モード</a></nav></header>
 <main>
-<section class="emergency-hero"><h1>MixAll 緊急モード</h1><p>Netlifyへ接続できないときに、この端末へ保存した最低限の画面と緊急メモを使います。</p><p id="emergencyStatus" class="status">状態を確認中...</p><p><span id="batteryLevel">電池残量: 確認中</span> · <span id="powerModeLabel">省電力モード: OFF</span></p></section>
+<section class="emergency-hero"><h1>MixAll + 緊急モード</h1><p>Netlifyへ接続できないときに、この端末へ保存した最低限の画面と緊急メモを使います。</p><p id="emergencyStatus" class="status">状態を確認中...</p><p><span id="batteryLevel">電池残量: 確認中</span> · <span id="powerModeLabel">省電力モード: OFF</span></p></section>
 <section class="card"><h2>この端末の緊急メモ</h2><p class="muted">ここで作成したメモはサーバーへ送信されず、この端末のIndexedDBだけに保存されます。近くの端末へ自動転送する機能ではありません。</p><form id="messageForm"><input id="author" maxlength="80" placeholder="名前（任意）"><textarea id="message" maxlength="3000" placeholder="安否、集合場所、必要な物資など"></textarea><button type="submit">端末に保存</button></form><div class="emergency-toolbar"><strong id="messageCount">0件</strong><button id="exportButton" type="button" class="secondary">JSONを書き出す</button><label class="secondary" style="cursor:pointer">JSONを復元<input id="importFile" type="file" accept="application/json" hidden></label><button id="clearButton" type="button" class="danger">この端末のメモを削除</button></div><div id="messageList"></div></section>
 <section class="card"><h2>危険監視</h2><p class="network-note">有効化すると、位置情報・通信品質・設定された気象APIを使って判定します。位置情報の許可が必要です。条件が成立した場合は、このWebViewを緊急モードへ切り替えます。</p><div class="emergency-actions"><button id="enableMonitorButton" type="button">危険監視を有効化</button><button id="distressButton" type="button" class="danger">遭難モードをON</button><button id="clearEmergencyButton" type="button" class="secondary">通常モードへ戻す</button></div><p id="monitorStatus" class="muted">監視状態を確認中...</p></section>
 <section class="card"><h2>緊急用ファイル</h2><p class="network-note">オンライン時に一度開いておくと、Service Workerが緊急モードの起動ファイルをキャッシュします。ブラウザのサイトデータ削除やOSのストレージ整理で消える可能性があるため、JSONの外部保存も推奨します。</p><div class="emergency-actions"><button id="cacheButton" type="button">起動ファイルを更新</button><label class="row"><input id="lowPowerToggle" type="checkbox"> 省電力モード（自動通信を止める）</label></div></section>

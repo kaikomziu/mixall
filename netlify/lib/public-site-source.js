@@ -111,7 +111,7 @@ function requestOnce(url, address, { method = 'GET', maxBytes = MAX_FILE_BYTES, 
       method,
       path: `${url.pathname || '/'}${url.search || ''}`,
       headers: {
-        'User-Agent': 'MixAll-PublicSiteSource/1.0',
+        'User-Agent': 'MixAllPlus-PublicSiteSource/1.0',
         'Accept': 'text/html,application/xhtml+xml,text/css,application/javascript,text/javascript,application/json,application/manifest+json;q=0.9,*/*;q=0.1',
         'Accept-Encoding': 'identity',
         'Connection': 'close'

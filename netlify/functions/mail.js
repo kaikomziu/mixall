@@ -170,7 +170,7 @@ async function handle(event) {
     if (!to) return json(400, { error: '宛先を入力してください' });
     const toAccount = await getJSON(STORE_NAMES.ACCOUNTS, to);
     const external = !toAccount;
-    if (external && to.endsWith('@bix.3erver')) return json(404, { error: `${to} は存在しないMixAllアカウントです` });
+    if (external && to.endsWith('@bix.3erver')) return json(404, { error: `${to} は存在しないMixAll +アカウントです` });
     if (external && !isValidExternalEmail(to)) return json(400, { error: '宛先アドレスの形式が正しくありません' });
 
     const subject = normalizeSubject(payload.subject);

@@ -61,7 +61,7 @@
       const response = await fetch(link.href, { cache: 'no-store' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const html = await response.text();
-      if (!/MixAll 緊急通信/.test(html) || !/<html[\s>]/i.test(html)) throw new Error('緊急通信HTMLの内容を確認できません');
+      if (!/MixAll + 緊急通信/.test(html) || !/<html[\s>]/i.test(html)) throw new Error('緊急通信HTMLの内容を確認できません');
       const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
       setStatus('この端末用のBlob URLで緊急通信を開きます。', 'local');
       window.location.assign(blobUrl);

@@ -3,14 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MixAll（ミックスオール）ホーム</title>
+<title>MixAll +（ミックスオールプラス）ホーム</title>
 <link rel="stylesheet" href="/css/style.css" />
 <script src="/js/settings.js"></script>
 <script src="/js/site-lock.js" defer></script>
 <script src="/js/mixall-nav.js" defer></script>
 <style>
-.home-hero { text-align:center; padding:28px 18px; background:linear-gradient(135deg,rgba(91,140,255,.18),rgba(112,78,190,.16)); }
-.home-hero h1 { margin:0 0 8px; font-size:clamp(2rem,7vw,3.8rem); }
+.home-hero { position:relative; overflow:hidden; text-align:center; padding:40px 18px 30px; background:radial-gradient(120% 90% at 50% 0%,rgba(139,107,255,.28),transparent 60%),linear-gradient(135deg,rgba(79,220,255,.12),rgba(255,92,154,.12)); }
+.home-hero::before { content:""; position:absolute; inset:-40% -10% auto; height:120%; background:conic-gradient(from 200deg at 50% 50%,rgba(79,220,255,.18),rgba(139,107,255,.22),rgba(255,92,154,.16),rgba(61,255,184,.14),rgba(79,220,255,.18)); filter:blur(60px); opacity:.55; pointer-events:none; animation:heroSpin 18s linear infinite; }
+@keyframes heroSpin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .home-hero::before { animation:none; } }
+.home-hero > * { position:relative; }
+.hero-mark { width:clamp(84px,18vw,128px); height:auto; display:block; margin:0 auto 14px; filter:drop-shadow(0 10px 30px rgba(120,90,255,.45)); }
+.home-hero h1 { margin:0 0 10px; font-size:clamp(2.2rem,8vw,4.2rem); line-height:1; }
+.home-hero h1 .brand-word { display:inline-flex; align-items:center; }
+.home-hero h1 .brand-plus { width:1em; height:1em; border-radius:.28em; font-size:.62em; margin-left:.16em; }
 .home-hero p { max-width:680px; margin:0 auto 18px; }
 .home-actions { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
 .feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
@@ -22,9 +29,9 @@
 
   <meta name="description" content="Uch掲示板、ぽけっとチャット、Ghost、Creator Studio、Custom 3Dワールドなどをまとめたコミュニティサービス。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll">
+  <meta property="og:site_name" content="MixAll +">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="MixAll（ミックスオール）">
+  <meta property="og:title" content="MixAll +（ミックスオールプラス）">
   <meta property="og:description" content="Uch掲示板、ぽけっとチャット、Ghost、Creator Studio、Custom 3Dワールドなどをまとめたコミュニティサービス。">
   <meta property="og:url" content="https://mix-alls.netlify.app/">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
@@ -34,7 +41,7 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="MixAll（ミックスオール）">
+  <meta name="twitter:title" content="MixAll +（ミックスオールプラス）">
   <meta name="twitter:description" content="Uch掲示板、ぽけっとチャット、Ghost、Creator Studio、Custom 3Dワールドなどをまとめたコミュニティサービス。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
 
@@ -45,14 +52,15 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand">Mix<span>All</span></div>
+  <div class="brand"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></div>
   <nav class="services">
     <a href="/" class="active">ホーム</a><a href="/Uch">Uch</a><a href="/Pocket">ぽけっと</a><a href="/Ghost">Ghost</a><a href="/Create">スタジオ</a><a href="/Mail">Mail</a><a href="/Custom">Custom</a>
   </nav>
 </header>
 <main>
   <section class="card home-hero">
-    <h1>Mix<span style="color:var(--accent)">All</span></h1>
+    <img class="hero-mark" src="/images/logo-mark.svg" alt="" width="128" height="128">
+    <h1><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></h1>
     <p class="muted">掲示板、通話、SNS、3Dワールドをひとつにまとめたコミュニティサービスです。</p>
     <div class="home-actions"><a class="button" href="/login/">ログイン</a><a class="button secondary" href="/register/">新規登録</a><a class="button secondary" href="#services">サービスを見る</a><a class="button secondary" href="/emergency.html">緊急モード</a></div>
     <p id="homeWelcome" class="muted" style="margin-top:14px"></p>

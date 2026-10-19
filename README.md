@@ -1,4 +1,4 @@
-# MixAll（旧ネットリファイ）
+# MixAll +（旧MixAll・ネットリファイ）
 
 認証、掲示板Uch、チャット「ぽけっと」、複合SNS Ghost、疑似メールMail、貸し出しサイトなどをまとめた統合Webプラットフォームです。
 もとは Netlify Functions + Netlify Blobs で作られていましたが、**GitHub Pages + Supabase** で動くように移行しました。

@@ -2,19 +2,19 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ghostライブ - MixAll</title>
+<title>Ghostライブ - MixAll +</title>
 <link rel="stylesheet" href="/css/style.css">
 <script src="/js/settings.js"></script><script src="/js/auth.js"></script><script src="/js/language-input.js"></script><script src="/js/mixall-nav.js" defer></script>
 <style>
 main{max-width:1000px}.live-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:14px}.live-player{width:100%;aspect-ratio:16/9;background:#050505;border-radius:12px;object-fit:contain}.live-status{font-weight:700}.live-dot{color:#ef4444}.live-chat{height:min(55vh,520px);overflow:auto;border:1px solid var(--border);border-radius:10px;padding:10px}.live-message{padding:7px 2px;border-bottom:1px solid var(--border);overflow-wrap:anywhere}.live-message small{color:var(--text-dim)}.live-compose{display:flex;gap:7px;margin-top:8px}.live-compose input{flex:1;min-width:0}.live-note{font-size:.85rem}.live-card{margin:10px 0}.archived-comments{border-top:1px solid var(--border);margin-top:14px;padding-top:10px}.archive-comment{padding:8px 0;border-bottom:1px solid var(--border)}.archive-comment small{color:var(--text-dim)}@media(max-width:760px){.live-layout{grid-template-columns:1fr}.live-chat{height:38vh}}
 </style>
 
-  <meta name="description" content="Ghostライブ - MixAll。MixAllのサービスページです。">
+  <meta name="description" content="Ghostライブ - MixAll +。MixAll +のサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll">
+  <meta property="og:site_name" content="MixAll +">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Ghostライブ - MixAll">
-  <meta property="og:description" content="Ghostライブ - MixAll。MixAllのサービスページです。">
+  <meta property="og:title" content="Ghostライブ - MixAll +">
+  <meta property="og:description" content="Ghostライブ - MixAll +。MixAll +のサービスページです。">
   <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/live">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261012-2">
   <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261012-2">
@@ -23,8 +23,8 @@ main{max-width:1000px}.live-layout{display:grid;grid-template-columns:minmax(0,2
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ghostライブ - MixAll">
-  <meta name="twitter:description" content="Ghostライブ - MixAll。MixAllのサービスページです。">
+  <meta name="twitter:title" content="Ghostライブ - MixAll +">
+  <meta name="twitter:description" content="Ghostライブ - MixAll +。MixAll +のサービスページです。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261012-2">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -33,7 +33,7 @@ main{max-width:1000px}.live-layout{display:grid;grid-template-columns:minmax(0,2
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
-<header class="top"><div class="brand"><a href="/Ghost" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Ghost/watch.html">動画</a><a href="/Ghost/live.html" class="active">ライブ</a><a href="/">トップへ</a></nav></header>
+<header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Ghost/watch.html">動画</a><a href="/Ghost/live.html" class="active">ライブ</a><a href="/">トップへ</a></nav></header>
 <main><div id="liveRoot" class="card"><p class="muted">読み込み中...</p></div></main>
 <script>
 const session=Netrify.requireLogin();
@@ -64,8 +64,8 @@ function commentMarkup(c){return `<div class="archive-comment"><small>${esc(c.au
 async function loadArchive(){clearInterval(liveTimer);clearInterval(peerTimer);clearInterval(viewerKeepAlive);for(const pc of peers.values())pc.close();peers.clear();const r=await fetch('/.netlify/functions/ghost?post='+encodeURIComponent(livePost.id)+(session?'&token='+encodeURIComponent(session.token):''));const d=await r.json();if(!r.ok)throw new Error(d.error||'アーカイブを読み込めません');livePost=d.post;const media=(livePost.media||[]).find(m=>m.kind==='videoBlob'||m.kind==='videoUrl'||m.kind==='videoFile');const src=media?.mediaUrl||media?.url||media?.dataUrl||'';root.innerHTML=`<h2>${esc(livePost.title||'ライブアーカイブ')}</h2><div class="muted">${esc(livePost.authorProfile?.displayName||livePost.authorName||'配信者')} · 配信終了 ${livePost.liveEndedAt?new Date(livePost.liveEndedAt).toLocaleString('ja-JP'):''}</div><p class="ghost-text-content">${window.NetrifyLanguage?NetrifyLanguage.renderText(livePost.description||''):esc(livePost.description||'')}</p>${src?`<video class="live-player" src="${esc(src)}" controls playsinline preload="metadata"></video>`:'<p class="error">アーカイブ動画を読み込めませんでした。</p>'}<section class="archived-comments"><h3>コメント（ライブチャット履歴を含む）</h3><div id="archiveComments">${(livePost.comments||[]).map(commentMarkup).join('')||'<p class="muted">まだコメントがありません。</p>'}</div>${session?'<div class="live-compose"><input id="archiveCommentInput" placeholder="コメントする"><button type="button" class="secondary" id="archiveCommentSend">送信</button></div>':''}</section><p><a href="/Ghost/watch.html">動画一覧へ</a></p>`;if(session)document.getElementById('archiveCommentSend').onclick=sendArchiveComment;}
 async function sendArchiveComment(){const input=document.getElementById('archiveCommentInput');if(!input.value.trim())return;try{await Netrify.api('/.netlify/functions/ghost',{action:'addComment',token:session.token,postId:livePost.id,text:input.value.trim()});await loadArchive();}catch(e){alert(e.message);}}
 async function endLive(){const button=document.getElementById('endLiveButton');button.disabled=true;const status=document.getElementById('liveStatus');status.textContent='録画を確定してコメントをアーカイブしています...';clearInterval(peerTimer);try{if(recorder&&recorder.state!=='inactive'){await new Promise(resolve=>{recorder.addEventListener('stop',resolve,{once:true});recorder.stop();});}await archiveChain;if(archiveError)throw archiveError;const merged=new Blob(archiveParts,{type:archiveMime});if(merged.size){await uploadArchiveChunk(merged,true);archiveParts=[];archivePartsSize=0;}if(!archiveIndex||!archiveSize)throw new Error('録画データがありません。数秒配信してから終了してください');await Netrify.api('/.netlify/functions/ghost',{action:'endLive',token:session.token,postId:livePost.id,fileId:archiveFileId,sizeBytes:archiveSize,fileName:(livePost.title||'Ghost-live').replace(/[\\/:*?"<>|]/g,'_')+(archiveMime.startsWith('video/mp4')?'.mp4':'.webm')});if(hostStream)hostStream.getTracks().forEach(track=>track.stop());for(const [peerId,pc] of peers){pc.close();api('leave',{peerId}).catch(()=>{});}await loadArchive();}catch(e){status.textContent='配信をまだ終了できませんでした';document.getElementById('liveError').textContent=e.message;button.disabled=false;}}
-async function renderDirectory(){document.title='Ghostライブ一覧 - MixAll';const r=await fetch('/.netlify/functions/ghost?type=live&limit=100&token='+encodeURIComponent(session.token));const d=await r.json();const posts=(d.posts||[]).filter(p=>p.isLive);root.innerHTML='<h2>Ghostライブ配信</h2><p class="muted">配信中のライブを視聴できます。</p><p><a class="secondary" href="/Ghost/?compose=1">ライブ配信を始める</a></p>'+(posts.map(p=>`<article class="card live-card"><strong><span class="live-dot">● LIVE</span> ${esc(p.title||'Ghostライブ')}</strong><p>${esc(p.authorProfile?.displayName||p.authorName||'配信者')}</p><p>${esc(p.description||'')}</p><a class="secondary" href="/Ghost/live.html?id=${encodeURIComponent(p.id)}">ライブを視聴・チャット</a></article>`).join('')||'<p class="muted">現在ライブ配信はありません。</p>');}
-async function loadLive(){if(!postId){await renderDirectory();return;}const r=await fetch('/.netlify/functions/ghost?post='+encodeURIComponent(postId)+(session?'&token='+encodeURIComponent(session.token):''));const d=await r.json();if(!r.ok)throw new Error(d.error||'配信を読み込めません');livePost=d.post;document.title=(livePost.title||'Ghostライブ')+' - MixAll';if(livePost.isLive&&livePost.contentType==='live'){const isHost=Boolean(session&&session.email===livePost.authorEmail);showLiveShell(isHost);await pollChat();liveTimer=setInterval(pollChat,1200);if(isHost)await startBroadcast();else await startViewer();}else await loadArchive();}
+async function renderDirectory(){document.title='Ghostライブ一覧 - MixAll +';const r=await fetch('/.netlify/functions/ghost?type=live&limit=100&token='+encodeURIComponent(session.token));const d=await r.json();const posts=(d.posts||[]).filter(p=>p.isLive);root.innerHTML='<h2>Ghostライブ配信</h2><p class="muted">配信中のライブを視聴できます。</p><p><a class="secondary" href="/Ghost/?compose=1">ライブ配信を始める</a></p>'+(posts.map(p=>`<article class="card live-card"><strong><span class="live-dot">● LIVE</span> ${esc(p.title||'Ghostライブ')}</strong><p>${esc(p.authorProfile?.displayName||p.authorName||'配信者')}</p><p>${esc(p.description||'')}</p><a class="secondary" href="/Ghost/live.html?id=${encodeURIComponent(p.id)}">ライブを視聴・チャット</a></article>`).join('')||'<p class="muted">現在ライブ配信はありません。</p>');}
+async function loadLive(){if(!postId){await renderDirectory();return;}const r=await fetch('/.netlify/functions/ghost?post='+encodeURIComponent(postId)+(session?'&token='+encodeURIComponent(session.token):''));const d=await r.json();if(!r.ok)throw new Error(d.error||'配信を読み込めません');livePost=d.post;document.title=(livePost.title||'Ghostライブ')+' - MixAll +';if(livePost.isLive&&livePost.contentType==='live'){const isHost=Boolean(session&&session.email===livePost.authorEmail);showLiveShell(isHost);await pollChat();liveTimer=setInterval(pollChat,1200);if(isHost)await startBroadcast();else await startViewer();}else await loadArchive();}
 window.addEventListener('beforeunload',()=>{clearInterval(liveTimer);clearInterval(peerTimer);clearInterval(viewerKeepAlive);if(hostStream)hostStream.getTracks().forEach(track=>track.stop());for(const pc of peers.values())pc.close();});
 loadLive().catch(e=>{root.innerHTML=`<p class="error">${esc(e.message)}</p><p><a href="/Ghost/live.html">ライブ一覧へ</a></p>`;});
 </script><script src="/js/ghost-nav.js"></script>

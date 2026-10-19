@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll Coin</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll + Coin</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
 <meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
 <script src="/js/mixall-nav.js" defer></script>
 <script src="/js/language-input.js"></script>
 
-  <meta name="description" content="MixAll Coin。MixAllのサービスページです。">
+  <meta name="description" content="MixAll + Coin。MixAll +のサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll">
+  <meta property="og:site_name" content="MixAll +">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="MixAll Coin">
-  <meta property="og:description" content="MixAll Coin。MixAllのサービスページです。">
+  <meta property="og:title" content="MixAll + Coin">
+  <meta property="og:description" content="MixAll + Coin。MixAll +のサービスページです。">
   <meta property="og:url" content="https://mix-alls.netlify.app/Coin/">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
   <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
@@ -18,8 +18,8 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="MixAll Coin">
-  <meta name="twitter:description" content="MixAll Coin。MixAllのサービスページです。">
+  <meta name="twitter:title" content="MixAll + Coin">
+  <meta name="twitter:description" content="MixAll + Coin。MixAll +のサービスページです。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261012-2">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -27,8 +27,8 @@
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="/manifest.webmanifest">
 </head><body>
-<header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Pocket">Pocket</a><a href="/">トップ</a></nav></header>
-<main><div class="card"><h2>MixAll Coin</h2><p class="muted">現在ログインしているアカウントの所持Coinです。</p><div id="balance" style="font-size:2.4rem;font-weight:bold">読み込み中...</div><p id="account" class="muted"></p><p id="note" class="muted"></p><div id="error" class="error"></div></div><div class="card" id="earningCard" style="display:none"><h3>Coinを稼ぐ</h3><p class="muted">運営が選定したCoin稼ぎゲームでスコアを獲得できます。</p><button type="button" id="earningButton">稼ぐ</button><div id="earningSites" style="display:none;margin-top:12px"></div></div></main>
+<header class="top"><div class="brand"><a href="/" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Pocket">Pocket</a><a href="/">トップ</a></nav></header>
+<main><div class="card"><h2>MixAll + Coin</h2><p class="muted">現在ログインしているアカウントの所持Coinです。</p><div id="balance" style="font-size:2.4rem;font-weight:bold">読み込み中...</div><p id="account" class="muted"></p><p id="note" class="muted"></p><div id="error" class="error"></div></div><div class="card" id="earningCard" style="display:none"><h3>Coinを稼ぐ</h3><p class="muted">運営が選定したCoin稼ぎゲームでスコアを獲得できます。</p><button type="button" id="earningButton">稼ぐ</button><div id="earningSites" style="display:none;margin-top:12px"></div></div></main>
 <script src="/js/auth.js"></script><script>
 const session=Netrify.requireLogin();
 async function load(){if(!session)return;try{const res=await fetch('/.netlify/functions/coins?token='+encodeURIComponent(session.token));const data=await res.json();if(!res.ok)throw new Error(data.error||'残高を取得できません');document.getElementById('balance').textContent=data.unlimited?'無限 Coin':`${Number(data.balance||0).toLocaleString('ja-JP')} Coin`;document.getElementById('account').textContent=data.email;document.getElementById('note').textContent=data.unlimited?'運営・公認アカウント特典により、Coin消費は無料扱いです。':'PoikatsuやCoin対応サイトで獲得した残高が表示されます。';const sites=await (await fetch('/.netlify/functions/coins?action=earningSites&token='+encodeURIComponent(session.token))).json();if((sites.sites||[]).length){document.getElementById('earningCard').style.display='block';document.getElementById('earningButton').onclick=()=>{const el=document.getElementById('earningSites');el.style.display=el.style.display==='none'?'block':'none';el.innerHTML=(sites.sites||[]).map(site=>`<div class="admin-item"><strong>${String(site.title).replace(/[&<>]/g,'')}</strong><p class="muted">${String(site.description||'Coinを稼げるゲーム')}</p><a class="secondary" href="${site.url}" target="_blank" rel="noopener">ゲームを開く</a></div>`).join('');};}}catch(e){document.getElementById('error').textContent=e.message}}load();setInterval(load,15000);

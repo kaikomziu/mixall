@@ -169,7 +169,7 @@ async function transformForViewer(message, viewerEmail, room, profiles, settings
   if (cached?.displayText !== undefined) return { ...base, text:String(cached.displayText), transformed:true, originalAvailable:true };
   const result = await callAiGateway({
     model:'gemini-2.5-flash',
-    system:`あなたはMixAllの個人表示フィルターです。受信者本人の設定に従い、受信者の画面に表示する文章へ変換してください。設定に該当しない場合は原文をそのまま返してください。説明や引用符は付けず本文だけを返してください。URL、メンション、固有名詞、コード、数値は不要に改変しないでください。\n個人設定:\n${String(settings.instruction || '').slice(0,3000)}\n\nこのチャットで確認できる運営区分:\n${operatorContext(room, profiles)}`,
+    system:`あなたはMixAll +の個人表示フィルターです。受信者本人の設定に従い、受信者の画面に表示する文章へ変換してください。設定に該当しない場合は原文をそのまま返してください。説明や引用符は付けず本文だけを返してください。URL、メンション、固有名詞、コード、数値は不要に改変しないでください。\n個人設定:\n${String(settings.instruction || '').slice(0,3000)}\n\nこのチャットで確認できる運営区分:\n${operatorContext(room, profiles)}`,
     user:`表示対象メッセージ:\n${raw.slice(0,12000)}\n\n送信者: ${message.authorName || message.authorEmail}\n計測: 文字数=${[...raw].length}、UTF-8バイト数=${Buffer.byteLength(raw, 'utf8')}`
   });
   const displayText = result.ok && result.text ? result.text.slice(0,12000) : raw;
@@ -353,7 +353,7 @@ async function handle(event) {
     if (!/^https?:$/.test(target.protocol) || /^(localhost|127\.|0\.|10\.|192\.168\.|169\.254\.)/i.test(target.hostname)) return json(400, { error:'このURLはプレビューできません' });
     const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 5000);
     try {
-      const response = await fetch(target.href, { headers:{'User-Agent':'MixAll-LinkPreview/1.0'}, signal:controller.signal });
+      const response = await fetch(target.href, { headers:{'User-Agent':'MixAllPlus-LinkPreview/1.0'}, signal:controller.signal });
       const html = (await response.text()).slice(0, 500000);
       const meta = (key) => { const re = new RegExp(`<meta[^>]+(?:property|name)=["']${key}["'][^>]+content=["']([^"']*)["']|<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${key}["']`, 'i'); const m=html.match(re); return String(m?.[1] || m?.[2] || '').replace(/&amp;/g,'&').replace(/&quot;/g,'"').trim(); };
       const title = meta('og:title') || (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '').replace(/<[^>]+>/g,'').trim();

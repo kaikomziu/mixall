@@ -2,7 +2,7 @@
   "routes": [
     {
       "path": "/",
-      "title": "MixAll"
+      "title": "MixAll +"
     },
     {
       "path": "/reset-password/",
@@ -78,11 +78,11 @@
     },
     {
       "path": "/emergency.html",
-      "title": "MixAll緊急モード"
+      "title": "MixAll +緊急モード"
     },
     {
       "path": "/emergency-peer.html",
-      "title": "MixAll端末間P2P"
+      "title": "MixAll +端末間P2P"
     },
     {
       "path": "/Tools",

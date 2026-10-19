@@ -1,12 +1,12 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ghost動画</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/auth.js"></script><script src="/js/language-input.js"></script><script src="/js/mixall-nav.js" defer></script><style>
 .video-card{margin-bottom:18px}.video-player{width:100%;max-height:72vh;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}.video-player video,.video-player iframe{width:100%;height:100%;border:0;object-fit:contain}.video-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.video-actions button{padding:7px 11px}.video-comments{border-top:1px solid var(--border);margin-top:12px;padding-top:10px}.video-comment{padding:8px 0;border-bottom:1px solid var(--border)}.video-comment .meta{font-size:.8rem;color:var(--text-dim)}.video-comment-form{display:flex;gap:8px;margin-top:10px}.video-comment-form .language-input-wrap{flex:1;min-width:0;margin:0}.video-comment-form .language-editor{min-height:40px}.video-comment-form button{flex:none}
 </style>
-  <meta name="description" content="MixAll Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
+  <meta name="description" content="MixAll + Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll">
+  <meta property="og:site_name" content="MixAll +">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Ghost動画 - MixAll">
-  <meta property="og:description" content="MixAll Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
+  <meta property="og:title" content="Ghost動画 - MixAll +">
+  <meta property="og:description" content="MixAll + Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
   <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/watch">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261012-2">
   <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261012-2">
@@ -15,15 +15,15 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ghost動画 - MixAll">
-  <meta name="twitter:description" content="MixAll Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
+  <meta name="twitter:title" content="Ghost動画 - MixAll +">
+  <meta name="twitter:description" content="MixAll + Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261012-2">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="/manifest.webmanifest">
-</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Ghost">通常投稿</a><a href="/Ghost/watch.html" class="active">動画</a><a href="/Ghost/live.html">ライブ</a><a href="/Ghost/videos.html">縦長動画</a></nav></header><main><div class="card"><h2>動画</h2><p class="muted">YouTube風の通常動画フィードです。動画の視聴、いいね、コメント、ブックマークに対応しています。</p></div><div id="feed"><p class="muted">読み込み中...</p></div></main><script>
+</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Ghost">通常投稿</a><a href="/Ghost/watch.html" class="active">動画</a><a href="/Ghost/live.html">ライブ</a><a href="/Ghost/videos.html">縦長動画</a></nav></header><main><div class="card"><h2>動画</h2><p class="muted">YouTube風の通常動画フィードです。動画の視聴、いいね、コメント、ブックマークに対応しています。</p></div><div id="feed"><p class="muted">読み込み中...</p></div></main><script>
 const session=Netrify.requireLogin();const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const yt=u=>{const m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/);return m?'https://www.youtube.com/embed/'+m[1]:''};
 function renderVideo(m){if(m.kind==='videoFile')return `<video src="${esc(m.dataUrl)}" controls playsinline></video>`;if(m.kind==='videoBlob')return `<video src="${esc(m.mediaUrl)}" controls playsinline></video>`;const embed=yt(m.url);return embed?`<iframe src="${embed}" allowfullscreen></iframe>`:`<video src="${esc(m.url)}" controls playsinline></video>`}
 function renderComments(post){if(post.isLive)return '<div class="video-comments"><p class="muted">配信中のコメントはライブチャットに表示されます。</p></div>';const comments=post.comments||[];return `<div class="video-comments" id="comments-${esc(post.id)}" hidden>${comments.map(c=>`<div class="video-comment"><div class="meta">${esc(c.authorProfile?.displayName||c.authorName||'ユーザー')} · ${new Date(c.createdAt).toLocaleString('ja-JP')}</div><div>${NetrifyLanguage.renderText(c.text||'')}</div></div>`).join('')||'<p class="muted">まだコメントがありません。</p>'}<div class="video-comment-form"><input type="text" data-comment-input="${esc(post.id)}" placeholder="コメントする"><button type="button" class="secondary" data-comment-send="${esc(post.id)}">送信</button></div></div>`}

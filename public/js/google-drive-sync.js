@@ -2,8 +2,8 @@
 // 任意機能: Googleアカウントを連携した人だけ、端末に保存しているチャット本文（chat-vault）を
 // Googleドライブの「アプリ専用フォルダ（appDataFolder）」にも保存し、別の端末でも読み戻せるようにする。
 // - スコープは drive.appdata だけ（ユーザーのドライブの他のファイルは見えない・触れない）
-// - Googleのトークンはこのブラウザの中だけで使い、MixAllのサーバーへは送らない
-// - 連携は MixAll アカウントごと。ファイルも MixAll アカウントごとに分ける
+// - Googleのトークンはこのブラウザの中だけで使い、MixAll +のサーバーへは送らない
+// - 連携は MixAll + アカウントごと。ファイルも MixAll + アカウントごとに分ける
 (function () {
   'use strict';
   if (window.MixAllDriveSync) return;
@@ -121,7 +121,7 @@
         if (remote && remote.format === 'mixall-chat-vault') imported = await window.MixAllChatVault.importAll(remote, 'drive');
       }
       const local = await window.MixAllChatVault.exportAll(email);
-      const body = JSON.stringify({ ...local, account: email, app: 'MixAll' });
+      const body = JSON.stringify({ ...local, account: email, app: 'MixAll +' });
       const hash = await sha16(JSON.stringify(local.items));
       let fileId = file ? file.id : null;
       const state = getState(email);
@@ -135,7 +135,7 @@
 
   async function link() {
     const email = currentEmail();
-    if (!email) throw new Error('先にMixAllにログインしてください');
+    if (!email) throw new Error('先にMixAll +にログインしてください');
     await requestToken(email, { consent: true });
     setState(email, { linked: true, linkedAt: Date.now() });
     return sync({ interactive: true });
@@ -178,7 +178,7 @@
     const connected = Boolean(getToken(email));
     const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     card.innerHTML = `<h3>Googleドライブにチャットを保存（任意）</h3>
-      <p class="muted">Pocket・Ghostチャット・Mailの本文はこの端末にだけ保存されています。Googleアカウントを連携すると、あなたのGoogleドライブの「アプリ専用フォルダ」にも保存され、別の端末でログインしたときに読み戻せます。MixAllはドライブの他のファイルを見ることはできず、Googleの許可情報もMixAllのサーバーには送りません。連携しなくても今まで通り使えます。</p>
+      <p class="muted">Pocket・Ghostチャット・Mailの本文はこの端末にだけ保存されています。Googleアカウントを連携すると、あなたのGoogleドライブの「アプリ専用フォルダ」にも保存され、別の端末でログインしたときに読み戻せます。MixAll +はドライブの他のファイルを見ることはできず、Googleの許可情報もMixAll +のサーバーには送りません。連携しなくても今まで通り使えます。</p>
       ${CLIENT_ID ? '' : '<p class="muted"><strong>この機能は準備中です</strong>（運営側でGoogleの設定が終わると使えるようになります）。</p>'}
       ${state.linked ? `<p>状態: <strong>連携中</strong>${connected ? '' : '（同期するには「今すぐ同期」でGoogleに再接続）'}<br>最終同期: ${fmt(state.lastSyncAt)}　端末の保存件数: ${window.MixAllChatVault ? window.MixAllChatVault.count() : 0}件</p>` : '<p>状態: 未連携</p>'}
       ${state.lastError ? `<p style="color:#d92d20">${esc(state.lastError)}</p>` : ''}
@@ -191,7 +191,7 @@
       button.onclick = async () => {
         const status = card.querySelector('[data-drive-status]');
         const action = button.dataset.drive;
-        if (action === 'purge' && !confirm('Googleドライブに保存したMixAllのチャットを削除して、連携を解除します。この端末の保存分は残ります。よろしいですか？')) return;
+        if (action === 'purge' && !confirm('Googleドライブに保存したMixAll +のチャットを削除して、連携を解除します。この端末の保存分は残ります。よろしいですか？')) return;
         button.disabled = true; status.textContent = '処理中...';
         try {
           if (action === 'link') { const r = await link(); status.textContent = `連携しました（ドライブから${r.imported}件読み込み）`; }

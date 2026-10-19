@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Custom 3Dワールドスタジオ - MixAll</title>
+<title>Custom 3Dワールドスタジオ - MixAll +</title>
 <link rel="stylesheet" href="/css/style.css">
 <script src="/js/settings.js"></script>
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
@@ -16,12 +16,12 @@ body{background:#111721;color:#f3f6fb;padding-bottom:20px}.builder{max-width:160
 .program-upload{margin:0 0 12px}.program-upload .panel-inner{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.program-upload .hint{flex:1 1 220px}.upload-actions{display:flex;gap:6px;flex-wrap:wrap}.upload-button{display:inline-flex;align-items:center;padding:7px 10px;border-radius:7px;background:#2f6fb0;color:white;font-size:.72rem;cursor:pointer}.upload-button.secondary{background:#394269}.program-file-list{flex-basis:100%;display:flex;gap:5px;flex-wrap:wrap}.program-file-chip{padding:4px 7px;border:1px solid #46536a;border-radius:6px;font-size:.66rem;color:#d6deea;background:#1b2432}
 </style>
 
-  <meta name="description" content="Custom 3Dワールドスタジオ - MixAll。MixAllのサービスページです。">
+  <meta name="description" content="Custom 3Dワールドスタジオ - MixAll +。MixAll +のサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll">
+  <meta property="og:site_name" content="MixAll +">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Custom 3Dワールドスタジオ - MixAll">
-  <meta property="og:description" content="Custom 3Dワールドスタジオ - MixAll。MixAllのサービスページです。">
+  <meta property="og:title" content="Custom 3Dワールドスタジオ - MixAll +">
+  <meta property="og:description" content="Custom 3Dワールドスタジオ - MixAll +。MixAll +のサービスページです。">
   <meta property="og:url" content="https://mix-alls.netlify.app/Custom/builder">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
   <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
@@ -30,8 +30,8 @@ body{background:#111721;color:#f3f6fb;padding-bottom:20px}.builder{max-width:160
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Custom 3Dワールドスタジオ - MixAll">
-  <meta name="twitter:description" content="Custom 3Dワールドスタジオ - MixAll。MixAllのサービスページです。">
+  <meta name="twitter:title" content="Custom 3Dワールドスタジオ - MixAll +">
+  <meta name="twitter:description" content="Custom 3Dワールドスタジオ - MixAll +。MixAll +のサービスページです。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/12-custom-game.jpg?v=20261012-2">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -40,7 +40,7 @@ body{background:#111721;color:#f3f6fb;padding-bottom:20px}.builder{max-width:160
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
-<header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Custom">カスタムへ戻る</a><a href="/Create">スタジオ</a></nav></header>
+<header class="top"><div class="brand"><a href="/" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Custom">カスタムへ戻る</a><a href="/Create">スタジオ</a></nav></header>
 <main class="builder">
   <div class="builder-head"><h1>Custom ワールドスタジオ</h1><input id="projectName" value="無題の3Dワールド" aria-label="ゲーム名"><select id="visibility"><option value="private">非公開プロジェクト</option><option value="public">公開プロジェクト</option></select><span class="saved-label" id="projectIdLabel"></span></div>
   <div class="program-upload panel"><div class="panel-inner"><strong>ゲームプログラムを読み込む</strong><span class="hint">JavaScript・JSON・HTML等をファイルとして保存します。フォルダ構成も保持されます。</span><div class="upload-actions"><label class="upload-button">プログラムファイル<input id="programFileInput" type="file" multiple hidden></label><label class="upload-button secondary">プログラムフォルダ<input id="programFolderInput" type="file" webkitdirectory directory multiple hidden></label><button type="button" class="ghost" id="clearProgramFiles">読み込みをクリア</button></div><div id="programFileList" class="program-file-list"><span class="hint">まだファイルがありません。</span></div><p class="hint" style="flex-basis:100%;margin:4px 0 0;">保存API: <code>NetrifyCustom.saveGameData(projectId, "score", 100)</code> / <code>NetrifyCustom.saveAccountData(projectId, "level", 3)</code>。別ゲームへは <code>NetrifyCustom.sendProjectMessage(fromId, toId, "event", data)</code> を使えます。</p></div></div>

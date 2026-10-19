@@ -28,7 +28,7 @@ async function getGeminiRuntimeSettings() {
       roster.push(`${account.displayName || account.email || key} (${account.email || key}): ${role}`);
     }
   } catch (_) { /* 運営一覧を読めない環境では固定設定だけで続行 */ }
-  const rosterPrompt = roster.length ? `\n\n現在のMixAll運営区分（ユーザーに公開される範囲の情報）:\n${roster.join('\n')}` : '';
+  const rosterPrompt = roster.length ? `\n\n現在のMixAll +運営区分（ユーザーに公開される範囲の情報）:\n${roster.join('\n')}` : '';
   return { fixedPrompt:'', allowUserReply:true, allowGeminiReply:true, readUch:true, readGhost:true, ...saved, fixedPrompt:`${String(saved.fixedPrompt || '')}${rosterPrompt}` };
 }
 

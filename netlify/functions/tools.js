@@ -99,7 +99,7 @@ exports.handler = async (event) => {
       if (/^https?:\/\//i.test(target)) return { statusCode:302, headers:{Location:target, 'Cache-Control':'public, max-age=300'}, body:'' };
       if (/^data:[^\s]+$/i.test(target)) {
         const escaped = target.replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/</g,'%3C');
-        return { statusCode:200, headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'public, max-age=300','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'"}, body:`<!doctype html><meta charset="utf-8"><title>MixAll redirect</title><p>移動しています…</p><script>location.replace(\`${escaped}\`)</script>` };
+        return { statusCode:200, headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'public, max-age=300','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'"}, body:`<!doctype html><meta charset="utf-8"><title>MixAll + redirect</title><p>移動しています…</p><script>location.replace(\`${escaped}\`)</script>` };
       }
       return { statusCode:400, headers:{'Content-Type':'text/plain; charset=utf-8'}, body:'対応していないリダイレクト先です' };
     }

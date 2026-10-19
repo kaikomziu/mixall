@@ -67,6 +67,34 @@ header.top .brand {
 
 header.top .brand span { color: var(--accent); }
 
+/* ---- MixAll + ロゴ（マーク＋文字） ---- */
+.brand-logo { display: inline-flex; align-items: center; gap: 0.5em; vertical-align: middle; }
+.brand-mark {
+  width: 1.75em; height: 1.75em; flex: none; border-radius: 0.45em;
+  background: url(/images/logo-mark.svg) center / contain no-repeat;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 4px 14px rgba(110, 90, 255, 0.35);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+a:hover > .brand-logo .brand-mark, .brand-logo:hover .brand-mark { transform: rotate(-8deg) scale(1.06); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 6px 20px rgba(110, 90, 255, 0.55); }
+.brand-word {
+  font-weight: 800; letter-spacing: -0.01em; line-height: 1;
+  font-family: "Segoe UI Variable Display", "SF Pro Display", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  color: var(--text);
+}
+header.top .brand .brand-logo, header.top .brand .brand-word { color: var(--text); }
+header.top .brand .brand-mark { color: inherit; }
+header.top .brand .brand-word > span, .brand-word > span {
+  background: linear-gradient(100deg, #4fdcff 0%, #8b6bff 55%, #ff5c9a 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.brand-plus {
+  display: inline-grid; place-items: center; margin-left: 0.18em;
+  width: 1.05em; height: 1.05em; border-radius: 0.32em; transform: translateY(-0.04em);
+  font-size: 0.82em; font-weight: 900; line-height: 1; color: #fff;
+  background: linear-gradient(135deg, #3d7bff, #9a5bff 55%, #ff4f8b);
+  box-shadow: 0 2px 10px rgba(154, 91, 255, 0.45);
+}
+
 nav.services {
   display: flex;
   gap: 10px;

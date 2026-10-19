@@ -98,7 +98,7 @@ async function handleRecoveryAction(event, payload) {
     if (await emailConfigurationMissing()) return json(503, { error:'Netlify Email Integrationの送信設定がまだ完了していません。運営に設定を確認してください。' });
     const { session, account } = result;
     const email = normalizeRealEmail(payload.recoveryEmail);
-    if (!email) return json(400, { error:'受信可能な実メールアドレスを入力してください。MixAllのログインIDは登録できません。' });
+    if (!email) return json(400, { error:'受信可能な実メールアドレスを入力してください。MixAll +のログインIDは登録できません。' });
     if (account.recoveryEmail === email && account.recoveryEmailVerifiedAt) return json(200, { ok:true, verified:true, recoveryEmail:email, message:'このメールアドレスは確認済みです。' });
     const key = `verify:${session.email}`;
     const prior = await getJSON(RECOVERY_STORE, key);
@@ -109,7 +109,7 @@ async function handleRecoveryAction(event, payload) {
     const record = { accountEmail:session.email, email, nonce, codeHash:verificationDigest(session.email, email, nonce, code), attempts:0, createdAt:new Date(now).toISOString(), expiresAt:now + VERIFY_TTL_MS, nextSendAt:now + RESEND_COOLDOWN_MS };
     await setJSON(RECOVERY_STORE, key, record);
     try {
-      await sendEmailTemplate(event, { template:'recovery-verify', to:email, subject:'MixAll 回復用メールアドレスの確認コード', parameters:{ displayName:String(account.displayName || session.email.split('@')[0]).slice(0, 80), code, expiresMinutes:10 } });
+      await sendEmailTemplate(event, { template:'recovery-verify', to:email, subject:'MixAll + 回復用メールアドレスの確認コード', parameters:{ displayName:String(account.displayName || session.email.split('@')[0]).slice(0, 80), code, expiresMinutes:10 } });
     } catch (error) {
       await deleteKey(RECOVERY_STORE, key);
       return json(503, { error:emailServiceError(error) });
@@ -167,7 +167,7 @@ async function handleRecoveryAction(event, payload) {
     await setJSON(RECOVERY_STORE, activeKey, { tokenHash, lastSentAt:now, expiresAt });
     try {
       const resetUrl = buildSiteUrl(event, `/reset-password/?token=${rawToken}`);
-      await sendEmailTemplate(event, { template:'password-reset', to:resolved.account.recoveryEmail, subject:'MixAll パスワード再設定のご案内', parameters:{ displayName:String(resolved.account.displayName || resolved.email.split('@')[0]).slice(0, 80), resetUrl, expiresMinutes:30 } });
+      await sendEmailTemplate(event, { template:'password-reset', to:resolved.account.recoveryEmail, subject:'MixAll + パスワード再設定のご案内', parameters:{ displayName:String(resolved.account.displayName || resolved.email.split('@')[0]).slice(0, 80), resetUrl, expiresMinutes:30 } });
     } catch (error) {
       await deleteKey(RECOVERY_STORE, `reset:${tokenHash}`);
       await deleteKey(RECOVERY_STORE, activeKey);

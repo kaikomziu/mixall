@@ -16,7 +16,7 @@
 </style>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pocketスレッド - MixAll（ミックスオール）</title>
+<title>Pocketスレッド - MixAll +（ミックスオールプラス）</title>
 <link rel="stylesheet" href="/css/style.css" />
 <script src="/js/settings.js"></script>
 <script src="/js/site-lock.js" defer></script>
@@ -26,12 +26,12 @@
 <script src="/js/mixall-nav.js" defer></script>
 <script src="/js/language-input.js"></script>
 
-  <meta name="description" content="Pocketスレッド - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta name="description" content="Pocketスレッド - MixAll +（ミックスオールプラス）。MixAll +のサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll">
+  <meta property="og:site_name" content="MixAll +">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Pocketスレッド - MixAll（ミックスオール）">
-  <meta property="og:description" content="Pocketスレッド - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta property="og:title" content="Pocketスレッド - MixAll +（ミックスオールプラス）">
+  <meta property="og:description" content="Pocketスレッド - MixAll +（ミックスオールプラス）。MixAll +のサービスページです。">
   <meta property="og:url" content="https://mix-alls.netlify.app/Pocket/thread">
   <meta property="og:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
   <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
@@ -40,8 +40,8 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Pocketスレッド - MixAll（ミックスオール）">
-  <meta name="twitter:description" content="Pocketスレッド - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta name="twitter:title" content="Pocketスレッド - MixAll +（ミックスオールプラス）">
+  <meta name="twitter:description" content="Pocketスレッド - MixAll +（ミックスオールプラス）。MixAll +のサービスページです。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261012-2">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -51,7 +51,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
+  <div class="brand"><a href="/" style="color:inherit;"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div>
   <nav class="services">
     <a href="/Pocket">ぽけっと一覧へ戻る</a>
   </nav>
@@ -164,7 +164,7 @@ async function loadPocketStamps() {
     const data = await res.json();
     pocketStamps = Array.isArray(data.stamps) ? data.stamps : [];
     const owned = new Set(data.ownedStampIds || []);
-    grid.innerHTML = pocketStamps.length ? `<div class="muted" style="margin-bottom:6px;">MixAllコイン残高: ${Number(data.balance || 0)}${data.balance === undefined ? '' : 'コイン'}</div>` + pocketStamps.map((stamp) => {
+    grid.innerHTML = pocketStamps.length ? `<div class="muted" style="margin-bottom:6px;">MixAll +コイン残高: ${Number(data.balance || 0)}${data.balance === undefined ? '' : 'コイン'}</div>` + pocketStamps.map((stamp) => {
       const price = Number(stamp.priceCoins || 0);
       const needsPurchase = price > 0 && !owned.has(stamp.id);
       return `<button type="button" class="secondary" data-pocket-stamp="${escapeHtml(stamp.id)}" title="${escapeHtml(stamp.name)}" style="padding:4px;">

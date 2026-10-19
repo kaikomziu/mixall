@@ -76,7 +76,7 @@ async function handle(event) {
     const unlimited = Boolean(info.isAdmin || info.isOfficial);
     if (!unlimited) {
       const balance = Number(await getJSON(STORE_NAMES.COINS, info.email)) || 0;
-      if (balance < price) return json(402, { error: `MixAllコインが不足しています（必要: ${price}、残高: ${balance}）`, balance, required: price });
+      if (balance < price) return json(402, { error: `MixAll +コインが不足しています（必要: ${price}、残高: ${balance}）`, balance, required: price });
       await setJSON(STORE_NAMES.COINS, info.email, balance - price);
     }
     for (const item of pack) await setJSON(STORE_NAMES.STAMP_OWNERS, `${info.email}:${item.id}`, { email: info.email, stampId: item.id, packId: item.packId || item.id, purchasedAt: new Date().toISOString(), priceCoins: unlimited ? 0 : price, unlimited });

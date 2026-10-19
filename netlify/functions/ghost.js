@@ -276,7 +276,7 @@ async function handle(event) {
       if (!post || post.deleted || !canViewAgeReviewed(post, viewer.age)) return json(404, { error:'投稿が見つかりません' });
       const profile = await getAccountProfile(post.authorEmail);
       const account = await getJSON(STORE_NAMES.ACCOUNTS, post.authorEmail);
-      const authorProfile = post.isOfficial ? { displayName:post.authorName || '公式アカウント', handle:post.authorEmail.replace('official:', ''), avatarUrl:null, bio:'MixAll公式アカウント', followingCount:0 } : (post.isBot ? { displayName:post.authorName || 'Gemini', handle:'gemini', avatarUrl:null, bio:'Ghost AI', followingCount:0 } : (account?.ghostHandle ? publicGhostProfile(account, post.authorEmail) : { displayName:profile.displayName, handle:null, avatarUrl:null, bio:'', followingCount:0 }));
+      const authorProfile = post.isOfficial ? { displayName:post.authorName || '公式アカウント', handle:post.authorEmail.replace('official:', ''), avatarUrl:null, bio:'MixAll +公式アカウント', followingCount:0 } : (post.isBot ? { displayName:post.authorName || 'Gemini', handle:'gemini', avatarUrl:null, bio:'Ghost AI', followingCount:0 } : (account?.ghostHandle ? publicGhostProfile(account, post.authorEmail) : { displayName:profile.displayName, handle:null, avatarUrl:null, bio:'', followingCount:0 }));
       return json(200, { post:{ ...post, media:await hydrateGhostMedia(post.media, qs.token), comments:await hydrateGhostComments(visibleComments(post.comments, viewer.age)), authorProfile } });
     }
     if (qs.profile) {
@@ -321,7 +321,7 @@ async function handle(event) {
       if (authorEmailFilter && p.authorEmail !== authorEmailFilter) continue;
       const profile = await getAccountProfile(p.authorEmail);
       const authorAccount = await getJSON(STORE_NAMES.ACCOUNTS, p.authorEmail);
-      const publicProfile = p.isOfficial ? { displayName:p.authorName || '公式アカウント', handle:p.authorEmail.replace('official:', ''), avatarUrl:null, bio:'MixAll公式アカウント', followingCount:0 } : (p.isBot ? { displayName:p.authorName || 'Gemini', handle:'gemini', avatarUrl:null, bio:'Ghost AI', followingCount:0 } : (authorAccount?.ghostHandle ? publicGhostProfile(authorAccount, p.authorEmail) : { displayName:profile.displayName, handle:null, avatarUrl:null, bio:'', followingCount:0 }));
+      const publicProfile = p.isOfficial ? { displayName:p.authorName || '公式アカウント', handle:p.authorEmail.replace('official:', ''), avatarUrl:null, bio:'MixAll +公式アカウント', followingCount:0 } : (p.isBot ? { displayName:p.authorName || 'Gemini', handle:'gemini', avatarUrl:null, bio:'Ghost AI', followingCount:0 } : (authorAccount?.ghostHandle ? publicGhostProfile(authorAccount, p.authorEmail) : { displayName:profile.displayName, handle:null, avatarUrl:null, bio:'', followingCount:0 }));
       const comments = await hydrateGhostComments(visibleComments(p.comments, viewer.age));
       const searchable = [p.text, p.title, p.description, p.authorName, profile.displayName, profile.email, ...(p.tags || []), ...comments.map((c) => c.text)].join(' ').toLowerCase();
       const authorHandle = String(publicProfile.handle || '').toLowerCase();

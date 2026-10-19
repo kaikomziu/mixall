@@ -25,7 +25,7 @@ function validatePackage(payload) {
   const bundle = String(payload.bundle || '');
   if (!bundle || bundle.length > 600000) throw new Error('実行コードは1文字以上600,000文字以内で指定してください');
   if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(bundle)) throw new Error('実行コードに制御文字は使用できません');
-  return { id:extensionId, name, version:cleanText(payload.version || '1.0.0', 30), description:cleanText(payload.description, 600), author:cleanText(payload.author || 'MixAll運営', 80), icon:cleanText(payload.icon || '🧩', 8) || '🧩', permissions:Array.isArray(payload.permissions) ? payload.permissions.map((x)=>cleanText(x,40)).filter(Boolean).slice(0,20) : [], manifest:typeof payload.manifest === 'object' && payload.manifest ? payload.manifest : {}, bundle };
+  return { id:extensionId, name, version:cleanText(payload.version || '1.0.0', 30), description:cleanText(payload.description, 600), author:cleanText(payload.author || 'MixAll +運営', 80), icon:cleanText(payload.icon || '🧩', 8) || '🧩', permissions:Array.isArray(payload.permissions) ? payload.permissions.map((x)=>cleanText(x,40)).filter(Boolean).slice(0,20) : [], manifest:typeof payload.manifest === 'object' && payload.manifest ? payload.manifest : {}, bundle };
 }
 
 exports.handler = async (event) => {
