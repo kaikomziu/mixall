@@ -32,6 +32,32 @@ const ROOT_RE = new RegExp(`(["'\`(])\\/((?:${ROOTS.join('|')})(?=[\\/?#"'\`)]|$
 // パス比較をしている行は、比較相手の文字列を書き換えない（比較側を MixAllBase.path() にする）
 const COMPARE_LINE = /MixAllBase\.path\(\)|normalizedPath|mailPath|\bpath ===|\bpath\.startsWith|===\s*['"]\/|!==\s*['"]\//;
 
+// 読み込み画面（セッションで最初に開いたときだけ）。CSSより先に描画されるよう<head>の先頭に直接埋め込む。
+// 画面の部品を作らず html の疑似要素だけで出すので、ページのHTMLやスクリプトには影響しない。
+function splash() {
+  const css = `html.mx-splash{overflow:hidden}
+html.mx-splash::before{content:"";position:fixed;inset:0;z-index:2147483646;
+background:url(${BASE}/images/logo-loader.svg) center calc(50% - 26px)/132px 132px no-repeat,
+radial-gradient(60% 45% at 50% 42%,rgba(123,92,255,.30),transparent 70%),
+radial-gradient(50% 40% at 20% 100%,rgba(79,220,255,.14),transparent 70%),
+radial-gradient(50% 40% at 85% 0%,rgba(255,92,154,.14),transparent 70%),#07081a;
+transition:opacity .45s ease,transform .45s ease}
+html.mx-splash::after{content:"MixAll+";position:fixed;z-index:2147483647;left:50%;top:calc(50% + 66px);transform:translateX(-50%);
+font:800 28px/1 "Segoe UI Variable Display","SF Pro Display","Hiragino Sans",system-ui,sans-serif;letter-spacing:-.01em;
+background:linear-gradient(100deg,#fff 0%,#fff 32%,#4fdcff 45%,#8b6bff 62%,#ff5c9a 80%);background-size:220% 100%;
+-webkit-background-clip:text;background-clip:text;color:transparent;animation:mx-shine 1.6s ease-in-out infinite;
+transition:opacity .35s ease}
+html.mx-splash-out::before{opacity:0;transform:scale(1.04)}
+html.mx-splash-out::after{opacity:0}
+@keyframes mx-shine{0%{background-position:100% 0}100%{background-position:0 0}}
+@media (prefers-reduced-motion:reduce){html.mx-splash::after{animation:none}}`.replace(/\n/g, '');
+  const js = `(function(){var d=document.documentElement;try{if(sessionStorage.getItem('mixall.splash'))return;sessionStorage.setItem('mixall.splash','1')}catch(e){return}
+d.classList.add('mx-splash');var t0=Date.now(),done=false;
+function hide(){if(done)return;done=true;setTimeout(function(){d.classList.add('mx-splash-out');setTimeout(function(){d.classList.remove('mx-splash','mx-splash-out')},460)},Math.max(0,900-(Date.now()-t0)))}
+document.addEventListener('DOMContentLoaded',function(){setTimeout(hide,150)});window.addEventListener('load',hide);setTimeout(hide,2500)})();`.replace(/\n/g, '');
+  return `<style id="mx-splash-css">${css}</style><script>${js}</script>`;
+}
+
 function rewriteJs(text) {
   let out = text;
   // 現在パスの比較はベースを除いたパスで行う
@@ -69,7 +95,7 @@ function rewrite(text, ext) {
     out = rewriteJs(out);
     const head = `<script>window.MIXALL_BASE=${JSON.stringify(BASE)};window.MIXALL_API_BASE=${JSON.stringify(API)};window.MIXALL_SITE_URL=${JSON.stringify(SITE)};window.MIXALL_GOOGLE_CLIENT_ID=${JSON.stringify(GOOGLE_CLIENT_ID)};</script>`
       + `<script src="${BASE}/js/mixall-base.js"></script><script src="${BASE}/js/chat-vault.js"></script><script src="${BASE}/js/mixall-ux.js"></script><script src="${BASE}/js/google-drive-sync.js" defer></script>`;
-    out = /<head[^>]*>/i.test(out) ? out.replace(/<head[^>]*>/i, (m) => m + head) : head + out;
+    out = /<head[^>]*>/i.test(out) ? out.replace(/<head[^>]*>/i, (m) => m + splash() + head) : splash() + head + out;
     return out;
   }
   if (ext === '.js') return rewriteJs(out);

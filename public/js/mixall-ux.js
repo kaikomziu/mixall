@@ -236,8 +236,62 @@
   window.addEventListener('offline', () => offlineBanner(true));
   window.addEventListener('online', () => { offlineBanner(false); show('オンラインに戻りました'); });
 
+  // ---------- 「読み込み中...」を回転アイコン＋光る文字にする ----------
+  const LOADING_RE = /^(読み込み中|読込中|ロード中|取得中|送信中|処理中|検索中|保存中)[.…。・]*$/;
+  function decorateLoading(root) {
+    if (!root || root.nodeType !== 1) return;
+    const check = (el) => {
+      if (el.children.length) return;
+      const text = (el.textContent || '').trim();
+      if (LOADING_RE.test(text)) el.classList.add('mx-loading');
+      else if (el.classList.contains('mx-loading')) el.classList.remove('mx-loading');
+    };
+    if (!['SCRIPT', 'STYLE', 'TEXTAREA', 'OPTION', 'BUTTON'].includes(root.tagName)) check(root);
+    if (root.querySelectorAll) root.querySelectorAll('p, span, div, li, td, small, strong, em, h2, h3').forEach(check);
+  }
+  function watchLoading() {
+    decorateLoading(document.body);
+    new MutationObserver((records) => {
+      for (const r of records) {
+        if (r.type === 'characterData') { if (r.target.parentElement) decorateLoading(r.target.parentElement); continue; }
+        if (r.target && r.target.nodeType === 1 && r.addedNodes.length) {
+          r.addedNodes.forEach((n) => { if (n.nodeType === 1) decorateLoading(n); else if (n.parentElement) decorateLoading(n.parentElement); });
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+
+  // ---------- 上部メニューの「いまいるページ」表示をURLから付け直す ----------
+  // （元のHTMLには、別のページの項目に active が付いたままのものがあるため）
+  function fixHeaderActive() {
+    const strip = (p) => {
+      const base = window.MixAllBase && window.MixAllBase.base;
+      let s = p;
+      if (base && (s === base || s.startsWith(base + '/'))) s = s.slice(base.length) || '/';
+      return s.replace(/\/index\.html$/i, '/').replace(/\/+$/, '').toLowerCase() || '/';
+    };
+    const here = strip(location.pathname);
+    const links = [...document.querySelectorAll('header.top nav.services a[href]')];
+    if (!links.length) return;
+    let best = null; let bestLen = -1;
+    for (const a of links) {
+      let target;
+      try { const u = new URL(a.getAttribute('href'), location.href); if (u.origin !== location.origin) continue; target = strip(u.pathname); } catch (_) { continue; }
+      const match = target === here || (target !== '/' && here.startsWith(target + '/')) || (target.endsWith('.html') && here === target);
+      if (match && target.length > bestLen) { best = a; bestLen = target.length; }
+    }
+    for (const a of links) {
+      const on = a === best;
+      a.classList.toggle('active', on);
+      if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    }
+    if (best && best.scrollIntoView) { try { best.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (_) { /* ignore */ } }
+  }
+
   function boot() {
     replayPending();
+    try { fixHeaderActive(); } catch (_) { /* ignore */ }
+    try { watchLoading(); } catch (_) { /* ignore */ }
     if (!navigator.onLine) offlineBanner(true);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });

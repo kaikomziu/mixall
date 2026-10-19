@@ -709,3 +709,130 @@ textarea.mixall-dialog-input { min-height: 110px; line-height: 1.55; }
   .mixall-dialog { border-radius: 26px; }
 }
 @media (prefers-reduced-motion: reduce) { .mixall-dialog-layer, .mixall-dialog { animation: none !important; } }
+
+/* ===== MixAll + 全体の見た目 =====
+   既存の配色（--bg / --panel など）はそのまま、ロゴと同じ4色の光をうっすら重ねて統一感を出す。 */
+:root {
+  --mx-grad: linear-gradient(135deg, #3d7bff, #9a5bff 58%, #ff4f8b);
+  --mx-grad-soft: linear-gradient(135deg, rgba(61, 123, 255, .16), rgba(154, 91, 255, .14) 58%, rgba(255, 79, 139, .12));
+  --mx-aurora-1: rgba(91, 108, 255, .16);
+  --mx-aurora-2: rgba(255, 92, 154, .09);
+  --mx-aurora-3: rgba(61, 255, 184, .06);
+  --mx-card-shadow: 0 1px 0 rgba(255, 255, 255, .035) inset, 0 10px 30px rgba(0, 0, 0, .22);
+  --mx-ring: 0 0 0 4px rgba(139, 107, 255, .22);
+}
+html[data-theme="light"] {
+  --mx-aurora-1: rgba(91, 108, 255, .10);
+  --mx-aurora-2: rgba(255, 92, 154, .07);
+  --mx-aurora-3: rgba(61, 200, 160, .06);
+  --mx-card-shadow: 0 1px 2px rgba(20, 24, 40, .05), 0 8px 24px rgba(20, 24, 40, .07);
+}
+body {
+  background:
+    radial-gradient(1100px 620px at 8% -12%, var(--mx-aurora-1), transparent 62%),
+    radial-gradient(900px 520px at 105% 2%, var(--mx-aurora-2), transparent 60%),
+    radial-gradient(800px 600px at 50% 115%, var(--mx-aurora-3), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: rgba(139, 107, 255, .35); color: inherit; }
+
+/* ページを開いたときにふわっと表示 */
+main { animation: mx-page-in .38s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes mx-page-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ヘッダー: すりガラス */
+header.top {
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+  backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .12);
+}
+nav.services a {
+  border-radius: 999px; transition: background .15s, color .15s, box-shadow .15s;
+}
+nav.services a:hover { background: color-mix(in srgb, var(--text) 8%, transparent); }
+nav.services a.active, nav.services a[aria-current="page"] {
+  color: #fff !important; background: var(--mx-grad) !important; border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(130, 90, 255, .35);
+}
+
+/* カード */
+.card {
+  border-radius: 18px;
+  border-color: color-mix(in srgb, var(--text) 9%, transparent);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #ffffff 3.5%, transparent), transparent 55%),
+    var(--panel);
+  box-shadow: var(--mx-card-shadow);
+}
+a > .card, .card.clickable { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+a:hover > .card, .card.clickable:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, #8b6bff 45%, var(--border));
+  box-shadow: var(--mx-card-shadow), 0 14px 34px rgba(110, 80, 255, .18);
+}
+.card h1, .card h2, .card h3, main > h1, main > h2 { font-weight: 800; letter-spacing: .005em; }
+
+/* ボタン: クラスなし・送信ボタンは主ボタン（グラデーション） */
+button, .button { border-radius: 12px; transition: transform .12s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease, color .15s ease; }
+button:not([class]), button[type="submit"]:not(.secondary):not(.ghost), .button:not(.secondary):not(.ghost), a.button:not(.secondary):not(.ghost) {
+  color: #fff; border-color: transparent; background: var(--mx-grad);
+  box-shadow: 0 6px 18px rgba(130, 90, 255, .32);
+}
+button:not([class]):hover, button[type="submit"]:not(.secondary):not(.ghost):hover, .button:not(.secondary):not(.ghost):hover {
+  box-shadow: 0 8px 24px rgba(130, 90, 255, .48); filter: brightness(1.06);
+}
+button:not(:disabled):active, .button:active { transform: scale(.97); }
+button.secondary, .button.secondary {
+  color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent);
+  border-color: color-mix(in srgb, var(--text) 14%, transparent);
+}
+button.secondary:hover, .button.secondary:hover { background: color-mix(in srgb, var(--text) 11%, transparent); border-color: color-mix(in srgb, #8b6bff 45%, var(--border)); }
+button.ghost:hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
+
+/* 入力欄 */
+input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="url"], input[type="number"], input[type="date"], textarea, select {
+  border-radius: 12px;
+  border-color: color-mix(in srgb, var(--text) 12%, transparent);
+  background: color-mix(in srgb, var(--panel-2) 88%, transparent);
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+input:focus, textarea:focus, select:focus { outline: none; border-color: #8b6bff !important; box-shadow: var(--mx-ring); }
+input[type="checkbox"], input[type="radio"] { accent-color: #8b6bff; }
+
+/* 細いスクロールバー */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, #8b6bff 55%, transparent) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, #8b6bff 45%, transparent); border-radius: 999px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background-color: color-mix(in srgb, #8b6bff 70%, transparent); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* 「読み込み中...」の表示（mixall-ux.js が付ける） */
+.mx-loading {
+  display: inline-flex; align-items: center; gap: 10px; color: var(--text-dim);
+  background: linear-gradient(100deg, var(--text-dim) 0%, var(--text-dim) 35%, #b9a8ff 50%, var(--text-dim) 65%, var(--text-dim) 100%);
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: mx-shine-text 1.6s linear infinite;
+}
+.mx-loading::before {
+  content: ""; flex: 0 0 18px; width: 18px; height: 18px; border-radius: 50%;
+  background: conic-gradient(from 0deg, #4fdcff, #8b6bff, #ff5c9a, transparent 75%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  animation: mixall-spin .8s linear infinite;
+}
+@keyframes mx-shine-text { from { background-position: 100% 0; } to { background-position: -120% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  main { animation: none; }
+  .mx-loading, .mx-loading::before { animation: none; }
+}
+/* リンク型のボタン（<a class="button">）にもボタンらしい形を付ける */
+a.button, .button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 42px; padding: 10px 18px; border-radius: 12px; border: 1px solid transparent;
+  font-weight: 750; line-height: 1.2; text-decoration: none; white-space: nowrap;
+}
+a.button.secondary, .button.secondary { color: var(--text); }

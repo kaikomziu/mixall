@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mixall-emergency-v3';
+const CACHE_NAME = 'mixall-emergency-v4';
 const CORE = [
   '/emergency.html',
   '/emergency-peer.html',
@@ -12,6 +12,7 @@ const CORE = [
   '/js/mixall-ux.js',
   '/js/google-drive-sync.js',
   '/images/logo-mark.svg',
+  '/images/logo-loader.svg',
   '/css/style.css',
   '/manifest.webmanifest',
   '/icons/icon-192.png',
