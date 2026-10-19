@@ -110,7 +110,7 @@ async function loadDataList() {
       document.getElementById('dataPublic').checked = result.data.publicRead === true;
       document.getElementById('dataValue').value = typeof result.data.value === 'string' ? result.data.value : JSON.stringify(result.data.value, null, 2);
     });
-    el.querySelectorAll('[data-data-delete]').forEach((button) => button.onclick = async () => { if (!confirm(`${button.dataset.dataDelete} を削除しますか？`)) return; await Netrify.api('/.netlify/functions/lending-data', { action:'deleteData', token:session.token, slug, key:button.dataset.dataDelete }); loadDataList(); });
+    el.querySelectorAll('[data-data-delete]').forEach((button) => button.onclick = async () => { if (!(await MixAllDialog.confirm(`${button.dataset.dataDelete} を削除しますか？`))) return; await Netrify.api('/.netlify/functions/lending-data', { action:'deleteData', token:session.token, slug, key:button.dataset.dataDelete }); loadDataList(); });
   } catch (e) { el.innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`; }
 }
 
@@ -145,14 +145,14 @@ async function loadSites() {
   });
   el.querySelectorAll('[data-run-coin]').forEach(btn => {
     btn.onclick = async () => {
-      if (!confirm('このサイトに保存されたCoin命令を実行しますか？')) return;
+      if (!(await MixAllDialog.confirm('このサイトに保存されたCoin命令を実行しますか？'))) return;
       try { const result = await Netrify.api('/.netlify/functions/lending', { action:'runCoinProgram', token:session.token, slug:btn.dataset.runCoin }); alert((result.results || []).map((item) => item.ok ? `${item.target}: +${item.amount}` : `${item.target}: ${item.error}`).join('\\n')); }
       catch (e) { alert(e.message); }
     };
   });
   el.querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = async () => {
-      if (!confirm('/site-view/' + btn.dataset.del + ' を削除しますか?')) return;
+      if (!(await MixAllDialog.confirm('/site-view/' + btn.dataset.del + ' を削除しますか?'))) return;
       await Netrify.api('/.netlify/functions/lending', { action: 'deleteSite', token: session.token, slug: btn.dataset.del });
       loadSites();
     };

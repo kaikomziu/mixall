@@ -142,7 +142,7 @@ function renderStamps(stamps) {
   }).join('');
   grid.querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = async () => {
-      if (!confirm('このスタンプを削除しますか?')) return;
+      if (!(await MixAllDialog.confirm('このスタンプを削除しますか?'))) return;
       await Netrify.api('/.netlify/functions/stamps', { action: 'deleteStamp', token: session.token, stampId: btn.dataset.del });
       loadStamps();
     };

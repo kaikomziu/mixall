@@ -647,3 +647,65 @@ body:has(.mixall-bottom-nav), body:has(.ghost-bottom-nav) { padding-bottom: calc
   .mixall-progress, .mixall-toast, .is-busy::after { transition: none !important; animation: none !important; }
 }
 .mixall-toast-sticky .mixall-toast-text { user-select: text; -webkit-user-select: text; font-family: inherit; }
+
+/* ===== MixAll + ダイアログ（確認・入力） ===== */
+html.mixall-dialog-open { overflow: hidden; }
+.mixall-dialog-layer {
+  position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: 18px;
+  background: radial-gradient(120% 80% at 50% 0%, rgba(110, 80, 255, .22), transparent 60%), rgba(5, 7, 18, .58);
+  backdrop-filter: blur(6px) saturate(1.2); -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  animation: mixall-dialog-fade .18s ease-out;
+}
+.mixall-dialog-layer.leaving { animation: mixall-dialog-fade-out .17s ease-in forwards; }
+.mixall-dialog {
+  position: relative; overflow: hidden; box-sizing: border-box; width: min(420px, 100%);
+  padding: 22px 20px 16px; border-radius: 24px; color: var(--text);
+  background: linear-gradient(180deg, color-mix(in srgb, #ffffff 6%, transparent), transparent 40%), color-mix(in srgb, var(--panel) 96%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  box-shadow: 0 30px 80px rgba(4, 6, 20, .55), 0 0 0 1px rgba(139, 107, 255, .12), inset 0 1px 0 rgba(255, 255, 255, .06);
+  animation: mixall-dialog-pop .24s cubic-bezier(.2, .9, .3, 1.2);
+}
+.mixall-dialog-layer.leaving .mixall-dialog { animation: mixall-dialog-drop .17s ease-in forwards; }
+.mixall-dialog-glow { position: absolute; inset: -60% -20% auto; height: 120%; pointer-events: none; opacity: .5;
+  background: conic-gradient(from 210deg, rgba(79, 220, 255, .22), rgba(139, 107, 255, .26), rgba(255, 92, 154, .2), rgba(61, 255, 184, .16), rgba(79, 220, 255, .22));
+  filter: blur(40px); }
+.mixall-dialog.is-danger .mixall-dialog-glow { background: radial-gradient(closest-side, rgba(255, 79, 110, .35), transparent); }
+.mixall-dialog > * { position: relative; }
+.mixall-dialog-icon {
+  width: 46px; height: 46px; margin: 0 auto 12px; border-radius: 15px; display: grid; place-items: center;
+  font-size: 1.35rem; font-weight: 900; color: #fff;
+  background: linear-gradient(135deg, #3d7bff, #9a5bff 58%, #ff4f8b); box-shadow: 0 10px 26px rgba(130, 90, 255, .45);
+}
+.mixall-dialog.is-danger .mixall-dialog-icon { background: linear-gradient(135deg, #ff6b6b, #e5294b); box-shadow: 0 10px 26px rgba(229, 41, 75, .45); }
+.mixall-dialog-content { text-align: center; }
+.mixall-dialog-title { margin: 0 0 6px; font-size: 1.12rem; font-weight: 800; line-height: 1.45; letter-spacing: .01em; overflow-wrap: anywhere; }
+.mixall-dialog-body { margin: 0 0 4px; color: var(--text-dim); font-size: .95rem; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 40vh; overflow-y: auto; }
+.mixall-dialog-input {
+  box-sizing: border-box; width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; text-align: left;
+  font: inherit; font-size: 16px; color: var(--text); background: color-mix(in srgb, var(--bg) 70%, transparent);
+  border: 1px solid var(--border); outline: none; transition: border-color .15s, box-shadow .15s; resize: vertical;
+}
+.mixall-dialog-input:focus { border-color: #8b6bff; box-shadow: 0 0 0 4px rgba(139, 107, 255, .22); }
+textarea.mixall-dialog-input { min-height: 110px; line-height: 1.55; }
+.mixall-dialog-hint { margin: 6px 2px 0; text-align: right; font-size: .75rem; color: var(--text-dim); }
+.mixall-dialog-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.mixall-dialog-actions button {
+  min-height: 46px; padding: 10px 14px; border-radius: 14px; font: inherit; font-weight: 750; cursor: pointer;
+  transition: transform .12s ease, box-shadow .15s ease, background .15s ease; -webkit-tap-highlight-color: transparent;
+}
+.mixall-dialog-actions button:active { transform: scale(.97); }
+.mixall-dialog-cancel { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); border: 1px solid var(--border); }
+.mixall-dialog-cancel:hover { background: color-mix(in srgb, var(--text) 13%, transparent); }
+.mixall-dialog-ok { color: #fff; border: 0; background: linear-gradient(135deg, #3d7bff, #9a5bff 58%, #ff4f8b); box-shadow: 0 8px 22px rgba(130, 90, 255, .42); }
+.mixall-dialog-ok:hover { box-shadow: 0 10px 28px rgba(130, 90, 255, .58); }
+.mixall-dialog.is-danger .mixall-dialog-ok { background: linear-gradient(135deg, #ff5f6d, #e5294b); box-shadow: 0 8px 22px rgba(229, 41, 75, .42); }
+.mixall-dialog-actions button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@keyframes mixall-dialog-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mixall-dialog-fade-out { to { opacity: 0; } }
+@keyframes mixall-dialog-pop { from { opacity: 0; transform: translateY(14px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes mixall-dialog-drop { to { opacity: 0; transform: translateY(8px) scale(.97); } }
+@media (max-width: 480px) {
+  .mixall-dialog-layer { align-items: end; padding: 12px 10px calc(12px + env(safe-area-inset-bottom)); }
+  .mixall-dialog { border-radius: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { .mixall-dialog-layer, .mixall-dialog { animation: none !important; } }

@@ -58,11 +58,112 @@
   const nativeAlert = window.alert ? window.alert.bind(window) : null;
   window.alert = (message) => show(message);
 
+  // ---------- 確認・入力ダイアログ（confirm / prompt の代わり） ----------
+  // 使い方: if (!(await MixAllDialog.confirm('削除しますか？'))) return;
+  //         const name = await MixAllDialog.prompt('名前', '初期値');  // キャンセルは null
+  const DANGER_RE = /削除|消去|解除|退出|追放|キック|ブロック|リセット|失効|ログアウト|取り消|破棄|初期化|停止|ロック|BAN/i;
+  let dialogQueue = Promise.resolve();
+  function splitMessage(message) {
+    const text = String(message == null ? '' : message).trim();
+    const lines = text.split('\n');
+    // 1行目が短ければ見出しにし、残りを本文にする
+    if (lines.length > 1 && lines[0].length <= 40) return { title: lines[0], body: lines.slice(1).join('\n').trim() };
+    if (text.length <= 40) return { title: text, body: '' };
+    return { title: '', body: text };
+  }
+  function openDialog({ kind, message, defaultValue, options }) {
+    return new Promise((resolve) => {
+      const opts = options || {};
+      const { title, body } = splitMessage(message);
+      const danger = opts.danger ?? (kind === 'confirm' && DANGER_RE.test(String(message)));
+      const multiline = kind === 'prompt' && (opts.multiline ?? (String(defaultValue || '').length > 40 || /\n/.test(String(defaultValue || '')) || /編集|本文|メッセージ|説明|理由|詳細/.test(String(message))));
+      const okLabel = opts.okLabel || (kind === 'prompt' ? '決定' : (danger ? (/削除/.test(String(message)) ? '削除する' : '実行する') : 'OK'));
+      const previousFocus = document.activeElement;
+
+      const layer = document.createElement('div');
+      layer.className = 'mixall-dialog-layer';
+      layer.innerHTML = `<div class="mixall-dialog${danger ? ' is-danger' : ''}" role="${kind === 'confirm' ? 'alertdialog' : 'dialog'}" aria-modal="true">
+          <div class="mixall-dialog-glow" aria-hidden="true"></div>
+          <div class="mixall-dialog-icon" aria-hidden="true">${danger ? '!' : (kind === 'prompt' ? '✎' : '?')}</div>
+          <div class="mixall-dialog-content">
+            ${title ? '<h2 class="mixall-dialog-title"></h2>' : ''}
+            ${body ? '<p class="mixall-dialog-body"></p>' : ''}
+            ${kind === 'prompt' ? (multiline ? '<textarea class="mixall-dialog-input" rows="4"></textarea><p class="mixall-dialog-hint">Ctrl＋Enterで決定</p>' : '<input class="mixall-dialog-input" type="text" autocomplete="off">') : ''}
+          </div>
+          <div class="mixall-dialog-actions">
+            <button type="button" class="mixall-dialog-cancel">${opts.cancelLabel || 'キャンセル'}</button>
+            <button type="button" class="mixall-dialog-ok">${okLabel}</button>
+          </div>
+        </div>`;
+      const dialog = layer.querySelector('.mixall-dialog');
+      const id = 'mixall-dialog-' + Math.random().toString(36).slice(2);
+      if (title) { const h = layer.querySelector('.mixall-dialog-title'); h.textContent = title; h.id = id + '-t'; dialog.setAttribute('aria-labelledby', h.id); }
+      if (body) { const p = layer.querySelector('.mixall-dialog-body'); p.textContent = body; p.id = id + '-b'; dialog.setAttribute('aria-describedby', p.id); }
+      const input = layer.querySelector('.mixall-dialog-input');
+      if (input) { input.value = defaultValue == null ? '' : String(defaultValue); if (title) input.setAttribute('aria-label', title); }
+
+      let finished = false;
+      function finish(value) {
+        if (finished) return;
+        finished = true;
+        layer.classList.add('leaving');
+        document.removeEventListener('keydown', onKey, true);
+        setTimeout(() => {
+          layer.remove();
+          if (!document.querySelector('.mixall-dialog-layer')) document.documentElement.classList.remove('mixall-dialog-open');
+          if (previousFocus && previousFocus.focus) { try { previousFocus.focus({ preventScroll: true }); } catch (_) { /* ignore */ } }
+        }, 170);
+        resolve(value);
+      }
+      const ok = () => finish(kind === 'prompt' ? input.value : true);
+      const cancel = () => finish(kind === 'prompt' ? null : false);
+      layer.querySelector('.mixall-dialog-ok').onclick = ok;
+      layer.querySelector('.mixall-dialog-cancel').onclick = cancel;
+      layer.addEventListener('pointerdown', (event) => { if (event.target === layer) cancel(); });
+      function onKey(event) {
+        if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); cancel(); return; }
+        if (event.key === 'Enter' && !event.isComposing) {
+          const inTextarea = event.target && event.target.tagName === 'TEXTAREA';
+          if (inTextarea && !(event.ctrlKey || event.metaKey)) return;
+          if (event.target && event.target.classList && event.target.classList.contains('mixall-dialog-cancel')) return;
+          event.preventDefault(); event.stopPropagation(); ok();
+        }
+        if (event.key === 'Tab') {
+          // ダイアログの外へフォーカスが出ないようにする
+          const items = [...dialog.querySelectorAll('button, input, textarea')];
+          const first = items[0], last = items[items.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }
+      }
+      document.addEventListener('keydown', onKey, true);
+      document.documentElement.classList.add('mixall-dialog-open');
+      (document.body || document.documentElement).appendChild(layer);
+      requestAnimationFrame(() => {
+        if (input) { input.focus(); input.select(); }
+        else layer.querySelector(danger ? '.mixall-dialog-cancel' : '.mixall-dialog-ok').focus();
+      });
+    });
+  }
+  // 同時に複数呼ばれても1つずつ順番に出す
+  function enqueue(spec) {
+    const run = dialogQueue.then(() => openDialog(spec));
+    dialogQueue = run.catch(() => {});
+    return run;
+  }
+  window.MixAllDialog = {
+    confirm: (message, options) => enqueue({ kind: 'confirm', message, options }),
+    prompt: (message, defaultValue, options) => enqueue({ kind: 'prompt', message, defaultValue, options }),
+    alert: (message) => show(message)
+  };
+
   // ---------- 進行バー・ボタンの処理中表示 ----------
   let lastInteraction = 0;
   let lastButton = null;
   const markInteraction = (event) => {
     lastInteraction = Date.now();
+    // ダイアログのボタンを押したときは、ダイアログを開いた元のボタンを「処理中」にする
+    if (event.target && event.target.closest && event.target.closest('.mixall-dialog-layer')) { if (lastButton) lastButton.at = Date.now(); return; }
     const target = event.target && event.target.closest ? event.target.closest('button, input[type="submit"], .button') : null;
     if (target) lastButton = { el: target, at: Date.now() };
     else if (event.type === 'submit' && event.submitter) lastButton = { el: event.submitter, at: Date.now() };

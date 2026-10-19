@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mixall-emergency-v2';
+const CACHE_NAME = 'mixall-emergency-v3';
 const CORE = [
   '/emergency.html',
   '/emergency-peer.html',
@@ -7,12 +7,16 @@ const CORE = [
   '/js/emergency-peer.js',
   '/js/mesh-persistence.js',
   '/js/emergency-monitor.js',
+  '/js/mixall-base.js',
+  '/js/chat-vault.js',
+  '/js/mixall-ux.js',
+  '/js/google-drive-sync.js',
+  '/images/logo-mark.svg',
   '/css/style.css',
   '/manifest.webmanifest',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
-  '/icons/apple-touch-icon.png',
-  '/manus-routes.json'
+  '/icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {

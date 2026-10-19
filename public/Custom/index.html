@@ -130,7 +130,7 @@ async function loadRooms() {
       const roomId = btn.dataset.join;
       let password;
       if (btn.dataset.private === 'true') {
-        password = prompt('このワールドのパスワードを入力してください');
+        password = (await MixAllDialog.prompt('このワールドのパスワードを入力してください'));
         if (password === null) return;
       }
       try {
@@ -144,7 +144,7 @@ async function loadRooms() {
   el.querySelectorAll('[data-delete-room]').forEach(btn => {
     btn.onclick = async () => {
       const room = data.rooms.find(item => item.id === btn.dataset.deleteRoom);
-      if (!room || !confirm(`「${room.name}」を削除しますか？このルームには入れなくなります。`)) return;
+      if (!room || !(await MixAllDialog.confirm(`「${room.name}」を削除しますか？このルームには入れなくなります。`))) return;
       btn.disabled = true;
       try {
         await Netrify.api('/.netlify/functions/custom', { action:'deleteRoom', token:session.token, roomId:room.id });

@@ -91,13 +91,13 @@ async function loadThreads() {
   }).join('');
   el.querySelectorAll('[data-report-thread]').forEach((button) => button.onclick = async () => {
     const s = Netrify.requireLogin(); if (!s) return;
-    const reason = prompt('通報理由を入力してください', '迷惑行為・規約違反'); if (!reason) return;
+    const reason = (await MixAllDialog.prompt('通報理由を入力してください', '迷惑行為・規約違反')); if (!reason) return;
     const result = await Netrify.api('/.netlify/functions/uch', { action:'report', token:s.token, threadId:button.dataset.reportThread, reason });
     alert(result.duplicate ? 'このスレッドはすでに通報済みです。' : '通報を受け付けました。');
   });
   el.querySelectorAll('[data-pick-tag]').forEach((button)=>button.onclick=(event)=>{event.preventDefault();const option=[...tagSelect.options].find(o=>o.value===button.dataset.pickTag);if(option)option.selected=true;loadThreads();});
   el.querySelectorAll('[data-delete-thread]').forEach((button) => button.onclick = async () => {
-    if (!confirm('このスレッドを削除しますか？')) return;
+    if (!(await MixAllDialog.confirm('このスレッドを削除しますか？'))) return;
     const s = Netrify.requireLogin(); if (!s) return;
     await Netrify.api('/.netlify/functions/uch', { action:'deleteThread', token:s.token, threadId:button.dataset.deleteThread }); loadThreads();
   });

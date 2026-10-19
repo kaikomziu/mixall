@@ -82,8 +82,8 @@ async function load(listId){
 }
 selectEl.onchange=()=>load(selectEl.value);
 searchEl.addEventListener('input',renderPosts);typeEl.addEventListener('change',renderPosts);
-document.getElementById('newList').onclick=async()=>{const name=prompt('新しいブックマークリスト名');if(!name)return;try{const result=await Netrify.api('/.netlify/functions/ghost',{action:'createBookmarkList',token:session.token,name});await load(result.list.id);}catch(error){alert(error.message);}};
-document.getElementById('deleteList').onclick=async()=>{const list=lists.find(item=>item.id===selectedList);if(!list||selectedList==='saved')return;if(!confirm(`「${list.name}」を削除しますか？このリストに保存されたブックマークも解除されます。`))return;try{await Netrify.api('/.netlify/functions/ghost',{action:'deleteBookmarkList',token:session.token,listId:selectedList});await load('saved');}catch(error){alert(error.message);}};
+document.getElementById('newList').onclick=async()=>{const name=(await MixAllDialog.prompt('新しいブックマークリスト名'));if(!name)return;try{const result=await Netrify.api('/.netlify/functions/ghost',{action:'createBookmarkList',token:session.token,name});await load(result.list.id);}catch(error){alert(error.message);}};
+document.getElementById('deleteList').onclick=async()=>{const list=lists.find(item=>item.id===selectedList);if(!list||selectedList==='saved')return;if(!(await MixAllDialog.confirm(`「${list.name}」を削除しますか？このリストに保存されたブックマークも解除されます。`)))return;try{await Netrify.api('/.netlify/functions/ghost',{action:'deleteBookmarkList',token:session.token,listId:selectedList});await load('saved');}catch(error){alert(error.message);}};
 load(new URLSearchParams(location.search).get('listId')||'saved');
 </script>
 <script src="/js/ghost-nav.js"></script>

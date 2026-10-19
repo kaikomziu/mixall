@@ -100,11 +100,11 @@ async function load() {
       try { await api('toggle', { id: button.dataset.toggle, enabled: button.dataset.enabled !== 'true' }); await load(); } catch (e) { showError(e); }
     });
     listEl.querySelectorAll('[data-rotate]').forEach((button) => button.onclick = async () => {
-      if (!confirm('秘密鍵を再発行しますか？旧秘密鍵は直ちに無効になります。')) return;
+      if (!(await MixAllDialog.confirm('秘密鍵を再発行しますか？旧秘密鍵は直ちに無効になります。'))) return;
       try { const data = await api('rotate', { id: button.dataset.rotate }); showSecret(data.secret); await load(); } catch (e) { showError(e); }
     });
     listEl.querySelectorAll('[data-delete]').forEach((button) => button.onclick = async () => {
-      if (!confirm('このWebhookを削除しますか？')) return;
+      if (!(await MixAllDialog.confirm('このWebhookを削除しますか？'))) return;
       try { await api('delete', { id: button.dataset.delete }); await load(); } catch (e) { showError(e); }
     });
   } catch (e) { showError(e); listEl.innerHTML = '<p class="error">読み込みに失敗しました。</p>'; }

@@ -223,7 +223,7 @@ function identityHtml(profile, fallback) {
 function setupPostContextMenu() {
   const menu=document.getElementById('postContextMenu'); let timer=null;
   const close=()=>{menu.style.display='none';};
-  const open=(post,x,y)=>{ menu.innerHTML=''; const add=(label,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{close();fn();};menu.appendChild(b);}; const text=post.querySelector('.text')?.textContent?.trim()||post.querySelector('.attachment-link')?.textContent?.trim()||''; add('コピー',async()=>{try{await navigator.clipboard.writeText(text);}catch{alert('コピーできませんでした');}}); const reply=post.querySelector('[data-reply-post]');if(reply)add('返信',()=>reply.click());const child=post.querySelector('[data-child-thread]');if(child)add('スレッド',()=>child.click());add('リアクション',()=>{const v=prompt('リアクション (例: 👍 ❤️ 😂)');if(v)alert(`${v} を選択しました`);});const report=post.querySelector('[data-report-post]');if(report)add('報告',()=>report.click());const edit=post.querySelector('[data-edit-post]');if(edit)add('編集',()=>edit.click());const history=post.querySelector('[data-history-post]');if(history)add('編集履歴',()=>history.click());const del=post.querySelector('[data-delete-post]');if(del)add('削除',()=>del.click());menu.style.left=`${Math.max(8,Math.min(x,innerWidth-190))}px`;menu.style.top=`${Math.max(8,Math.min(y,innerHeight-260))}px`;menu.style.display='block';};
+  const open=(post,x,y)=>{ menu.innerHTML=''; const add=(label,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{close();fn();};menu.appendChild(b);}; const text=post.querySelector('.text')?.textContent?.trim()||post.querySelector('.attachment-link')?.textContent?.trim()||''; add('コピー',async()=>{try{await navigator.clipboard.writeText(text);}catch{alert('コピーできませんでした');}}); const reply=post.querySelector('[data-reply-post]');if(reply)add('返信',()=>reply.click());const child=post.querySelector('[data-child-thread]');if(child)add('スレッド',()=>child.click());add('リアクション',async ()=>{const v=(await MixAllDialog.prompt('リアクション (例: 👍 ❤️ 😂)'));if(v)alert(`${v} を選択しました`);});const report=post.querySelector('[data-report-post]');if(report)add('報告',()=>report.click());const edit=post.querySelector('[data-edit-post]');if(edit)add('編集',()=>edit.click());const history=post.querySelector('[data-history-post]');if(history)add('編集履歴',()=>history.click());const del=post.querySelector('[data-delete-post]');if(del)add('削除',()=>del.click());menu.style.left=`${Math.max(8,Math.min(x,innerWidth-190))}px`;menu.style.top=`${Math.max(8,Math.min(y,innerHeight-260))}px`;menu.style.display='block';};
   document.addEventListener('pointerdown',e=>{const post=e.target.closest?.('.post[data-post-id]');if(!post)return;clearTimeout(timer);timer=setTimeout(()=>open(post,e.clientX,e.clientY),550);}); document.addEventListener('pointerup',()=>clearTimeout(timer));document.addEventListener('pointercancel',()=>clearTimeout(timer));document.addEventListener('pointermove',()=>clearTimeout(timer),{passive:true}); document.addEventListener('contextmenu',e=>{const post=e.target.closest?.('.post[data-post-id]');if(!post)return;e.preventDefault();open(post,e.clientX,e.clientY);}); document.addEventListener('pointerdown',e=>{if(!e.target.closest?.('#postContextMenu'))close();},true);
 }
 
@@ -302,7 +302,7 @@ async function bindUchFileAttachments(root) {
 
 async function editUchPost(postId) {
   const post = window.currentUchThread?.posts?.find((item) => item.id === postId); if (!post) return;
-  const text = prompt('投稿を編集', post.text || ''); if (text === null || !text.trim()) return;
+  const text = (await MixAllDialog.prompt('投稿を編集', post.text || '')); if (text === null || !text.trim()) return;
   try { await Netrify.api('/.netlify/functions/uch', { action:'editPost', token:session.token, threadId, postId, text }); await loadThread(); } catch (error) { alert('編集できませんでした: ' + error.message); }
 }
 function showUchHistory(postId) {
@@ -338,12 +338,12 @@ function renderThread(thread) {
   nested.innerHTML = (thread.nestedThreads || []).map((child) => `<div><a href="/Uch/thread.html?id=${encodeURIComponent(child.id)}">${escapeHtml(child.title)}</a>（${child.postCount}件）</div>`).join('') || '<span class="muted">このスレッドから作成された子スレッドはありません。</span>';
 
   list.querySelectorAll('[data-reply-post]').forEach((button) => { button.onclick = () => { replyTo = button.dataset.replyPost; const post = thread.posts.find((item) => item.id === replyTo); const info = document.getElementById('replyInfo'); info.textContent = `返信先: ${(post?.text || '投稿').slice(0,80)}`; info.style.display = 'block'; document.getElementById('postBody').focus(); }; });
-  list.querySelectorAll('[data-child-thread]').forEach((button) => { button.onclick = async () => { const title = prompt('子スレッド名', 'スレッド'); if (title === null) return; try { const result = await Netrify.api('/.netlify/functions/uch', { action:'createThread', token:session.token, title, body:'', displayName:session.displayName, parentThreadId:threadId, parentPostId:button.dataset.childThread }); location.href = '/Uch/thread.html?id=' + encodeURIComponent(result.thread.id); } catch (error) { alert(error.message); } }; });
+  list.querySelectorAll('[data-child-thread]').forEach((button) => { button.onclick = async () => { const title = (await MixAllDialog.prompt('子スレッド名', 'スレッド')); if (title === null) return; try { const result = await Netrify.api('/.netlify/functions/uch', { action:'createThread', token:session.token, title, body:'', displayName:session.displayName, parentThreadId:threadId, parentPostId:button.dataset.childThread }); location.href = '/Uch/thread.html?id=' + encodeURIComponent(result.thread.id); } catch (error) { alert(error.message); } }; });
   list.querySelectorAll('[data-edit-post]').forEach((button) => { button.onclick = () => editUchPost(button.dataset.editPost); });
   list.querySelectorAll('[data-history-post]').forEach((button) => { button.onclick = () => showUchHistory(button.dataset.historyPost); });
   list.querySelectorAll('[data-delete-post]').forEach((button) => {
     button.onclick = async () => {
-      if (!confirm('この投稿を削除しますか？')) return;
+      if (!(await MixAllDialog.confirm('この投稿を削除しますか？'))) return;
       const s = Netrify.requireLogin();
       if (!s) return;
       try { await Netrify.api('/.netlify/functions/uch', { action: 'deletePost', token: s.token, threadId, postId: button.dataset.deletePost }); await loadThread(); } catch (error) { alert(error.message); }
@@ -353,7 +353,7 @@ function renderThread(thread) {
     button.onclick = async () => {
       const s = Netrify.requireLogin();
       if (!s) return;
-      const reason = prompt('通報理由を入力してください', '迷惑行為・規約違反');
+      const reason = (await MixAllDialog.prompt('通報理由を入力してください', '迷惑行為・規約違反'));
       if (!reason) return;
       const result = await Netrify.api('/.netlify/functions/uch', { action: 'report', token: s.token, threadId, targetType: 'post', postId: button.dataset.reportPost, reason });
       alert(result.duplicate ? 'この投稿はすでに通報済みです。' : '通報を受け付けました。');
@@ -389,12 +389,12 @@ function renderBots(bots) {
     listEl.querySelectorAll('[data-edit]').forEach(btn => {
       btn.onclick = async () => {
         const bot = bots.find((item) => item.id === btn.dataset.edit); if (!bot) return;
-        const name = prompt('bot名', bot.name); if (name === null) return;
-        const icon = prompt('アイコン', bot.icon || '?'); if (icon === null) return;
+        const name = (await MixAllDialog.prompt('bot名', bot.name)); if (name === null) return;
+        const icon = (await MixAllDialog.prompt('アイコン', bot.icon || '?')); if (icon === null) return;
         const payload = { action:'updateBot', token:Netrify.requireLogin().token, threadId, botId:bot.id, name, icon, triggerType:bot.triggerType };
-        if (bot.triggerType === 'keyword') { const keywords = prompt('キーワードを改行区切りで入力', (bot.keywords || []).join('\\n')); if (keywords === null) return; payload.keywords = keywords.split(/[,\\n]/).map((s) => s.trim()).filter(Boolean); payload.mode = bot.mode; payload.replyMessage = bot.replyMessage; payload.scope = bot.scope; payload.replaceWith = bot.replaceWith; payload.deleteOnMatch = bot.deleteOnMatch; }
-        if (bot.triggerType === 'canned') { const message = prompt('定型返信', bot.cannedMessage || ''); if (message === null) return; payload.cannedMessage = message; }
-        if (bot.triggerType === 'ai') { const instruction = prompt('AI指示文', bot.instruction || ''); if (instruction === null) return; payload.model = bot.model; payload.instruction = instruction; }
+        if (bot.triggerType === 'keyword') { const keywords = (await MixAllDialog.prompt('キーワードを改行区切りで入力', (bot.keywords || []).join('\\n'))); if (keywords === null) return; payload.keywords = keywords.split(/[,\\n]/).map((s) => s.trim()).filter(Boolean); payload.mode = bot.mode; payload.replyMessage = bot.replyMessage; payload.scope = bot.scope; payload.replaceWith = bot.replaceWith; payload.deleteOnMatch = bot.deleteOnMatch; }
+        if (bot.triggerType === 'canned') { const message = (await MixAllDialog.prompt('定型返信', bot.cannedMessage || '')); if (message === null) return; payload.cannedMessage = message; }
+        if (bot.triggerType === 'ai') { const instruction = (await MixAllDialog.prompt('AI指示文', bot.instruction || '')); if (instruction === null) return; payload.model = bot.model; payload.instruction = instruction; }
         try { await Netrify.api('/.netlify/functions/uch', payload); loadThread(); } catch (e) { alert(e.message); }
       };
     });
@@ -412,7 +412,7 @@ function renderBots(bots) {
 let pendingAttachment = null;
 let attachmentUploadId = 0;
 let pendingPoll = null;
-document.getElementById('uchPollButton').onclick = () => { const question=prompt('投票の質問'); if(!question)return; const values=String(prompt('選択肢をカンマ区切りで入力')||'').split(',').map((v)=>v.trim()).filter(Boolean); if(values.length<2){alert('選択肢を2つ以上入力してください');return;} pendingPoll={question,options:values}; document.getElementById('postFilePreview').textContent=`投票: ${question}（${values.join(' / ')}）`; };
+document.getElementById('uchPollButton').onclick = async () => { const question=(await MixAllDialog.prompt('投票の質問')); if(!question)return; const values=String((await MixAllDialog.prompt('選択肢をカンマ区切りで入力'))||'').split(',').map((v)=>v.trim()).filter(Boolean); if(values.length<2){alert('選択肢を2つ以上入力してください');return;} pendingPoll={question,options:values}; document.getElementById('postFilePreview').textContent=`投票: ${question}（${values.join(' / ')}）`; };
 document.getElementById('postFile').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   const preview = document.getElementById('postFilePreview');
@@ -629,12 +629,12 @@ document.getElementById('participantsBtn').onclick = () => {
 };
 document.getElementById('reportThreadBtn').onclick = async () => {
   const s = Netrify.requireLogin(); if (!s) return;
-  const reason = prompt('通報理由を入力してください', '迷惑行為・規約違反'); if (!reason) return;
+  const reason = (await MixAllDialog.prompt('通報理由を入力してください', '迷惑行為・規約違反')); if (!reason) return;
   const result = await Netrify.api('/.netlify/functions/uch', { action:'report', token:s.token, threadId, reason });
   alert(result.duplicate ? 'このスレッドはすでに通報済みです。' : '通報を受け付けました。');
 };
 document.getElementById('deleteThreadBtn').onclick = async () => {
-  if (!confirm('このスレッドを削除しますか？')) return;
+  if (!(await MixAllDialog.confirm('このスレッドを削除しますか？'))) return;
   const s = Netrify.requireLogin();
   if (!s) return;
   await Netrify.api('/.netlify/functions/uch', { action: 'deleteThread', token: s.token, threadId });

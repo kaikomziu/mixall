@@ -105,7 +105,7 @@
   });
   $('exportButton').addEventListener('click', async () => { const payload = {format:'mixall-emergency-local', version:1, exportedAt:new Date().toISOString(), messages:await allMessages()}; download(`mixall-emergency-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(payload, null, 2), 'application/json'); });
   $('importFile').addEventListener('change', async (event) => { const file = event.target.files?.[0]; if (!file) return; try { const data=JSON.parse(await file.text()); if(data.format !== 'mixall-emergency-local' || !Array.isArray(data.messages)) throw new Error('緊急メモ形式ではありません'); await replaceMessages(data.messages.slice(-500)); await renderMessages(); setStatus('緊急メモを端末へ復元しました。', 'local'); } catch(error) { setStatus(`復元失敗: ${error.message}`, 'error'); } event.target.value=''; });
-  $('clearButton').addEventListener('click', async () => { if (!confirm('この端末の緊急メモをすべて削除しますか？')) return; await replaceMessages([]); await renderMessages(); });
+  $('clearButton').addEventListener('click', async () => { if (!(await MixAllDialog.confirm('この端末の緊急メモをすべて削除しますか？'))) return; await replaceMessages([]); await renderMessages(); });
   $('cacheButton').addEventListener('click', async () => { try { await cacheCore(); setStatus('緊急モードの起動ファイルを更新しました。', 'online'); } catch(error) { setStatus(`キャッシュ更新失敗: ${error.message}`, 'error'); } });
   $('apkDownloadButton').addEventListener('click', () => downloadApk('手動操作'));
   $('enableMonitorButton').addEventListener('click', () => { window.MixAllEmergencyMonitor?.enable(); $('monitorStatus').textContent = '危険監視を有効化しました。位置情報の許可を確認してください。'; });

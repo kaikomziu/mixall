@@ -68,7 +68,7 @@ async function load(){
     document.querySelectorAll('[data-review]').forEach(button=>button.onclick=async()=>{
       const postId=button.dataset.review,select=document.querySelector(`[data-categories="${CSS.escape(postId)}"]`);
       const categories=select.value?select.value.split(','):[];
-      if(!confirm('選択した年齢区分で、この投稿の目視確認結果を保存しますか？'))return;
+      if(!(await MixAllDialog.confirm('選択した年齢区分で、この投稿の目視確認結果を保存しますか？')))return;
       button.disabled=true;
       try{await Netrify.api('/.netlify/functions/ghost',{action:'manualAgeReview',token:session.token,targetType:'post',postId,categories});await load();}
       catch(e){alert(e.message);button.disabled=false;}

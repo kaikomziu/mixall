@@ -178,7 +178,7 @@ async function loadDevices() {
       </div>`).join('') : '<p class="muted">有効なセッションはありません。</p>';
     el.querySelectorAll('[data-revoke-session]').forEach((button) => {
       button.onclick = async () => {
-        if (!confirm('この端末をログアウトしますか？')) return;
+        if (!(await MixAllDialog.confirm('この端末をログアウトしますか？'))) return;
         await Netrify.revokeSession(button.dataset.revokeSession);
         if (!Netrify.getSession()) { renderSession(); return; }
         loadDevices();
@@ -271,7 +271,7 @@ document.getElementById('deleteAccountSubmit').onclick = async () => {
   const error = document.getElementById('deleteAccountError'); error.textContent='';
   const s = Netrify.getSession(); if (!s || s.isAdmin) return;
   if (document.getElementById('deleteAccountConfirm').value.trim() !== 'DELETE') { error.textContent='DELETE と入力してください'; return; }
-  if (!confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。')) return;
+  if (!(await MixAllDialog.confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。'))) return;
   try { await Netrify.api('/.netlify/functions/auth',{action:'deleteAccount',token:s.token,password:document.getElementById('deleteAccountPassword').value,confirm:'DELETE'}); Netrify.clearSession(); alert('アカウントを削除しました。'); renderSession(); } catch(e) { error.textContent=e.message; }
 };
 

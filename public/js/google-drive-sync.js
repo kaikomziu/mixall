@@ -191,7 +191,7 @@
       button.onclick = async () => {
         const status = card.querySelector('[data-drive-status]');
         const action = button.dataset.drive;
-        if (action === 'purge' && !confirm('Googleドライブに保存したMixAll +のチャットを削除して、連携を解除します。この端末の保存分は残ります。よろしいですか？')) return;
+        if (action === 'purge' && !(await MixAllDialog.confirm('Googleドライブに保存したMixAll +のチャットを削除して、連携を解除します。この端末の保存分は残ります。よろしいですか？'))) return;
         button.disabled = true; status.textContent = '処理中...';
         try {
           if (action === 'link') { const r = await link(); status.textContent = `連携しました（ドライブから${r.imported}件読み込み）`; }

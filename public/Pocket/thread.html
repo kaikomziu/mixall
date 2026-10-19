@@ -177,7 +177,7 @@ async function loadPocketStamps() {
         if (!stamp) return;
         const price = Number(stamp.priceCoins || 0);
         if (price > 0 && !owned.has(stamp.id)) {
-          if (!confirm(`${price}コインで「${stamp.name}」を購入しますか？`)) return;
+          if (!(await MixAllDialog.confirm(`${price}コインで「${stamp.name}」を購入しますか？`))) return;
           try { await Netrify.api('/.netlify/functions/stamps', { action:'purchaseStamp', token:session.token, stampId:stamp.id }); await loadPocketStamps(); owned.add(stamp.id); }
           catch (error) { alert(error.message); return; }
         }
@@ -347,17 +347,17 @@ function render() {
 
   document.getElementById('nicknameInput').value = room.nicknames[session.email] || '';
   document.querySelectorAll('[data-reply-message]').forEach((button) => { button.onclick = () => { const target = room.messages.find(m => m.id === button.dataset.replyMessage); document.getElementById('replyInfo').textContent = `返信先: ${(target?.text || target?.attachment?.name || '添付メッセージ').slice(0,80)}`; document.getElementById('replyInfo').style.display = 'block'; document.getElementById('replyInfo').dataset.replyTo = button.dataset.replyMessage; document.getElementById('msgBody').focus(); }; });
-  document.querySelectorAll('[data-thread-message]').forEach((button) => { button.onclick = async () => { const parent = room.messages.find(m => m.id === button.dataset.threadMessage); let thread = (room.threads || []).find(t => t.parentMessageId === parent.id); if (!thread) { const title = prompt('スレッド名', 'スレッド'); if (title === null) return; const result = await Netrify.api('/.netlify/functions/pocket',{action:'createThread',token:session.token,roomId,parentMessageId:parent.id,title}); thread = result.thread; } activeThread = thread; renderThread(); }; });
+  document.querySelectorAll('[data-thread-message]').forEach((button) => { button.onclick = async () => { const parent = room.messages.find(m => m.id === button.dataset.threadMessage); let thread = (room.threads || []).find(t => t.parentMessageId === parent.id); if (!thread) { const title = (await MixAllDialog.prompt('スレッド名', 'スレッド')); if (title === null) return; const result = await Netrify.api('/.netlify/functions/pocket',{action:'createThread',token:session.token,roomId,parentMessageId:parent.id,title}); thread = result.thread; } activeThread = thread; renderThread(); }; });
   document.querySelectorAll('[data-delete-message]').forEach((button) => {
     button.onclick = async () => {
-      if (!confirm('このメッセージを削除しますか？')) return;
+      if (!(await MixAllDialog.confirm('このメッセージを削除しますか？'))) return;
       await Netrify.api('/.netlify/functions/pocket', { action: 'deleteMessage', token: session.token, roomId, messageId: button.dataset.deleteMessage });
       loadRoom();
     };
   });
   document.querySelectorAll('[data-report-message]').forEach((button) => {
     button.onclick = async () => {
-      const reason = prompt('通報理由を入力してください', '迷惑行為・規約違反');
+      const reason = (await MixAllDialog.prompt('通報理由を入力してください', '迷惑行為・規約違反'));
       if (!reason) return;
       const result = await Netrify.api('/.netlify/functions/pocket', { action: 'report', token: session.token, roomId, messageId: button.dataset.reportMessage, reason });
       alert(result.duplicate ? 'このメッセージはすでに通報済みです。' : '通報を受け付けました。');
@@ -377,7 +377,7 @@ function render() {
   if (currentPerms.manageBots) {
     const botList = document.getElementById('botList');
     botList.innerHTML = (room.bots || []).map((bot) => `<div class="bot-item"><span>${escapeHtml(bot.icon || 'BOT')} ${escapeHtml(bot.name)} <span class="muted">@${escapeHtml(bot.name)}</span></span><button type="button" class="ghost" data-remove-bot="${escapeHtml(bot.id)}">削除</button></div>`).join('') || '<p class="muted">botはまだありません。</p>';
-    botList.querySelectorAll('[data-remove-bot]').forEach((button) => { button.onclick = async () => { if (!confirm('このbotを削除しますか？')) return; await Netrify.api('/.netlify/functions/pocket', { action:'removeBot', token:session.token, roomId, botId:button.dataset.removeBot }); await loadRoom(); }; });
+    botList.querySelectorAll('[data-remove-bot]').forEach((button) => { button.onclick = async () => { if (!(await MixAllDialog.confirm('このbotを削除しますか？'))) return; await Netrify.api('/.netlify/functions/pocket', { action:'removeBot', token:session.token, roomId, botId:button.dataset.removeBot }); await loadRoom(); }; });
   }
 
   if (currentPerms.manageRoles) {
@@ -409,7 +409,7 @@ function render() {
     });
     memberList.querySelectorAll('[data-kick]').forEach(btn => {
       btn.onclick = async () => {
-        if (!confirm(btn.dataset.kick + ' をキックしますか?')) return;
+        if (!(await MixAllDialog.confirm(btn.dataset.kick + ' をキックしますか?'))) return;
         await Netrify.api('/.netlify/functions/pocket', { action: 'kickMember', token: session.token, roomId, targetEmail: btn.dataset.kick });
         loadRoom();
       };
@@ -446,7 +446,7 @@ function render() {
   }
 }
 
-function setupThreadContextMenu(){const menu=document.getElementById('messageContextMenu');let timer=null;const close=()=>menu.style.display='none';const open=(post,x,y)=>{menu.innerHTML='';const add=(label,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{close();fn();};menu.appendChild(b);};const text=post.querySelector('.text')?.textContent?.trim()||'';add('コピー',async()=>{try{await navigator.clipboard.writeText(text);}catch{alert('コピーできませんでした');}});const reply=post.querySelector('[data-thread-reply]');if(reply)add('返信',()=>reply.click());const child=post.querySelector('[data-thread-message]');if(child)add('入れ子スレッド',()=>child.click());const report=post.querySelector('[data-thread-report]');if(report)add('報告',()=>report.click());add('リアクション',()=>{const v=prompt('リアクション (例: 👍 ❤️ 😂)');if(v)alert(`${v} を選択しました`);});menu.style.left=`${Math.max(8,Math.min(x,innerWidth-190))}px`;menu.style.top=`${Math.max(8,Math.min(y,innerHeight-260))}px`;menu.style.display='block';};document.addEventListener('pointerdown',e=>{const p=e.target.closest?.('#threadMessageList .post[data-message-id]');if(!p)return;clearTimeout(timer);timer=setTimeout(()=>open(p,e.clientX,e.clientY),550);});document.addEventListener('pointerup',()=>clearTimeout(timer));document.addEventListener('pointercancel',()=>clearTimeout(timer));document.addEventListener('pointermove',()=>clearTimeout(timer),{passive:true});document.addEventListener('contextmenu',e=>{const p=e.target.closest?.('#threadMessageList .post[data-message-id]');if(!p)return;e.preventDefault();open(p,e.clientX,e.clientY);});document.addEventListener('pointerdown',e=>{if(!e.target.closest?.('#messageContextMenu'))close();},true);}
+function setupThreadContextMenu(){const menu=document.getElementById('messageContextMenu');let timer=null;const close=()=>menu.style.display='none';const open=(post,x,y)=>{menu.innerHTML='';const add=(label,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{close();fn();};menu.appendChild(b);};const text=post.querySelector('.text')?.textContent?.trim()||'';add('コピー',async()=>{try{await navigator.clipboard.writeText(text);}catch{alert('コピーできませんでした');}});const reply=post.querySelector('[data-thread-reply]');if(reply)add('返信',()=>reply.click());const child=post.querySelector('[data-thread-message]');if(child)add('入れ子スレッド',()=>child.click());const report=post.querySelector('[data-thread-report]');if(report)add('報告',()=>report.click());add('リアクション',async ()=>{const v=(await MixAllDialog.prompt('リアクション (例: 👍 ❤️ 😂)'));if(v)alert(`${v} を選択しました`);});menu.style.left=`${Math.max(8,Math.min(x,innerWidth-190))}px`;menu.style.top=`${Math.max(8,Math.min(y,innerHeight-260))}px`;menu.style.display='block';};document.addEventListener('pointerdown',e=>{const p=e.target.closest?.('#threadMessageList .post[data-message-id]');if(!p)return;clearTimeout(timer);timer=setTimeout(()=>open(p,e.clientX,e.clientY),550);});document.addEventListener('pointerup',()=>clearTimeout(timer));document.addEventListener('pointercancel',()=>clearTimeout(timer));document.addEventListener('pointermove',()=>clearTimeout(timer),{passive:true});document.addEventListener('contextmenu',e=>{const p=e.target.closest?.('#threadMessageList .post[data-message-id]');if(!p)return;e.preventDefault();open(p,e.clientX,e.clientY);});document.addEventListener('pointerdown',e=>{if(!e.target.closest?.('#messageContextMenu'))close();},true);}
 
 function renderThread() {
   const card = document.getElementById('threadCard');
@@ -458,9 +458,9 @@ function renderThread() {
   const messages = currentRoom.messages.filter(m => m.threadId === activeThread.id);
   document.getElementById('threadMessageList').innerHTML = messages.map(m => `<div class="post" data-message-id="${escapeHtml(m.id)}"><div class="icon">${escapeHtml((m.authorName||'?').slice(0,2))}</div><div><strong>${escapeHtml(m.authorName||m.authorEmail)}</strong>${m.replyTo ? `<div class="muted">返信先あり</div>` : ''}<div class="text">${escapeHtml(m.text||'')}${renderAttachment(m.attachment)}</div><div class="time">${new Date(m.createdAt).toLocaleString('ja-JP')}</div><div class="row" style="display:none;"><button type="button" class="ghost" data-thread-reply="${escapeHtml(m.id)}">返信</button><button type="button" class="ghost" data-thread-message="${escapeHtml(m.id)}">入れ子スレッド</button><button type="button" class="ghost" data-thread-report="${escapeHtml(m.id)}">通報</button></div></div></div>`).join('') || '<p class="muted">まだ返信がありません。</p>';
   bindAttachmentSlots(document.getElementById('threadMessageList'));
-  document.querySelectorAll('#threadMessageList [data-thread-message]').forEach((button) => { button.onclick = async () => { const parent = currentRoom.messages.find(m => m.id === button.dataset.threadMessage); if (!parent) return; const title = prompt('入れ子スレッド名', 'スレッド'); if (title === null) return; const result = await Netrify.api('/.netlify/functions/pocket',{action:'createThread',token:session.token,roomId,parentMessageId:parent.id,title}); window.location.href = `/Pocket/thread.html?id=${encodeURIComponent(roomId)}&thread=${encodeURIComponent(result.thread.id)}`; }; });
+  document.querySelectorAll('#threadMessageList [data-thread-message]').forEach((button) => { button.onclick = async () => { const parent = currentRoom.messages.find(m => m.id === button.dataset.threadMessage); if (!parent) return; const title = (await MixAllDialog.prompt('入れ子スレッド名', 'スレッド')); if (title === null) return; const result = await Netrify.api('/.netlify/functions/pocket',{action:'createThread',token:session.token,roomId,parentMessageId:parent.id,title}); window.location.href = `/Pocket/thread.html?id=${encodeURIComponent(roomId)}&thread=${encodeURIComponent(result.thread.id)}`; }; });
   document.querySelectorAll('#threadMessageList [data-thread-reply]').forEach((button) => { button.onclick = () => { document.getElementById('threadBody').dataset.replyTo = button.dataset.threadReply; document.getElementById('threadBody').placeholder = 'このメッセージへの返信'; document.getElementById('threadBody').focus(); }; });
-  document.querySelectorAll('#threadMessageList [data-thread-report]').forEach((button) => { button.onclick = async () => { const reason = prompt('通報理由を入力してください', '迷惑行為・規約違反'); if (!reason) return; try { const result = await Netrify.api('/.netlify/functions/pocket',{action:'report',token:session.token,roomId,messageId:button.dataset.threadReport,reason}); alert(result.duplicate ? 'このメッセージはすでに通報済みです。' : '通報を受け付けました。'); } catch (error) { alert(error.message); } }; });
+  document.querySelectorAll('#threadMessageList [data-thread-report]').forEach((button) => { button.onclick = async () => { const reason = (await MixAllDialog.prompt('通報理由を入力してください', '迷惑行為・規約違反')); if (!reason) return; try { const result = await Netrify.api('/.netlify/functions/pocket',{action:'report',token:session.token,roomId,messageId:button.dataset.threadReport,reason}); alert(result.duplicate ? 'このメッセージはすでに通報済みです。' : '通報を受け付けました。'); } catch (error) { alert(error.message); } }; });
 }
 
 let pendingAttachment = null; // アップロード完了後は { fileId, name, type, sizeBytes }
@@ -525,8 +525,8 @@ document.getElementById('roomNameSubmit').onclick = async () => {
 document.getElementById('renameRoomButton').onclick = () => { document.getElementById('roomNameInput').focus(); };
 document.getElementById('importUchBotButton').onclick = async () => {
   const error = document.getElementById('botError'); error.textContent = '';
-  const sourceThreadId = prompt('UchスレッドIDを入力してください'); if (!sourceThreadId) return;
-  const botId = prompt('Uch bot IDを入力してください'); if (!botId) return;
+  const sourceThreadId = (await MixAllDialog.prompt('UchスレッドIDを入力してください')); if (!sourceThreadId) return;
+  const botId = (await MixAllDialog.prompt('Uch bot IDを入力してください')); if (!botId) return;
   try { await Netrify.api('/.netlify/functions/pocket', { action:'importUchBot', token:session.token, roomId, sourceThreadId:sourceThreadId.trim(), botId:botId.trim() }); await loadRoom(); } catch (e) { error.textContent = e.message; }
 };
 
