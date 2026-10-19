@@ -16,7 +16,7 @@ await build({
   target: 'es2022',
   minify: true,
   legalComments: 'none',
-  external: ['npm:*', 'node:*', 'postgres'],
+  external: ['npm:*', 'node:*', 'postgres', 'web-push'],
   // Nodeの組み込みモジュールを require するコードのため、Denoで require を用意する
   banner: { js: "import { createRequire as __mixallCreateRequire } from 'node:module'; const require = __mixallCreateRequire(import.meta.url);" },
   logLevel: 'warning'

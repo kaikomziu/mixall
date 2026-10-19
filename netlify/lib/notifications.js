@@ -21,12 +21,14 @@ async function addNotification(recipientEmail, data) {
   if (!email) return null;
   const record = { id: notificationId(), recipientEmail: email, read: false, createdAt: new Date().toISOString(), ...data };
   await setJSON(STORE_NAMES.NOTIFICATIONS, `${email}:${record.id}`, record);
+  // プッシュ通知（登録している端末へ。応答は待たない）
+  try { require('../../server/plus').onNotificationAdded(email, record); } catch (error) { console.error('push hook failed:', error); }
   return record;
 }
 
 async function listNotifications(email, limit = 100) {
   const prefix = `${String(email).toLowerCase()}:`;
-  const keys = await listKeys(STORE_NAMES.NOTIFICATIONS);
+  const keys = await listKeys(STORE_NAMES.NOTIFICATIONS, prefix);
   const values = [];
   for (const key of keys) if (key.startsWith(prefix)) { const item = await getJSON(STORE_NAMES.NOTIFICATIONS, key); if (item) values.push(item); }
   return values.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, limit);

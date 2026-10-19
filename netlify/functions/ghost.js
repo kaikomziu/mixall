@@ -286,7 +286,9 @@ async function handle(event) {
       if (!found) return json(404, { error:'Ghostアカウントが見つかりません' });
       let followers = 0; for (const key of keys) { const account = await getJSON(STORE_NAMES.ACCOUNTS, key); if (Array.isArray(account?.ghostFollowing) && account.ghostFollowing.includes(foundEmail)) followers += 1; }
       const posts = []; for (const key of await listGhostPostKeys()) { const post = await getJSON(STORE_NAMES.GHOST_POSTS, key); if (post?.authorEmail === foundEmail && !post.deleted) posts.push(post); }
-      return json(200, { profile:{ ...publicGhostProfile(found, foundEmail), followersCount:followers, postCount:posts.length, following: Boolean(viewerEmail && Array.isArray((await getJSON(STORE_NAMES.ACCOUNTS, viewerEmail))?.ghostFollowing) && (await getJSON(STORE_NAMES.ACCOUNTS, viewerEmail)).ghostFollowing.includes(foundEmail)) } });
+      // MixAll+: ヘッダー画像・テーマカラー・バッジ
+      let plus = null; try { plus = await require('../../server/plus').profileExtras(foundEmail); } catch (_) { plus = null; }
+      return json(200, { profile:{ ...publicGhostProfile(found, foundEmail), plus, followersCount:followers, postCount:posts.length, following: Boolean(viewerEmail && Array.isArray((await getJSON(STORE_NAMES.ACCOUNTS, viewerEmail))?.ghostFollowing) && (await getJSON(STORE_NAMES.ACCOUNTS, viewerEmail)).ghostFollowing.includes(foundEmail)) } });
     }
     if (qs.accounts === '1') {
       const accountKeys = await listKeys(STORE_NAMES.ACCOUNTS);
@@ -724,6 +726,7 @@ async function handle(event) {
         catch (fallbackError) { console.error('Ghost bot fallback failed:', fallbackError); }
       }
     }
+    try { require('../../server/plus').recordMission(email, 'ghost'); } catch (_) { /* デイリーミッション */ }
     return json(201, { post, geminiPost:null, geminiPending });
   }
 

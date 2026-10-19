@@ -528,6 +528,7 @@ async function handle(event) {
         catch (fallbackError) { console.error('Pocket bot fallback failed:', fallbackError); }
       }
     }
+    try { require('../../server/plus').recordMission(email, 'pocket'); } catch (_) { /* デイリーミッション */ }
     return json(200, { ok: true, botPending });
   }
 

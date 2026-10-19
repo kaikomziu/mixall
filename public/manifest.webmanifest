@@ -2,12 +2,12 @@
   "name": "MixAll +",
   "short_name": "MixAll +",
   "lang": "ja",
-  "start_url": "/emergency.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0b0d1f",
   "theme_color": "#0b0d1f",
-  "description": "接続がないときのローカル緊急メモとオフライン起動",
+  "description": "掲示板・チャット・SNSをひとつにまとめたMixAll+",
   "icons": [
     {
       "src": "/icons/icon-192.png",

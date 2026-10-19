@@ -3,6 +3,7 @@
 import nodeProcess from 'node:process';
 import { Buffer } from 'node:buffer';
 import postgres from 'npm:postgres@3.4.5';
+import webpush from 'npm:web-push@3.6.7';
 
 // Supabase Edge Runtime では環境変数の書き換え（Deno.env.set）ができないため、
 // process.env を書き換え可能な普通のオブジェクトに差し替える（runtime-config.js が設定を足す）。
@@ -17,3 +18,4 @@ const processShim = new Proxy(nodeProcess, {
 Object.defineProperty(globalThis, 'process', { value: processShim, writable: true, configurable: true });
 globalThis.Buffer = globalThis.Buffer || Buffer;
 globalThis.__mixallPostgres = postgres;
+globalThis.__mixallWebPush = webpush;

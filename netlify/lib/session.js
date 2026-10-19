@@ -30,8 +30,9 @@ async function getSessionInfo(token) {
   const now = Date.now();
   // 最終利用時刻・オンライン表示（90秒以内でオンライン）の更新は30秒に1回で十分。
   // 毎リクエスト2回の書き込みをしていたのを減らして、どの画面の応答も速くする。
-  if (!Number(session.lastSeenAt) || now - Number(session.lastSeenAt) > 30 * 1000) {
+  if (!Number(session.presenceAt) || now - Number(session.presenceAt) > 30 * 1000) {
     session.lastSeenAt = now;
+    session.presenceAt = now;
     await Promise.all([
       setJSON(STORE_NAMES.SESSIONS, token, session),
       setJSON(STORE_NAMES.PRESENCE, session.email, { email: session.email, lastSeenAt: now })

@@ -61,6 +61,7 @@
   // ---------- 確認・入力ダイアログ（confirm / prompt の代わり） ----------
   // 使い方: if (!(await MixAllDialog.confirm('削除しますか？'))) return;
   //         const name = await MixAllDialog.prompt('名前', '初期値');  // キャンセルは null
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const DANGER_RE = /削除|消去|解除|退出|追放|キック|ブロック|リセット|失効|ログアウト|取り消|破棄|初期化|停止|ロック|BAN/i;
   let dialogQueue = Promise.resolve();
   function splitMessage(message) {
@@ -84,7 +85,7 @@
       layer.className = 'mixall-dialog-layer';
       layer.innerHTML = `<div class="mixall-dialog${danger ? ' is-danger' : ''}" role="${kind === 'confirm' ? 'alertdialog' : 'dialog'}" aria-modal="true">
           <div class="mixall-dialog-glow" aria-hidden="true"></div>
-          <div class="mixall-dialog-icon" aria-hidden="true">${danger ? '!' : (kind === 'prompt' ? '✎' : '?')}</div>
+          <div class="mixall-dialog-icon" aria-hidden="true">${opts.icon ? esc(opts.icon) : (danger ? '!' : (kind === 'prompt' ? '✎' : '?'))}</div>
           <div class="mixall-dialog-content">
             ${title ? '<h2 class="mixall-dialog-title"></h2>' : ''}
             ${body ? '<p class="mixall-dialog-body"></p>' : ''}

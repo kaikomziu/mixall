@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mixall-emergency-v4';
+const CACHE_NAME = 'mixall-emergency-v5';
 const CORE = [
   '/emergency.html',
   '/emergency-peer.html',
@@ -43,5 +43,36 @@ self.addEventListener('fetch', (event) => {
       const cached = await caches.match(request);
       return cached || (request.mode === 'navigate' ? caches.match('/emergency.html') : Response.error());
     }
+  })());
+});
+
+// ---- MixAll+ プッシュ通知 ----
+// サーバー（server/plus.js）から届いた通知を表示し、タップで該当ページを開く。
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data ? event.data.text() : '' }; }
+  const title = data.title || 'MixAll+';
+  event.waitUntil(self.registration.showNotification(title, {
+    body: data.body || '新しいお知らせがあります',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/favicon-48.png',
+    tag: data.tag || 'mixall',
+    renotify: true,
+    data: { url: data.url || '/' }
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil((async () => {
+    const all = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of all) {
+      if (client.url === url && 'focus' in client) return client.focus();
+    }
+    for (const client of all) {
+      if ('navigate' in client && 'focus' in client) { await client.navigate(url); return client.focus(); }
+    }
+    return clients.openWindow(url);
   })());
 });

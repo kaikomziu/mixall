@@ -37,7 +37,8 @@ const handlers = {
   uch: () => require('../netlify/functions/uch'),
   webhook: () => require('../netlify/functions/webhook'),
   webhooks: () => require('../netlify/functions/webhooks'),
-  migrate: () => require('./migrate')
+  migrate: () => require('./migrate'),
+  plus: () => require('./plus')
 };
 
 const TEXT_TYPES = /^(text\/|application\/(json|x-www-form-urlencoded|xml|javascript))/i;
@@ -140,6 +141,7 @@ async function handle(request) {
   if (!load) return new Response(JSON.stringify({ error: 'APIが見つかりません' }), { status: 404, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8' } });
 
   const event = await toEvent(request, url, subPath);
+  try { require('./plus').countRequest(); } catch (_) { /* 集計の失敗で本処理を止めない */ }
   // Netlifyでは外部から叩けなかった定期実行関数は、pg_cronからの秘密ヘッダー付き要求だけ受け付ける。
   if (name.startsWith('scheduled-') && !checkCronSecret(event)) {
     return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: { ...cors, 'Content-Type': 'application/json' } });
@@ -148,6 +150,8 @@ async function handle(request) {
   const handler = mod.handler || mod.default;
   if (name === 'scheduled-tools-cleanup') {
     try { await require('./chat-vault').purgeExpired(); } catch (error) { console.error('[chat-vault purge]', error); }
+    try { await require('./plus').cleanup(); } catch (error) { console.error('[plus cleanup]', error); }
+    try { await require('./plus').checkUsage(); } catch (error) { console.error('[plus usage]', error); }
   }
 
   // Background Function互換: すぐ202を返し、処理はレスポンス後も継続させる。

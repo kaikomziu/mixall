@@ -94,7 +94,7 @@ function rewrite(text, ext) {
     // <script> の中身も含めて JS と同じ規則で書き換える
     out = rewriteJs(out);
     const head = `<script>window.MIXALL_BASE=${JSON.stringify(BASE)};window.MIXALL_API_BASE=${JSON.stringify(API)};window.MIXALL_SITE_URL=${JSON.stringify(SITE)};window.MIXALL_GOOGLE_CLIENT_ID=${JSON.stringify(GOOGLE_CLIENT_ID)};</script>`
-      + `<script src="${BASE}/js/mixall-base.js"></script><script src="${BASE}/js/chat-vault.js"></script><script src="${BASE}/js/mixall-ux.js"></script><script src="${BASE}/js/google-drive-sync.js" defer></script>`;
+      + `<script src="${BASE}/js/mixall-base.js"></script><script src="${BASE}/js/chat-vault.js"></script><script src="${BASE}/js/mixall-ux.js"></script><script src="${BASE}/js/mixall-plus.js"></script><script src="${BASE}/js/google-drive-sync.js" defer></script>`;
     out = /<head[^>]*>/i.test(out) ? out.replace(/<head[^>]*>/i, (m) => m + splash() + head) : splash() + head + out;
     return out;
   }
@@ -105,7 +105,7 @@ function rewrite(text, ext) {
 }
 
 const TEXT = new Set(['.html', '.js', '.css', '.json', '.webmanifest']);
-const SKIP_JS = new Set(['js/vendor/fflate.min.js', 'js/mixall-base.js', 'js/chat-vault.js', 'js/google-drive-sync.js', 'js/mixall-ux.js']);
+const SKIP_JS = new Set(['js/vendor/fflate.min.js', 'js/mixall-base.js', 'js/chat-vault.js', 'js/google-drive-sync.js', 'js/mixall-ux.js', 'js/mixall-plus.js', 'js/ghost-stories.js', 'js/account-plus.js', 'js/admin-plus.js', 'js/coin-plus.js']);
 function walk(dir) {
   for (const name of readdirSync(dir)) {
     const full = join(dir, name);

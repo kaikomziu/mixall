@@ -541,6 +541,7 @@ async function handle(event) {
         catch (fallbackError) { console.error('Uch AI fallback failed:', fallbackError); }
       }
     }
+    try { require('../../server/plus').recordMission(email, 'uch'); } catch (_) { /* デイリーミッション */ }
     return json(200, { thread: await getThread(threadId), postDeleted: deleted, botPending });
   }
 

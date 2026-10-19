@@ -15,7 +15,9 @@ const STORE_NAMES = {
   NOTIFICATION_SETTINGS: 'netrify-notification-settings', NOTIFICATIONS: 'netrify-notifications', COIN_EARNING_SITES: 'netrify-coin-earning-sites', WEBHOOKS: 'netrify-webhooks', LANGUAGES: 'netrify-languages', CALENDARS: 'netrify-calendars', OFFICIAL_ACCOUNTS: 'netrify-official-accounts', GEMINI_MEMORIES: 'netrify-gemini-memories', SEARCH_HISTORY: 'netrify-search-history',
   TOOL_DATA: 'netrify-tools-data', MESSAGE_FILTER_SETTINGS: 'netrify-message-filter-settings', MESSAGE_FILTER_CACHE: 'netrify-message-filter-cache', ANON_BOXES: 'netrify-anon-boxes', TEMP_ROOMS: 'netrify-temporary-rooms', TEMP_SHARES: 'netrify-temporary-shares', WIKI: 'netrify-wiki-pages', EXTENSIONS: 'netrify-extensions', EXTENSION_DATA: 'netrify-extension-data', AI_JOBS: 'netrify-ai-background-jobs', ACCOUNT_RECOVERY: 'netrify-account-recovery',
   // 端末保存チャット用: アカウントごとの端末一覧
-  CHAT_DEVICES: 'mixall-chat-devices'
+  CHAT_DEVICES: 'mixall-chat-devices',
+  // MixAll+ の追加機能（server/plus.js）。バックアップ対象にするためここにも並べる
+  PLUS_PROFILE: 'mixall-profile-extras', PLUS_DAILY: 'mixall-daily', PLUS_MUTES: 'mixall-mutes', PLUS_PUSH: 'mixall-push-subscriptions'
 };
 
 // ---- バックエンド -------------------------------------------------------
@@ -55,7 +57,16 @@ function postgresBackend() {
   if (!url) throw new Error('SUPABASE_DB_URLが設定されていません');
   // eslint-disable-next-line global-require
   const postgres = globalThis.__mixallPostgres || require('postgres');
-  const sql = postgres(url, { prepare: false, max: 4, idle_timeout: 20, connect_timeout: 10 });
+  // 直接接続（5432）は同時接続の上限（60）を Edge Function の各インスタンスで食いつぶしやすいので、
+  // 接続プーラー（Supavisor のトランザクションモード、6543）を経由する。
+  // MIXALL_DB_POOLER_HOST を空にすると直接接続に戻る。
+  const direct = new URL(url);
+  const poolerHost = process.env.MIXALL_DB_POOLER_HOST ?? 'aws-1-ap-northeast-1.pooler.supabase.com';
+  const ref = direct.hostname.startsWith('db.') ? direct.hostname.split('.')[1] : '';
+  const options = { prepare: false, max: 2, idle_timeout: 8, max_lifetime: 300, connect_timeout: 10 };
+  const sql = poolerHost && ref && direct.username === 'postgres'
+    ? postgres({ ...options, host: poolerHost, port: 6543, database: direct.pathname.slice(1) || 'postgres', username: `postgres.${ref}`, password: decodeURIComponent(direct.password), ssl: 'require' })
+    : postgres(url, options);
   return {
     async get(s, k) {
       const rows = await sql`select value from public.mixall_kv where store = ${s} and key = ${k}`;

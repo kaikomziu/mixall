@@ -21,12 +21,143 @@
   <meta name="twitter:title" content="Ghost - MixAll +">
   <meta name="twitter:description" content="MixAll + Ghostのフィード。テキスト、画像、作品、動画を投稿して楽しめます。">
   <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261020-plus">
+  <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="/manifest.webmanifest">
   <script>
-    const params = new URLSearchParams(location.search);
-    const handle = params.get('handle') || params.get('') || location.search.replace(/^\?@?/, '');
-    if (handle) location.replace('/Ghost/profile.html?handle=' + encodeURIComponent(handle));
-    else location.replace('/Ghost/');
+    // 旧URL（/Ghost/?@handle や ?handle=）はプロフィールへ
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const handle = params.get('handle') || (/^\?@/.test(location.search) ? location.search.slice(2) : '');
+      if (handle) location.replace('/Ghost/profile.html?handle=' + encodeURIComponent(handle));
+    })();
   </script>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/settings.js"></script>
+  <script src="/js/site-lock.js" defer></script>
+  <script src="/js/mixall-nav.js" defer></script>
+  <style>
+    .gf-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 12px; }
+    .gf-tabs::-webkit-scrollbar { display: none; }
+    .gf-tabs button { flex: 0 0 auto; border-radius: 999px !important; }
+    .gf-tabs button[aria-pressed="true"] { color: #fff !important; background: var(--mx-grad) !important; border-color: transparent !important; }
+    .gf-compose { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-dim); }
+    .gf-compose .fake { flex: 1; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel-2); }
+    .gf-post { padding: 14px 16px; }
+    .gf-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .gf-avatar { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 50%; background: var(--mx-grad) center/cover no-repeat; display: grid; place-items: center; color: #fff; font-weight: 800; }
+    .gf-name { font-weight: 800; color: var(--text); }
+    .gf-handle, .gf-time { color: var(--text-dim); font-size: .82rem; }
+    .gf-title { margin: 4px 0 6px; font-size: 1.05rem; font-weight: 800; }
+    .gf-text { margin: 0 0 8px; line-height: 1.65; }
+    .gf-media { display: grid; gap: 6px; margin: 8px 0; }
+    .gf-media.n2 { grid-template-columns: 1fr 1fr; }
+    .gf-media img, .gf-media video { width: 100%; max-height: 520px; object-fit: cover; border-radius: 14px; background: #000; }
+    .gf-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+    .gf-tags a { font-size: .82rem; font-weight: 700; }
+    .gf-actions { display: flex; gap: 6px; margin-top: 6px; }
+    .gf-actions button, .gf-actions a { display: inline-flex; align-items: center; gap: 6px; min-height: 36px !important; padding: 6px 12px !important; border-radius: 999px !important; font-size: .88rem; font-weight: 700; color: var(--text-dim) !important; background: transparent !important; border: 1px solid transparent !important; box-shadow: none !important; text-decoration: none; }
+    .gf-actions button:hover, .gf-actions a:hover { background: color-mix(in srgb, var(--text) 7%, transparent) !important; color: var(--text) !important; }
+    .gf-actions .liked { color: #ff4f8b !important; }
+    .gf-actions .liked svg { fill: currentColor; }
+    .gf-more { display: block; margin: 8px auto 20px; }
+    .gf-more[hidden] { display: none; }
+  </style>
 </head>
-<body><p>Ghostフィードを開いています...</p></body>
+<body>
+<header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div>
+  <nav class="services"><a href="/Ghost">ホーム</a><a href="/Ghost/watch.html">動画</a><a href="/Ghost/videos.html">ショート</a><a href="/Ghost/live.html">ライブ</a><a href="/Ghost/search.html">検索</a><a href="/Ghost/notifications.html">通知</a><a href="/Ghost/bookmarks.html">保存済み</a><a href="/">トップへ</a></nav></header>
+<main>
+  <a class="card gf-compose" href="/Ghost/compose.html"><span class="gf-avatar" id="gfMe">＋</span><span class="fake">いまどうしてる？</span><span class="button">投稿</span></a>
+  <div class="gf-tabs" role="tablist" aria-label="表示する投稿">
+    <button type="button" class="secondary" data-channel="timeline" aria-pressed="true">タイムライン</button>
+    <button type="button" class="secondary" data-channel="" aria-pressed="false">すべて</button>
+    <button type="button" class="secondary" data-channel="video" aria-pressed="false">動画</button>
+    <button type="button" class="secondary" data-channel="short" aria-pressed="false">ショート</button>
+  </div>
+  <div id="feed"><p class="muted">読み込み中...</p></div>
+  <button type="button" class="secondary gf-more" id="gfMore" hidden>もっと見る</button>
+</main>
+<script src="/js/auth.js"></script>
+<script>
+(function () {
+  const session = Netrify.requireLogin();
+  if (!session) return;
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const yt = (u) => { const m = String(u || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/); return m ? 'https://www.youtube.com/embed/' + m[1] : ''; };
+  let channel = 'timeline'; let limit = 30; let loading = false;
+  const me = document.getElementById('gfMe');
+  if (session.avatarUrl && /^data:image/.test(session.avatarUrl)) { me.style.backgroundImage = `url('${session.avatarUrl}')`; me.textContent = ''; }
+
+  function ago(iso) {
+    const s = (Date.now() - new Date(iso)) / 1000;
+    if (s < 60) return 'たった今'; if (s < 3600) return Math.floor(s / 60) + '分前'; if (s < 86400) return Math.floor(s / 3600) + '時間前';
+    if (s < 86400 * 7) return Math.floor(s / 86400) + '日前';
+    return new Date(iso).toLocaleDateString('ja-JP');
+  }
+  function mediaHtml(media) {
+    const items = (media || []).map((m) => (m.kind === 'image' || m.kind === 'imageBlob') ? `<img src="${esc(m.mediaUrl || m.dataUrl)}" alt="" loading="lazy">`
+      : m.kind === 'videoFile' ? `<video src="${esc(m.dataUrl)}" controls playsinline preload="metadata"></video>`
+      : m.kind === 'videoBlob' ? `<video src="${esc(m.mediaUrl)}" controls playsinline preload="metadata"></video>`
+      : (yt(m.url) ? `<iframe src="${esc(yt(m.url))}" style="width:100%;aspect-ratio:16/9;border:0;border-radius:14px" allowfullscreen loading="lazy"></iframe>` : `<video src="${esc(m.url)}" controls playsinline preload="metadata"></video>`));
+    return items.length ? `<div class="gf-media${items.length > 1 ? ' n2' : ''}">${items.join('')}</div>` : '';
+  }
+  const heart = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z"/></svg>';
+  const bubble = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 3V5Z"/></svg>';
+  function postHtml(p) {
+    const a = p.authorProfile || {};
+    const name = a.displayName || p.authorName || 'ユーザー';
+    const likes = Array.isArray(p.likes) ? p.likes : [];
+    const liked = likes.includes(session.email);
+    const avatar = a.avatarUrl && /^data:image|^https?:/.test(a.avatarUrl) ? `style="background-image:url('${esc(a.avatarUrl)}')"` : '';
+    const profile = a.handle ? `/Ghost/profile.html?handle=${encodeURIComponent(a.handle)}` : '#';
+    const href = p.contentType === 'live' ? `/Ghost/live.html?id=${encodeURIComponent(p.id)}` : `/Ghost/post.html?id=${encodeURIComponent(p.id)}`;
+    return `<article class="card gf-post" data-id="${esc(p.id)}">
+      <div class="gf-head"><a class="gf-avatar" href="${profile}" ${avatar}>${avatar ? '' : esc(name.slice(0, 1))}</a>
+        <div style="min-width:0"><a class="gf-name" href="${profile}">${esc(name)}</a>${a.handle ? ` <span class="gf-handle">@${esc(a.handle)}</span>` : ''}<div class="gf-time">${ago(p.createdAt)}${p.contentType === 'live' && p.isLive ? ' · 🔴 ライブ配信中' : ''}</div></div></div>
+      ${p.title ? `<h3 class="gf-title">${esc(p.title)}</h3>` : ''}
+      ${p.text ? `<p class="gf-text ghost-text-content">${esc(p.text)}</p>` : ''}
+      ${mediaHtml(p.media)}
+      ${(p.tags || []).length ? `<div class="gf-tags">${p.tags.map((t) => `<a href="/Ghost/search.html?q=${encodeURIComponent('#' + t)}">#${esc(t)}</a>`).join('')}</div>` : ''}
+      <div class="gf-actions"><button type="button" class="${liked ? 'liked' : ''}" data-like="${esc(p.id)}" aria-pressed="${liked}">${heart}<span>${likes.length || ''}</span></button>
+        <a href="${href}">${bubble}<span>${(p.comments || []).length || ''}</span></a></div>
+    </article>`;
+  }
+  async function load() {
+    if (loading) return; loading = true;
+    const feed = document.getElementById('feed');
+    try {
+      const q = new URLSearchParams({ token: session.token, limit: String(limit) });
+      if (channel) q.set('channel', channel);
+      const res = await fetch('/.netlify/functions/ghost?' + q);
+      const data = await res.json();
+      if (!res.ok) { feed.innerHTML = `<div class="card"><p>${esc(data.error || '読み込めませんでした')}</p>${data.ageRequired ? '<a class="button" href="/age.html">年齢を設定する</a>' : ''}</div>`; return; }
+      const posts = data.posts || [];
+      feed.innerHTML = posts.map(postHtml).join('') || '<div class="card"><p class="muted">まだ投稿がありません。最初の投稿をしてみましょう。</p></div>';
+      document.getElementById('gfMore').hidden = posts.length < limit || limit >= 100;
+      feed.querySelectorAll('[data-like]').forEach((b) => { b.onclick = async () => {
+        try {
+          const r = await Netrify.api('/.netlify/functions/ghost', { action: 'likePost', token: session.token, postId: b.dataset.like });
+          b.classList.toggle('liked', r.liked); b.setAttribute('aria-pressed', String(r.liked)); b.querySelector('span').textContent = r.likes || '';
+        } catch (e) { alert(e.message); }
+      }; });
+    } catch (e) { feed.innerHTML = '<div class="card"><p>読み込めませんでした。通信状態を確認してください。</p></div>'; }
+    finally { loading = false; }
+  }
+  document.querySelectorAll('[data-channel]').forEach((b) => { b.onclick = () => {
+    channel = b.dataset.channel; limit = 30;
+    document.querySelectorAll('[data-channel]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    document.getElementById('feed').innerHTML = '<p class="muted">読み込み中...</p>';
+    load();
+  }; });
+  document.getElementById('gfMore').onclick = () => { limit = Math.min(100, limit + 30); load(); };
+  load();
+  // 1分ごとに更新（画面上部を見ていて、動画を再生していないときだけ）
+  setInterval(() => { if (!document.hidden && window.scrollY < 300 && ![...document.querySelectorAll('video')].some((v) => !v.paused)) load(); }, 60000);
+})();
+</script>
+<script src="/js/ghost-stories.js" defer></script>
+<script src="/js/ghost-nav.js"></script>
+</body>
 </html>

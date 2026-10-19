@@ -81,5 +81,48 @@ async function register(name) {
   const cron = await call('scheduled-tools-cleanup', {});
   assert.equal(cron.status, 403);
 
+  // ---- MixAll+ 追加機能 ----
+  const plus = (body) => call('plus', body);
+  // ログインボーナス: 1日1回、Coinが増える
+  const d1 = await plus({ action: 'claimDaily', token: alice });
+  assert.equal(d1.status, 200, JSON.stringify(d1.data));
+  assert.ok(d1.data.claimed > 0 && d1.data.balance === d1.data.claimed);
+  const d2 = await plus({ action: 'claimDaily', token: alice });
+  assert.equal(d2.data.already, true);
+  // デイリーミッション: Pocketで送った分は達成済み（バックグラウンドで記録されるので少し待つ）
+  await new Promise((r) => setTimeout(r, 50));
+  const daily = await plus({ action: 'daily', token: alice });
+  assert.ok(daily.data.missions.find((m) => m.id === 'pocket').done, 'pocket mission done');
+  const mission = await plus({ action: 'claimMission', token: alice, id: 'pocket' });
+  assert.equal(mission.status, 200, JSON.stringify(mission.data));
+  assert.equal((await plus({ action: 'claimMission', token: alice, id: 'ghost' })).status, 400);
+  // 未読バッジ
+  const badges = await plus({ action: 'badges', token: bob });
+  assert.ok(badges.data.chat >= 1, JSON.stringify(badges.data));
+  // ミュート
+  const mutes = await plus({ action: 'saveMutes', token: bob, mutes: { users: ['Alice@bix.3erver', 'alice@bix.3erver'], words: ['ネタバレ'] } });
+  assert.deepEqual(mutes.data.mutes.users, ['alice@bix.3erver']);
+  // ストーリー: 作成・一覧・既読・削除
+  const story = await plus({ action: 'createStory', token: alice, text: 'きょうのひとこと' });
+  assert.equal(story.status, 201, JSON.stringify(story.data));
+  const stories = await plus({ action: 'stories', token: bob });
+  assert.equal(stories.data.authors.length, 1);
+  assert.equal(stories.data.authors[0].email, undefined, '他人のメールアドレスは出さない');
+  await plus({ action: 'viewStory', token: bob, id: story.data.id });
+  assert.equal((await plus({ action: 'stories', token: alice })).data.authors[0].stories[0].views, 1);
+  assert.equal((await plus({ action: 'deleteStory', token: bob, id: story.data.id })).status, 403);
+  // 端末の引き継ぎ: 預けて、ログインなしのIDで受け取る
+  const tr = await plus({ action: 'transferCreate', token: alice, data: 'QUJD'.repeat(10), iv: 'aXZpdml2aXZpdml2' });
+  assert.equal(tr.status, 200, JSON.stringify(tr.data));
+  const got2 = await plus({ action: 'transferGet', id: tr.data.id });
+  assert.equal(got2.data.data, 'QUJD'.repeat(10));
+  // お知らせ: 一般ユーザーは設定できない
+  assert.equal((await plus({ action: 'setAnnouncement', token: bob, text: 'x' })).status, 403);
+  assert.equal((await plus({ action: 'announcement' })).data.announcement, null);
+  // プロフィールの追加設定
+  const prof = await plus({ action: 'saveProfileExtras', token: alice, color: '#ff4f8b', link: 'https://example.com' });
+  assert.equal(prof.data.extras.color, '#ff4f8b');
+  assert.ok(prof.data.extras.badges.some((b) => b.id === 'new'));
+
   console.log('smoke test OK');
 })().catch((error) => { console.error(error); process.exit(1); });
