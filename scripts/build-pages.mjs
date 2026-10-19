@@ -146,5 +146,15 @@ writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="
 })();
 </script></body></html>`);
 
+// 検索エンジン用サイトマップ（ログインなしで中身が見えるページだけ）。
+// ルートの robots.txt（kaikomziu.github.io）は別リポジトリなので、Search Console から送信する。
+const today = new Date().toISOString().slice(0, 10);
+const publicPages = ['/', '/login/', '/register/', '/emergency.html'];
+writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${publicPages.map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod>${p === '/' ? '<priority>1.0</priority>' : ''}</url>`).join('\n')}
+</urlset>
+`);
+
 writeFileSync(join(OUT, '.nojekyll'), '');
 console.log(`built ${OUT}/ (base=${BASE || '/'}, api=${API})`);

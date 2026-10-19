@@ -72,7 +72,7 @@
       ] }
     ] },
     game: { label: 'ゲーム', icon: icons.game, items: [link('/Custom', 'カスタム', icons.custom)] },
-    creator: { label: 'クリエイター', icon: icons.creator, items: [
+    creator: { label: 'クリエイター', short: 'つくる', icon: icons.creator, items: [
       link('/Create', 'スタジオ', icons.studio),
       link('/lending', 'サイト作成', icons.site)
     ] },
@@ -115,7 +115,11 @@
     return `<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
   }
   function hrefIsActive(href) {
-    const target = new URL(href, window.location.origin).pathname.replace(/\/+$/, '').toLowerCase() || '/';
+    // GitHub Pages ではリンクに /mixall などのベースが付くので、現在パス（MixAllBase.path()）と同じ形にそろえる
+    let targetPath = new URL(href, window.location.origin).pathname;
+    const base = window.MixAllBase && window.MixAllBase.base;
+    if (base && (targetPath === base || targetPath.startsWith(base + '/'))) targetPath = targetPath.slice(base.length) || '/';
+    const target = targetPath.replace(/\/+$/, '').toLowerCase() || '/';
     if (target === '/') return normalizedPath === '/';
     return normalizedPath === target || normalizedPath.startsWith(target + '/');
   }
@@ -128,7 +132,7 @@
   nav.className = 'mixall-bottom-nav';
   nav.setAttribute('aria-label', 'MixAll +メニュー');
   function renderNavigation() {
-    nav.innerHTML = Object.entries(groups).map(([key, group]) => `<button type="button" class="mixall-nav-trigger${groupIsActive(group) ? ' active' : ''}" data-nav-group="${key}" aria-controls="mixall-nav-panel" aria-expanded="false" aria-label="${group.label}メニュー" title="${group.label}">${makeIcon(group.icon)}<span>${group.label}</span></button>`).join('');
+    nav.innerHTML = Object.entries(groups).map(([key, group]) => `<button type="button" class="mixall-nav-trigger${groupIsActive(group) ? ' active' : ''}" data-nav-group="${key}" aria-controls="mixall-nav-panel" aria-expanded="false" aria-label="${group.label}メニュー" title="${group.label}">${makeIcon(group.icon)}<span>${group.short || group.label}</span></button>`).join('');
     nav.style.setProperty('--mixall-nav-count', String(Object.keys(groups).length));
   }
   renderNavigation();

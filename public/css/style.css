@@ -532,3 +532,74 @@ body:has(.shorts-app) .short-bottom-nav a strong { font-size:1.35rem; line-heigh
 body:has(.shorts-app) .short-bottom-nav a.plus strong { width:42px; height:42px; display:grid; place-items:center; border-radius:50%; background:#252525; font-size:2rem; }
 body:has(.shorts-app) .short-top { height:68px; background:linear-gradient(#0008,transparent); }
 @media(max-width:680px){ body:has(#messageList) header.top nav.services a:not(:first-child), body:has(#roomList) header.top nav.services a:not(:first-child){display:none} body:has(#threadList) main,body:has(#postList) main{padding-left:10px;padding-right:10px} }
+
+/* ===== MixAll + 下部バー（フローティングドック） =====
+   旧スタイルより後ろに置いて上書きする。文字は最小でも約10pxにして読みやすく、
+   いまいるグループはロゴと同じグラデーションのピルで示す。 */
+body:has(.mixall-bottom-nav), body:has(.ghost-bottom-nav) { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+.mixall-bottom-nav, .ghost-bottom-nav {
+  box-sizing: border-box; position: fixed; z-index: 100;
+  left: 50%; right: auto; bottom: calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  width: min(600px, calc(100vw - 16px)); height: 68px; padding: 6px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px;
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent); border-radius: 24px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #ffffff 7%, transparent), transparent 45%),
+    color-mix(in srgb, var(--panel) 84%, transparent);
+  backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  box-shadow: 0 14px 40px rgba(4, 6, 20, .38), 0 2px 8px rgba(4, 6, 20, .22), inset 0 1px 0 rgba(255, 255, 255, .06);
+  overflow: visible;
+}
+.mixall-bottom-nav { grid-template-columns: repeat(var(--mixall-nav-count, 7), minmax(0, 1fr)); }
+.mixall-bottom-nav a, .mixall-bottom-nav button, .ghost-bottom-nav a {
+  position: relative; isolation: isolate; box-sizing: border-box; min-width: 0; width: 100%; height: 100%; min-height: 0;
+  max-width: none; padding: 9px 1px 4px; margin: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 8px;
+  border: 0; border-radius: 18px; background: transparent; color: var(--text-dim);
+  text-decoration: none; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: color .18s ease, transform .18s ease, background .18s ease;
+}
+.mixall-bottom-nav svg, .ghost-bottom-nav svg { position: relative; z-index: 1; display: block; flex: 0 0 auto; width: 24px; height: 24px; transition: transform .18s ease; }
+.mixall-bottom-nav span, .ghost-bottom-nav span {
+  position: relative; z-index: 1; display: block; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-size: clamp(10px, 2.75vw, 11.5px); font-weight: 650; letter-spacing: -.01em; line-height: 1.15;
+}
+.ghost-bottom-nav a { font-size: clamp(10px, 2.75vw, 11.5px); font-weight: 650; }
+.mixall-bottom-nav a:hover, .mixall-bottom-nav button:hover, .ghost-bottom-nav a:hover,
+.mixall-bottom-nav a:focus-visible, .mixall-bottom-nav button:focus-visible, .ghost-bottom-nav a:focus-visible {
+  color: var(--text); background: color-mix(in srgb, var(--text) 7%, transparent); border-color: transparent; outline: none;
+}
+.mixall-bottom-nav a:hover svg, .mixall-bottom-nav button:hover svg, .ghost-bottom-nav a:hover svg { transform: translateY(-2px); }
+.mixall-bottom-nav button:active, .mixall-bottom-nav a:active, .ghost-bottom-nav a:active { transform: scale(.94); }
+/* いまいるグループ・開いているメニュー */
+.mixall-bottom-nav button.active, .mixall-bottom-nav a.active, .ghost-bottom-nav a.active, .ghost-bottom-nav a[aria-current="page"] {
+  color: #fff; background: transparent; border-color: transparent;
+}
+.mixall-bottom-nav button.active::before, .mixall-bottom-nav a.active::before, .ghost-bottom-nav a.active::before, .ghost-bottom-nav a[aria-current="page"]::before {
+  content: ""; position: absolute; z-index: 0; top: 3px; left: 50%; width: min(50px, 94%); height: 34px; transform: translateX(-50%);
+  border-radius: 13px; background: linear-gradient(135deg, #3d7bff, #9a5bff 58%, #ff4f8b);
+  box-shadow: 0 6px 18px rgba(130, 90, 255, .5);
+}
+.mixall-bottom-nav button.active span, .mixall-bottom-nav a.active span { color: var(--text); }
+.mixall-bottom-nav button[aria-expanded="true"] { color: var(--text); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.mixall-bottom-nav button.active[aria-expanded="true"] { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.mixall-bottom-nav button[aria-expanded="true"] svg { transform: translateY(-2px); }
+/* 展開パネルはドックの上に浮かべる */
+.mixall-nav-panel { bottom: calc(88px + env(safe-area-inset-bottom)); border-radius: 22px; box-shadow: 0 18px 50px rgba(4, 6, 20, .42); }
+.mixall-nav-backdrop { background: rgba(6, 8, 20, .38); backdrop-filter: blur(2px); }
+.mixall-nav-panel-heading h2 { font-size: 1.1rem; letter-spacing: .01em; }
+.mixall-nav-link, .mixall-nav-subgroup-trigger { border-radius: 14px; transition: border-color .15s, color .15s, transform .15s; }
+.mixall-nav-link:hover, .mixall-nav-subgroup-trigger:hover { transform: translateX(2px); }
+.mixall-nav-link.active { color: #fff; border-color: transparent; background: linear-gradient(135deg, #3d7bff, #9a5bff 58%, #ff4f8b); }
+@media (max-width: 680px) {
+  main { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+  .mixall-bottom-nav span, .ghost-bottom-nav span { font-size: clamp(9.5px, 2.75vw, 11px); }
+  .mixall-bottom-nav svg, .ghost-bottom-nav svg { width: 23px; height: 23px; }
+}
+@media (max-width: 360px) {
+  .mixall-bottom-nav, .ghost-bottom-nav { width: calc(100vw - 10px); padding: 5px 3px; gap: 0; }
+  .mixall-bottom-nav svg, .ghost-bottom-nav svg { width: 21px; height: 21px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mixall-bottom-nav *, .ghost-bottom-nav * { transition: none !important; }
+}
