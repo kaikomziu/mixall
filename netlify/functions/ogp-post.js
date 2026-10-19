@@ -15,7 +15,7 @@ exports.handler = async (event) => {
   if (!post || post.deleted) return { statusCode:404, headers:{'Content-Type':'text/html; charset=utf-8'}, body:'<!doctype html><title>Ghost投稿が見つかりません</title>' };
   const base = baseUrl();
   const canonical = `${base}/ghost/post/${encodeURIComponent(id)}`;
-  const fallback = `${base}/ogp/04-ghost-post.jpg?v=20261012-2`;
+  const fallback = `${base}/ogp/04-ghost-post.jpg?v=20261020-plus`;
   const media = Array.isArray(post.media) ? post.media : [];
   const image = media.find((item) => String(item.kind || '').startsWith('image') && item.mediaUrl)?.mediaUrl || fallback;
   const title = String(post.title || post.authorName || 'Ghost投稿').slice(0, 160);
