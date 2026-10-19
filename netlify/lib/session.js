@@ -28,9 +28,15 @@ async function getSessionInfo(token) {
     await setJSON(STORE_NAMES.ACCOUNTS, session.email, account);
   }
   const now = Date.now();
-  session.lastSeenAt = now;
-  await setJSON(STORE_NAMES.SESSIONS, token, session);
-  await setJSON(STORE_NAMES.PRESENCE, session.email, { email: session.email, lastSeenAt: now });
+  // 最終利用時刻・オンライン表示（90秒以内でオンライン）の更新は30秒に1回で十分。
+  // 毎リクエスト2回の書き込みをしていたのを減らして、どの画面の応答も速くする。
+  if (!Number(session.lastSeenAt) || now - Number(session.lastSeenAt) > 30 * 1000) {
+    session.lastSeenAt = now;
+    await Promise.all([
+      setJSON(STORE_NAMES.SESSIONS, token, session),
+      setJSON(STORE_NAMES.PRESENCE, session.email, { email: session.email, lastSeenAt: now })
+    ]);
+  }
 
   return {
     email: session.email,

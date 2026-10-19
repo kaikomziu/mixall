@@ -158,7 +158,9 @@ async function handle(request) {
   }
 
   try {
-    const result = await handler(event, {});
+    // 通常のAPIはリクエスト内キャッシュ付きで動かす（定期実行・Background処理は最新値を読むため付けない）
+    const { withRequestCache } = require('../netlify/lib/store');
+    const result = name.startsWith('scheduled-') ? await handler(event, {}) : await withRequestCache(() => handler(event, {}));
     if (VAULT_FUNCTIONS.has(name)) await attachVault(event, result);
     return toResponse(result, cors);
   } catch (error) {

@@ -33,6 +33,13 @@ function memoryBackend() {
     async set(s, k, v) { data.set(id(s, k), JSON.stringify(v)); },
     async del(s, k) { data.delete(id(s, k)); },
     async list(s, prefix) { const head = `${s}\u0000${prefix || ''}`; return [...data.keys()].filter((key) => key.startsWith(head)).map((key) => key.slice(s.length + 1)).sort(); },
+    async listWithValues(s, prefix, maxBytes) {
+      const head = `${s}\u0000${prefix || ''}`;
+      return [...data.keys()].filter((key) => key.startsWith(head)).sort().map((key) => {
+        const raw = data.get(key);
+        return { key: key.slice(s.length + 1), value: raw.length <= maxBytes ? JSON.parse(raw) : undefined };
+      });
+    },
     async inboxInsert(rows) { for (const row of rows) inbox.push({ id: ++seq, ...row, created_at: Date.now() }); },
     async inboxFetch(email, device, limit) { return inbox.filter((row) => row.email === email && (row.device_id === device || row.device_id === null)).slice(0, limit); },
     async inboxAck(email, device, maxId) { for (let i = inbox.length - 1; i >= 0; i -= 1) { const row = inbox[i]; if (row.email === email && (row.device_id === device || row.device_id === null) && row.id <= maxId) inbox.splice(i, 1); } },
@@ -89,6 +96,13 @@ function postgresBackend() {
       const rows = await sql`select key from public.mixall_kv where store = ${s} and key like ${pattern} order by key`;
       return rows.map((row) => row.key);
     },
+    // 一覧と同時に、小さい値だけ中身も取る（大きいファイル片などは取らない）
+    async listWithValues(s, prefix, maxBytes) {
+      const pattern = `${String(prefix || '').replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+      const rows = await sql`select key, case when bytes <= ${maxBytes} then value end as value, bytes <= ${maxBytes} as small
+        from public.mixall_kv where store = ${s} and key like ${pattern} order by key`;
+      return rows.map((row) => ({ key: row.key, value: row.small ? row.value : undefined }));
+    },
     sql
   };
 }
@@ -98,14 +112,32 @@ function db() {
   return backend;
 }
 
+// ---- リクエスト内キャッシュ ------------------------------------------------
+// 1回のAPIリクエストの中で同じキーを何度も読む・一覧のあと1件ずつ読む、を少ない問い合わせにまとめる。
+// キャッシュはリクエストごと（AsyncLocalStorage）。長く走るBackground処理では使わない（server/entry.js）。
+const { AsyncLocalStorage } = require('node:async_hooks');
+const requestCache = new AsyncLocalStorage();
+const PREFETCH_MAX_BYTES = 64 * 1024;
+const cacheId = (s, k) => `${s}\u0000${k}`;
+function cloneValue(v) { return v === null || v === undefined ? v : structuredClone(v); }
+function withRequestCache(fn) { return requestCache.run(new Map(), fn); }
+
 // ---- 公開API ------------------------------------------------------------
 
 async function getJSON(storeName, key) {
-  return db().get(storeName, String(key));
+  const cache = requestCache.getStore();
+  const id = cacheId(storeName, key);
+  if (cache && cache.has(id)) return cloneValue(cache.get(id));
+  const value = await db().get(storeName, String(key));
+  if (cache) cache.set(id, cloneValue(value));
+  return value;
 }
 
 async function getManyJSON(storeName, keys) {
-  return db().getMany(storeName, keys.map(String));
+  const found = await db().getMany(storeName, keys.map(String));
+  const cache = requestCache.getStore();
+  if (cache) for (const key of keys) cache.set(cacheId(storeName, key), found.has(String(key)) ? cloneValue(found.get(String(key))) : null);
+  return found;
 }
 
 let chatVault = null;
@@ -114,14 +146,25 @@ async function setJSON(storeName, key, value) {
   if (!chatVault) chatVault = require('../../server/chat-vault');
   if (chatVault.VAULT_STORES.has(storeName)) await chatVault.beforeWrite(storeName, String(key), value);
   await db().set(storeName, String(key), value);
+  const cache = requestCache.getStore();
+  if (cache) cache.set(cacheId(storeName, key), cloneValue(value === undefined ? null : value));
 }
 
 async function deleteKey(storeName, key) {
   await db().del(storeName, String(key));
+  const cache = requestCache.getStore();
+  if (cache) cache.set(cacheId(storeName, key), null);
 }
 
 async function listKeys(storeName, prefix) {
-  return db().list(storeName, prefix);
+  const cache = requestCache.getStore();
+  if (!cache) return db().list(storeName, prefix);
+  const rows = await db().listWithValues(storeName, prefix, PREFETCH_MAX_BYTES);
+  for (const row of rows) {
+    const id = cacheId(storeName, row.key);
+    if (row.value !== undefined && !cache.has(id)) cache.set(id, row.value);
+  }
+  return rows.map((row) => row.key);
 }
 
 async function putChunkedText(storeName, fileId, text, meta = {}) {
@@ -158,4 +201,4 @@ async function deleteChunked(storeName, fileId) {
   await deleteKey(storeName, `meta:${fileId}`);
 }
 
-module.exports = { STORE_NAMES, getJSON, getManyJSON, setJSON, deleteKey, listKeys, putChunkedText, getChunkedText, deleteChunked, db };
+module.exports = { STORE_NAMES, getJSON, getManyJSON, setJSON, deleteKey, listKeys, putChunkedText, getChunkedText, deleteChunked, db, withRequestCache };
