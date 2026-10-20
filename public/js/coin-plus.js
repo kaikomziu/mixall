@@ -47,8 +47,8 @@
   }
   // Coin ページの残高表示があれば更新
   function updateBalance(balance) {
-    const el = document.getElementById('coinBalance') || document.querySelector('[data-coin-balance]');
-    if (el && Number.isFinite(balance)) el.textContent = String(balance);
+    const el = document.getElementById('balance') || document.getElementById('coinBalance') || document.querySelector('[data-coin-balance]');
+    if (el && Number.isFinite(balance)) el.textContent = `${balance.toLocaleString()} Coin`;
   }
 
   function boot() { if (session() && window.MixAllPlus) render(); }

@@ -78,6 +78,42 @@
         <div class="row" style="margin-top:10px"><button type="button" id="mxAnnSend">配信する</button>${ann ? '<button type="button" class="secondary" id="mxAnnClear">取り下げる</button>' : ''}</div>
       </div>`;
     if (ann) el.querySelector('#mxAnnLevel').value = ann.level;
+
+    // ---- 20. 運営からの警告・お知らせ（個別） ----
+    const warn = document.createElement('div');
+    warn.className = 'card';
+    warn.innerHTML = `<h2 style="margin-top:0">✉️ 運営から個別に連絡</h2>
+      <p class="muted">相手が次にサイトを開いたとき、「確認しました」を押すまで閉じられない表示で出ます（プッシュ通知も届きます）。</p>
+      <input type="email" id="mxWarnTo" placeholder="相手のアドレス（例: someone@bix.3erver）">
+      <div class="row"><select id="mxWarnLevel" style="width:auto;margin:0"><option value="notice">お知らせ</option><option value="warning" selected>警告</option><option value="final">最終警告</option></select>
+        <select id="mxWarnTpl" style="width:auto;margin:0"><option value="">テンプレート…</option><option value="spam">連投・スパム</option><option value="abuse">悪口・誹謗中傷</option><option value="nsfw">年齢に合わない投稿</option><option value="other">その他</option></select></div>
+      <input type="text" id="mxWarnTitle" placeholder="件名" style="margin-top:8px">
+      <textarea id="mxWarnBody" placeholder="本文"></textarea>
+      <div class="row"><button type="button" id="mxWarnSend">送る</button></div>
+      <h3>送った連絡</h3><div id="mxWarnList" class="muted">読み込み中...</div>`;
+    el.appendChild(warn);
+    const TPL = {
+      spam: ['連投・スパムについて', '短時間に同じような投稿をくり返す行為が確認されました。ほかの利用者の迷惑になるため、控えてください。'],
+      abuse: ['ことばづかいについて', '他の利用者への悪口・誹謗中傷にあたる投稿が確認されました。MixAll+ では禁止されています。今後は控えてください。'],
+      nsfw: ['投稿内容について', '年齢に合わない内容の投稿が確認されました。投稿の前に内容をご確認ください。'],
+      other: ['運営からのお知らせ', '']
+    };
+    warn.querySelector('#mxWarnTpl').onchange = (e) => { const t = TPL[e.target.value]; if (t) { warn.querySelector('#mxWarnTitle').value = t[0]; warn.querySelector('#mxWarnBody').value = t[1]; } };
+    const loadWarns = async () => {
+      try {
+        const d = await plus('warningsSent', {}, 'GET');
+        warn.querySelector('#mxWarnList').innerHTML = d.items.length ? d.items.map((w) => `<div class="admin-item"><strong>${esc(w.title)}</strong> → ${esc(w.to)}<br><span class="muted">${esc({ notice: 'お知らせ', warning: '警告', final: '最終警告' }[w.level])} ・ ${new Date(w.createdAt).toLocaleString('ja-JP')} ・ ${w.ackAt ? '確認済み' : '未確認'}</span></div>`).join('') : 'まだありません';
+      } catch (e) { warn.querySelector('#mxWarnList').textContent = e.message; }
+    };
+    warn.querySelector('#mxWarnSend').onclick = async () => {
+      const to = warn.querySelector('#mxWarnTo').value.trim();
+      const body = warn.querySelector('#mxWarnBody').value.trim();
+      if (!to || !body) { toast('相手のアドレスと本文を入れてください', { kind: 'error' }); return; }
+      if (!(await window.MixAllDialog.confirm(`${to} に送りますか？`, { okLabel: '送る', danger: false }))) return;
+      try { await plus('sendWarning', { email: to, level: warn.querySelector('#mxWarnLevel').value, title: warn.querySelector('#mxWarnTitle').value, body }); toast('送りました'); warn.querySelector('#mxWarnBody').value = ''; loadWarns(); }
+      catch (e) { toast(e.message, { kind: 'error' }); }
+    };
+    loadWarns();
     el.querySelector('#mxCheckUsage').onclick = async () => { try { const r = await plus('checkUsage', {}); toast(r.alerts.length ? `通知しました: ${r.alerts.join(' / ')}` : '使用量は問題ありません'); } catch (e) { toast(e.message, { kind: 'error' }); } };
     const send = async (text) => {
       try {

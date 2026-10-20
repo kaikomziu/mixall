@@ -17,7 +17,8 @@ const STORE_NAMES = {
   // 端末保存チャット用: アカウントごとの端末一覧
   CHAT_DEVICES: 'mixall-chat-devices',
   // MixAll+ の追加機能（server/plus.js）。バックアップ対象にするためここにも並べる
-  PLUS_PROFILE: 'mixall-profile-extras', PLUS_DAILY: 'mixall-daily', PLUS_MUTES: 'mixall-mutes', PLUS_PUSH: 'mixall-push-subscriptions', PLUS_SEEN: 'mixall-seen'
+  PLUS_PROFILE: 'mixall-profile-extras', PLUS_DAILY: 'mixall-daily', PLUS_MUTES: 'mixall-mutes', PLUS_PUSH: 'mixall-push-subscriptions', PLUS_SEEN: 'mixall-seen',
+  PLUS_POLLS: 'mixall-polls', PLUS_REACTIONS: 'mixall-reactions', PLUS_SCHEDULED: 'mixall-scheduled-posts', PLUS_NOTES: 'mixall-bookmark-notes', PLUS_WARNINGS: 'mixall-warnings'
 };
 
 // ---- バックエンド -------------------------------------------------------

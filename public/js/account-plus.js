@@ -188,8 +188,40 @@
     el.querySelector('#mxProfileLinkSave').onclick = () => save({ link: el.querySelector('#mxProfileLink').value });
   }
 
+  // ---------------- テーマ ----------------
+  function renderTheme() {
+    const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (_) { return null; } return null; };
+    const mode = ls('mixall.themeMode') || 'manual';
+    const accent = ls('mixall.accent') || 'aurora';
+    const ACC = [['aurora', 'オーロラ', 'linear-gradient(135deg,#3d7bff,#9a5bff,#ff4f8b)'], ['ocean', 'オーシャン', 'linear-gradient(135deg,#00c6ff,#3d7bff,#5b3dff)'], ['sakura', 'さくら', 'linear-gradient(135deg,#ff9ac8,#ff5c9a,#c13dff)'], ['mint', 'ミント', 'linear-gradient(135deg,#3dffb8,#0daa93,#2b7bff)'], ['sunset', 'サンセット', 'linear-gradient(135deg,#ffcc4d,#ff7a3d,#ff3d6e)'], ['mono', 'モノクロ', 'linear-gradient(135deg,#5a6275,#8a93a6,#c7ccd6)']];
+    const el = card('mxThemeCard', '🎨 テーマ', `
+      <p class="muted">ダーク／ライトの切り替え方と、ボタンなどに使うアクセントカラーを選べます（この端末に保存）。</p>
+      <div class="row" role="radiogroup" aria-label="切り替え方">${[['manual', '手動（右上の⚙で切り替え）'], ['system', '端末の設定に合わせる'], ['time', '時間帯で自動（6時〜18時はライト）']].map(([v, l]) => `<button type="button" class="secondary" data-mode="${v}" aria-pressed="${mode === v}">${l}</button>`).join('')}</div>
+      <p class="muted" style="margin-top:12px">アクセントカラー</p>
+      <div class="mx-swatches">${ACC.map(([v, l, g]) => `<button type="button" data-accent="${v}" style="background:${g}" aria-label="${l}" title="${l}" aria-pressed="${accent === v}"></button>`).join('')}</div>`);
+    el.querySelectorAll('[data-mode]').forEach((b) => { b.onclick = () => { ls('mixall.themeMode', b.dataset.mode); location.reload(); }; });
+    el.querySelectorAll('[data-accent]').forEach((b) => { b.onclick = () => { ls('mixall.accent', b.dataset.accent); location.reload(); }; });
+  }
+
+  // ---------------- 返信リマインド ----------------
+  async function renderReminder() {
+    let on = true;
+    try { on = (await plus('getProfileExtras', {}, 'GET')).extras && true; } catch (_) { /* ignore */ }
+    const stored = (() => { try { return localStorage.getItem('mixall.replyReminder'); } catch (_) { return null; } })();
+    on = stored !== 'off';
+    const el = card('mxReminderCard', '⏰ 返信リマインド', `
+      <p class="muted">ぽけっとの個人チャットで、相手からのメッセージに20時間以上返信していないとき、通知でお知らせします。</p>
+      <div class="row"><button type="button" class="${on ? '' : 'secondary'}" data-rem="on" aria-pressed="${on}">オン</button><button type="button" class="${on ? 'secondary' : ''}" data-rem="off" aria-pressed="${!on}">オフ</button></div>`);
+    el.querySelectorAll('[data-rem]').forEach((b) => { b.onclick = async () => {
+      try { await plus('setReplyReminder', { on: b.dataset.rem === 'on' }); localStorage.setItem('mixall.replyReminder', b.dataset.rem); toast(b.dataset.rem === 'on' ? '返信リマインドをオンにしました' : '返信リマインドをオフにしました'); } catch (e) { toast(e.message, { kind: 'error' }); }
+      renderReminder();
+    }; });
+  }
+
   function boot() {
     if (!session() || !window.MixAllPlus) return;
+    renderTheme();
+    renderReminder();
     renderProfile();
     renderPush();
     renderMutes();

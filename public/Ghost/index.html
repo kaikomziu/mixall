@@ -113,7 +113,7 @@
     const avatar = a.avatarUrl && /^data:image|^https?:/.test(a.avatarUrl) ? `style="background-image:url('${esc(a.avatarUrl)}')"` : '';
     const profile = a.handle ? `/Ghost/profile.html?handle=${encodeURIComponent(a.handle)}` : '#';
     const href = p.contentType === 'live' ? `/Ghost/live.html?id=${encodeURIComponent(p.id)}` : `/Ghost/post.html?id=${encodeURIComponent(p.id)}`;
-    return `<article class="card gf-post" data-id="${esc(p.id)}">
+    return `<article class="card gf-post" data-id="${esc(p.id)}" data-handle="${esc(String(a.handle || "").toLowerCase())}">
       <div class="gf-head"><a class="gf-avatar" href="${profile}" ${avatar}>${avatar ? '' : esc(name.slice(0, 1))}</a>
         <div style="min-width:0"><a class="gf-name" href="${profile}">${esc(name)}</a>${a.handle ? ` <span class="gf-handle">@${esc(a.handle)}</span>` : ''}<div class="gf-time">${ago(p.createdAt)}${p.contentType === 'live' && p.isLive ? ' · 🔴 ライブ配信中' : ''}</div></div></div>
       ${p.title ? `<h3 class="gf-title">${esc(p.title)}</h3>` : ''}
@@ -159,5 +159,6 @@
 </script>
 <script src="/js/ghost-stories.js" defer></script>
 <script src="/js/ghost-nav.js"></script>
+<script src="/js/ghost-plus.js" defer></script>
 </body>
 </html>

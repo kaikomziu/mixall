@@ -1019,3 +1019,75 @@ a.button.secondary, .button.secondary { color: var(--text); }
 .mx-notif-dot { flex: 0 0 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #ff5f6d, #e5294b); box-shadow: 0 0 0 3px rgba(229, 41, 75, .18); }
 .mx-notif-empty { margin: 22px 12px; text-align: center; color: var(--text-dim); }
 @media (max-width: 480px) { .mx-notif-panel { left: 10px; right: 10px; width: auto; top: calc(58px + env(safe-area-inset-top)); } }
+
+/* ===== MixAll+ 第2弾 ===== */
+.mixall-dialog-actions:has(> :only-child) { grid-template-columns: 1fr; }
+/* 投票 */
+.gx-poll { display: grid; gap: 8px; margin: 10px 0; }
+.gx-poll-q { margin: 0; font-weight: 800; }
+.gx-poll-opt { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 44px !important; padding: 10px 14px !important;
+  border-radius: 12px !important; text-align: left; font-weight: 700; color: var(--text) !important; background: color-mix(in srgb, var(--text) 5%, transparent) !important;
+  border: 1px solid color-mix(in srgb, #8b6bff 35%, var(--border)) !important; box-shadow: none !important; }
+.gx-poll-opt i { position: absolute; inset: 0 auto 0 0; background: var(--mx-grad-soft); transition: width .5s cubic-bezier(.2, .8, .2, 1); z-index: 0; }
+.gx-poll-opt.mine i { background: color-mix(in srgb, #8b6bff 32%, transparent); }
+.gx-poll-opt span, .gx-poll-opt b { position: relative; z-index: 1; }
+.gx-poll-opt.mine span::after { content: " ✓"; color: #8b6bff; }
+.gx-poll-meta { margin: 0; font-size: .8rem; color: var(--text-dim); }
+/* リアクション */
+.gx-react { position: relative; display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 2px; }
+.gx-react-chip, .gx-react-add { display: inline-flex; align-items: center; gap: 4px; min-height: 30px !important; padding: 3px 10px !important; border-radius: 999px !important; font-size: .9rem !important; font-weight: 700;
+  color: var(--text) !important; background: color-mix(in srgb, var(--text) 6%, transparent) !important; border: 1px solid var(--border) !important; box-shadow: none !important; }
+.gx-react-chip span { font-size: .8rem; }
+.gx-react-chip.mine { background: var(--mx-grad-soft) !important; border-color: color-mix(in srgb, #8b6bff 55%, transparent) !important; }
+.gx-react-add { color: var(--text-dim) !important; }
+.gx-react-picker { position: absolute; z-index: 30; bottom: calc(100% + 6px); left: 0; display: flex; gap: 2px; padding: 6px; border-radius: 999px;
+  background: var(--panel); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0, 0, 0, .3); animation: mixall-dialog-pop .18s ease-out; }
+.gx-react-picker button { min-height: 0 !important; width: 38px; height: 38px; padding: 0 !important; border-radius: 50% !important; font-size: 1.3rem !important; background: transparent !important; border: 0 !important; box-shadow: none !important; transition: transform .12s; }
+.gx-react-picker button:hover { transform: scale(1.25); }
+/* 装飾（Coinショップ） */
+.gx-name-color, .mx-profile-name.gx-name-color { -webkit-background-clip: text; background-clip: text; color: transparent !important; }
+.gx-framed { position: relative; box-shadow: 0 0 0 2px var(--panel), 0 0 0 4.5px transparent !important; }
+.gx-framed::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px; background: var(--gx-frame);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.gx-title { display: inline-block; padding: 1px 8px; margin-left: 4px; border-radius: 999px; font-size: .72rem; font-weight: 800; background: var(--mx-grad-soft); border: 1px solid color-mix(in srgb, #8b6bff 35%, transparent); vertical-align: 1px; }
+.mx-profile-name { padding: 10px 14px 0; font-size: 1.4rem; font-weight: 900; }
+.mx-framed-hero { border: 3px solid transparent; background: linear-gradient(var(--panel), var(--panel)) padding-box, var(--mx-frame) border-box; }
+/* おすすめユーザー */
+.gx-recommend h3 { margin: 0 0 10px; }
+.gx-rec-list { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.gx-rec { flex: 0 0 150px; display: grid; justify-items: center; gap: 6px; padding: 14px 10px; border-radius: 16px; text-align: center; background: color-mix(in srgb, var(--panel-2) 70%, transparent); border: 1px solid var(--border); }
+.gx-rec .gf-avatar { width: 56px; height: 56px; flex: none; font-size: 1.3rem; }
+.gx-rec-name { font-weight: 800; color: var(--text); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gx-rec-why { font-size: .74rem; color: var(--text-dim); min-height: 2.2em; }
+.gx-rec button { min-height: 34px !important; padding: 6px 14px !important; font-size: .85rem; }
+/* コメント欄・メモ */
+.gx-comment-form { display: flex; gap: 8px; align-items: flex-end; margin-top: 12px; }
+.gx-comment-form textarea { flex: 1; min-height: 44px; margin: 0 !important; }
+.gx-note { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
+.gx-note-text { flex: 1; min-width: 0; font-size: .9rem; white-space: pre-wrap; }
+/* Pocket: ピン留め・文字起こし */
+.mx-pin-bar { display: grid; gap: 4px; margin-bottom: 8px; }
+.mx-pin { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 0 !important; padding: 8px 12px !important; border-radius: 12px !important; text-align: left; font-weight: 600 !important;
+  color: var(--text) !important; background: var(--mx-grad-soft) !important; border: 1px solid color-mix(in srgb, #8b6bff 35%, transparent) !important; box-shadow: none !important; }
+.mx-pin-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .88rem; }
+.mx-pinned { box-shadow: inset 3px 0 0 #8b6bff; }
+.mx-flash { animation: mx-flash 1.6s ease; }
+@keyframes mx-flash { 0%, 100% { background-color: transparent; } 20%, 60% { background-color: color-mix(in srgb, #8b6bff 25%, transparent); } }
+.mx-transcript { display: grid; gap: 2px; margin-top: 6px; padding: 8px 10px; border-radius: 10px; font-size: .88rem; line-height: 1.55; background: color-mix(in srgb, var(--text) 6%, transparent); white-space: pre-wrap; }
+.mx-transcript-label { font-size: .72rem; font-weight: 800; color: var(--text-dim); }
+/* Coinショップ */
+.mx-shop-balance { padding: 6px 12px; border-radius: 999px; background: var(--mx-grad-soft); }
+.mx-shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.mx-shop-item { display: grid; justify-items: center; gap: 8px; padding: 14px 10px; border-radius: 16px; text-align: center; border: 1px solid var(--border); background: color-mix(in srgb, var(--panel-2) 70%, transparent); }
+.mx-shop-item.on { border-color: #8b6bff; box-shadow: 0 0 0 2px color-mix(in srgb, #8b6bff 35%, transparent); }
+.mx-shop-item button { width: 100%; min-height: 36px !important; padding: 6px 10px !important; }
+.mx-shop-label { font-size: .82rem; font-weight: 700; min-height: 2.2em; }
+.mx-shop-frame { width: 56px; height: 56px; border-radius: 50%; padding: 4px; display: grid; }
+.mx-shop-frame i { border-radius: 50%; background: var(--panel-2); border: 2px solid var(--panel); }
+.mx-shop-name { font-size: 1.3rem; font-weight: 900; -webkit-background-clip: text; background-clip: text; color: transparent; padding: 14px 0; }
+.mx-shop-title { padding: 6px 12px; border-radius: 999px; font-weight: 800; background: var(--mx-grad-soft); border: 1px solid color-mix(in srgb, #8b6bff 35%, transparent); margin: 12px 0; }
+.mx-shop-bg { width: 56px; height: 80px; border-radius: 12px; }
+/* URL・日時などの入力欄も、文字入力欄と同じ形に */
+input[type="url"], input[type="datetime-local"], input[type="number"], input[type="date"], input[type="time"], input[type="search"] {
+  width: 100%; padding: 10px 12px; margin-bottom: 10px; color: var(--text); font: inherit;
+}

@@ -124,5 +124,45 @@ async function register(name) {
   assert.equal(prof.data.extras.color, '#ff4f8b');
   assert.ok(prof.data.extras.badges.some((b) => b.id === 'new'));
 
+  // ---- MixAll+ 第2弾 ----
+  const gp = await call('ghost', { action: 'createPost', token: alice, text: 'どれが好き？', contentType: 'text' });
+  assert.equal(gp.status, 201, JSON.stringify(gp.data));
+  const pid = gp.data.post.id;
+  const poll = await plus({ action: 'createPoll', token: alice, postId: pid, poll: { options: ['いぬ', 'ねこ', ''] } });
+  assert.equal(poll.data.poll.options.length, 2);
+  assert.equal((await plus({ action: 'createPoll', token: bob, postId: pid, poll: { options: ['a', 'b'] } })).status, 403);
+  const vote = await plus({ action: 'votePoll', token: bob, postId: pid, optionId: 'o1' });
+  assert.equal(vote.data.poll.options[1].count, 1); assert.equal(vote.data.poll.myVote, 'o1');
+  const react = await plus({ action: 'react', token: bob, target: `post:${pid}`, emoji: '🔥' });
+  assert.deepEqual(react.data.counts, { '🔥': 1 });
+  const extras = await plus({ action: 'postExtras', token: alice, postIds: [pid] });
+  assert.equal(extras.data.polls[pid].total, 1); assert.equal(extras.data.polls[pid].myVote, null);
+  assert.ok(!JSON.stringify(extras.data).includes('bob@'), '投票者・リアクションした人のメールは出さない');
+  // Coinショップ: 残高が足りないと買えない／買うと装備される
+  assert.equal((await plus({ action: 'buy', token: bob, id: 'title-hero' })).status, 400);
+  await plus({ action: 'claimDaily', token: bob });
+  const coinsNow = (await plus({ action: 'shop', token: bob })).data.balance;
+  assert.ok(coinsNow >= 12);
+  require('../netlify/lib/store').setJSON(STORE_NAMES.COINS, 'bob@bix.3erver', 100);
+  await new Promise((r) => setTimeout(r, 10));
+  const bought = await plus({ action: 'buy', token: bob, id: 'title-hero' });
+  assert.equal(bought.status, 200, JSON.stringify(bought.data));
+  assert.equal(bought.data.balance, 60); assert.equal(bought.data.equipped.title, 'title-hero');
+  // 予約投稿: 期限が来たら公開される
+  const sched = await plus({ action: 'schedulePost', token: alice, at: Date.now() + 61000, post: { text: '予約した投稿', contentType: 'text' }, poll: { options: ['はい', 'いいえ'] } });
+  assert.equal(sched.status, 200, JSON.stringify(sched.data));
+  const { STORES } = require('./plus2');
+  const sk = (await require('../netlify/lib/store').listKeys(STORES.SCHEDULED))[0];
+  const job = await require('../netlify/lib/store').getJSON(STORES.SCHEDULED, sk);
+  job.at = Date.now() - 1; await require('../netlify/lib/store').setJSON(STORES.SCHEDULED, sk, job);
+  assert.equal(await require('./plus2').publishScheduled(), 1);
+  const feedAfter = await call('ghost', null, { method: 'GET', query: `?token=${alice}&limit=10` });
+  assert.ok(feedAfter.data.posts.some((p) => p.text === '予約した投稿'), 'scheduled post published');
+  // ブックマークのメモ
+  const note = await plus({ action: 'saveNote', token: alice, postId: pid, note: 'あとで読む' });
+  assert.equal(note.data.notes[pid].text, 'あとで読む');
+  // 運営からの警告: 一般ユーザーは送れない
+  assert.equal((await plus({ action: 'sendWarning', token: bob, email: 'alice@bix.3erver', body: 'x' })).status, 403);
+
   console.log('smoke test OK');
 })().catch((error) => { console.error(error); process.exit(1); });

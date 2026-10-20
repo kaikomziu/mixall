@@ -228,7 +228,7 @@ async function badges(email) {
     if (n.type === 'uchPost') uch += 1; else other += 1;
   }
   const ghost = await ghostActivity(email);
-  return { chat: chat + mail + uch, pocket: chat, mail, uch, sns: ghost.unread, ghostComments: ghost.unreadComments, ghostLikes: ghost.unreadLikes, other, total: chat + mail + uch + ghost.unread + other };
+  return { chat: chat + mail + uch, pocket: chat, mail, uch, sns: ghost.unread, ghostComments: ghost.unreadComments, ghostLikes: ghost.unreadLikes, other, warnings: await require('./plus2').unackedWarnings(email), total: chat + mail + uch + ghost.unread + other };
 }
 
 // Ghost の通知: 自分の投稿についた、他の人のコメントといいね。
@@ -329,7 +329,9 @@ async function profileExtras(email) {
   if (streak >= 30) badgesList.push({ id: 'streak30', label: `連続ログイン${streak}日`, icon: '🔥' });
   else if (streak >= 7) badgesList.push({ id: 'streak7', label: `連続ログイン${streak}日`, icon: '🔥' });
   if ((Number(daily?.totalDays) || 0) >= 100) badgesList.push({ id: 'days100', label: 'ログイン100日', icon: '💯' });
-  return { headerUrl: extras.headerDataUrl || null, color: COLOR_RE.test(extras.color || '') ? extras.color : null, link: extras.link || '', badges: badgesList };
+  const cosmetics = await require('./plus2').cosmeticsOf(email);
+  if (cosmetics.title) badgesList.unshift({ id: 'title', label: cosmetics.title.split(' ').slice(1).join(' '), icon: cosmetics.title.split(' ')[0] });
+  return { headerUrl: extras.headerDataUrl || null, color: COLOR_RE.test(extras.color || '') ? extras.color : null, link: extras.link || '', badges: badgesList, frame: cosmetics.frame, nameColor: cosmetics.nameColor };
 }
 
 // =====================================================================
@@ -370,6 +372,18 @@ async function listStories(viewer) {
   }
   authors.sort((a, b) => (b.mine - a.mine) || (a.stories.every((s) => s.seen) - b.stories.every((s) => s.seen)) || (b.latestAt - a.latestAt));
   return authors;
+}
+
+// ストーリーの背景: 色、またはCoinショップで買った背景
+async function storyBackground(email, payload) {
+  const item = String(payload.bgItem || '');
+  if (item) {
+    const owned = ((await getJSON(S.PROFILE, email)) || {}).owned || [];
+    const shop = require('./plus2').SHOP_ITEMS;
+    const found = shop.find((x) => x.id === item && x.type === 'storyBg');
+    if (found && owned.includes(item)) return found.preview;
+  }
+  return COLOR_RE.test(String(payload.bg || '')) ? payload.bg : '#5b3dff';
 }
 
 // 定期処理（1時間ごと）: 期限切れのストーリー・引き継ぎデータを消す
@@ -599,7 +613,7 @@ exports.handler = async (event) => {
     const mine = (await listKeys(S.STORIES, `${email}:`)).length;
     if (mine >= 20) return json(400, { error: 'ストーリーは同時に20件までです' });
     const now = Date.now();
-    const story = { id: newId(8), authorEmail: email, text, imageDataUrl: image || null, bg: COLOR_RE.test(String(payload.bg || '')) ? payload.bg : '#5b3dff', createdAt: now, expiresAt: now + STORY_TTL, viewers: [] };
+    const story = { id: newId(8), authorEmail: email, text, imageDataUrl: image || null, bg: await storyBackground(email, payload), createdAt: now, expiresAt: now + STORY_TTL, viewers: [] };
     await setJSON(S.STORIES, `${email}:${story.id}`, story);
     return json(201, { ok: true, id: story.id });
   }
@@ -616,6 +630,10 @@ exports.handler = async (event) => {
     if (story.authorEmail !== email && !(story.viewers || []).includes(email)) { story.viewers = [...(story.viewers || []), email].slice(-2000); await setJSON(S.STORIES, key, story); }
     return json(200, { ok: true });
   }
+
+  // 第2弾の機能（server/plus2.js）
+  const second = await require('./plus2').handle(action, payload, info);
+  if (second) return second;
 
   return json(400, { error: '不明な操作です' });
 };

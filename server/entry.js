@@ -152,6 +152,13 @@ async function handle(request) {
     try { await require('./chat-vault').purgeExpired(); } catch (error) { console.error('[chat-vault purge]', error); }
     try { await require('./plus').cleanup(); } catch (error) { console.error('[plus cleanup]', error); }
     try { await require('./plus').checkUsage(); } catch (error) { console.error('[plus usage]', error); }
+    try { await require('./plus2').replyReminders(); } catch (error) { console.error('[plus reminders]', error); }
+  }
+
+  // 予約投稿の公開（1分ごとの定期処理に相乗り）
+  if (name === 'scheduled-tokibou-background') {
+    const job = require('./plus2').publishScheduled().catch((error) => console.error('[scheduled posts]', error));
+    if (globalThis.EdgeRuntime?.waitUntil) globalThis.EdgeRuntime.waitUntil(job);
   }
 
   // Background Function互換: すぐ202を返し、処理はレスポンス後も継続させる。

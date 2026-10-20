@@ -431,6 +431,8 @@ function setupMessageContextMenu() {
     const selection = window.getSelection(); const selectedText = selection?.toString().trim() || '';
     if (selectedText && post.querySelector('.text')?.contains(selection.anchorNode)) add('選択部分だけコピー', async () => { try { await navigator.clipboard.writeText(selectedText); } catch { alert('選択部分をコピーできませんでした'); } });
     const reply = post.querySelector('[data-reply-message]'); if (reply) add('返信', () => reply.click());
+    // MixAll+: ピン留め・文字起こしなど（js/pocket-plus.js）
+    if (window.MixAllPocketPlus) window.MixAllPocketPlus.menuItems(post, add);
     const thread = post.querySelector('[data-thread-message]'); if (thread) add('スレッド', () => thread.click());
     const threadLink = post.querySelector('a[href*="/Pocket/thread.html"]'); if (threadLink) add('スレッドを開く', () => { location.href=threadLink.href; });
     add('リアクション', async () => { const value=(await MixAllDialog.prompt('リアクション (例: 👍 ❤️ 😂)')); if (value) alert(`${value} を選択しました`); });

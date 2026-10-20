@@ -105,7 +105,7 @@ function rewrite(text, ext) {
 }
 
 const TEXT = new Set(['.html', '.js', '.css', '.json', '.webmanifest']);
-const SKIP_JS = new Set(['js/vendor/fflate.min.js', 'js/mixall-base.js', 'js/chat-vault.js', 'js/google-drive-sync.js', 'js/mixall-ux.js', 'js/mixall-plus.js', 'js/ghost-stories.js', 'js/account-plus.js', 'js/admin-plus.js', 'js/coin-plus.js']);
+const SKIP_JS = new Set(['js/vendor/fflate.min.js', 'js/mixall-base.js', 'js/chat-vault.js', 'js/google-drive-sync.js', 'js/mixall-ux.js', 'js/mixall-plus.js', 'js/ghost-stories.js', 'js/account-plus.js', 'js/admin-plus.js', 'js/coin-plus.js', 'js/coin-shop.js', 'js/ghost-plus.js', 'js/pocket-plus.js']);
 function walk(dir) {
   for (const name of readdirSync(dir)) {
     const full = join(dir, name);

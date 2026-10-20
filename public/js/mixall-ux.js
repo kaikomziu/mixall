@@ -92,7 +92,7 @@
             ${kind === 'prompt' ? (multiline ? '<textarea class="mixall-dialog-input" rows="4"></textarea><p class="mixall-dialog-hint">Ctrl＋Enterで決定</p>' : '<input class="mixall-dialog-input" type="text" autocomplete="off">') : ''}
           </div>
           <div class="mixall-dialog-actions">
-            <button type="button" class="mixall-dialog-cancel">${opts.cancelLabel || 'キャンセル'}</button>
+            ${opts.noCancel ? '' : `<button type="button" class="mixall-dialog-cancel">${opts.cancelLabel || 'キャンセル'}</button>`}
             <button type="button" class="mixall-dialog-ok">${okLabel}</button>
           </div>
         </div>`;
@@ -117,9 +117,10 @@
         resolve(value);
       }
       const ok = () => finish(kind === 'prompt' ? input.value : true);
-      const cancel = () => finish(kind === 'prompt' ? null : false);
+      // noCancel: 運営からの警告など、確認ボタンを押すまで閉じられないもの
+      const cancel = () => { if (!opts.noCancel) finish(kind === 'prompt' ? null : false); };
       layer.querySelector('.mixall-dialog-ok').onclick = ok;
-      layer.querySelector('.mixall-dialog-cancel').onclick = cancel;
+      const cancelBtn = layer.querySelector('.mixall-dialog-cancel'); if (cancelBtn) cancelBtn.onclick = cancel;
       layer.addEventListener('pointerdown', (event) => { if (event.target === layer) cancel(); });
       function onKey(event) {
         if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); cancel(); return; }
@@ -142,7 +143,7 @@
       (document.body || document.documentElement).appendChild(layer);
       requestAnimationFrame(() => {
         if (input) { input.focus(); input.select(); }
-        else layer.querySelector(danger ? '.mixall-dialog-cancel' : '.mixall-dialog-ok').focus();
+        else (layer.querySelector(danger ? '.mixall-dialog-cancel' : '.mixall-dialog-ok') || layer.querySelector('.mixall-dialog-ok')).focus();
       });
     });
   }
@@ -289,8 +290,43 @@
     if (best && best.scrollIntoView) { try { best.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (_) { /* ignore */ } }
   }
 
+  // ---------- 12. 下書きの自動保存（Ghost・Uch・Mail・Pocket の入力欄） ----------
+  // 文字を打つと端末に保存し、送信に成功したら消す。ページを開き直したときに空なら復元する。
+  const DRAFT_PREFIX = 'mixall.draft:';
+  const DRAFT_PAGES = /^\/(ghost\/compose\.html|uch\/thread\.html|uch\/?|mail\/thread\.html|mail\/?|pocket\/room\.html|pocket\/thread\.html|ghost\/post\.html)/i;
+  const SEND_ACTIONS = /"action"\s*:\s*"(sendMessage|createPost|addPost|createThread|send|reply|addComment|liveComment)"/;
+  function pagePath() { const b = (window.MixAllBase && window.MixAllBase.base) || ''; let p = location.pathname; if (b && p.startsWith(b)) p = p.slice(b.length); return p; }
+  function draftKey(el) { return `${DRAFT_PREFIX}${pagePath()}${location.search}#${el.id}`; }
+  function draftFields() { return [...document.querySelectorAll('textarea[id], input[type="text"][id]')].filter((el) => !/password|search|token|email|mail/i.test(el.id) && !el.closest('.mixall-dialog-layer, .mx-search-layer')); }
+  function setupDrafts() {
+    if (!DRAFT_PAGES.test(pagePath())) return;
+    let restored = 0;
+    const hook = (el) => {
+      if (el.dataset.mxDraft) return;
+      el.dataset.mxDraft = '1';
+      let saved = null; try { saved = localStorage.getItem(draftKey(el)); } catch (_) { /* ignore */ }
+      if (saved && !el.value) { el.value = saved; el.dispatchEvent(new Event('input', { bubbles: true })); restored += 1; }
+      let t = null;
+      el.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { try { if (el.value.trim()) localStorage.setItem(draftKey(el), el.value); else localStorage.removeItem(draftKey(el)); } catch (_) { /* ignore */ } }, 400); });
+    };
+    draftFields().forEach(hook);
+    if (restored) show('書きかけの下書きを復元しました');
+    // 後から作られる入力欄にも
+    new MutationObserver(() => draftFields().forEach(hook)).observe(document.body, { childList: true, subtree: true });
+  }
+  function clearDrafts() { try { Object.keys(localStorage).filter((k) => k.startsWith(`${DRAFT_PREFIX}${pagePath()}${location.search}#`)).forEach((k) => localStorage.removeItem(k)); } catch (_) { /* ignore */ } }
+  const draftFetch = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    const p = draftFetch(input, init);
+    try {
+      if (init && typeof init.body === 'string' && SEND_ACTIONS.test(init.body)) p.then((res) => { if (res.ok) clearDrafts(); }).catch(() => {});
+    } catch (_) { /* ignore */ }
+    return p;
+  };
+
   function boot() {
     replayPending();
+    try { setupDrafts(); } catch (_) { /* ignore */ }
     try { fixHeaderActive(); } catch (_) { /* ignore */ }
     try { watchLoading(); } catch (_) { /* ignore */ }
     if (!navigator.onLine) offlineBanner(true);

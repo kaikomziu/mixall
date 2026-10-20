@@ -26,6 +26,40 @@
     return d;
   }
   const toast = (m, o) => (window.MixAllUX ? window.MixAllUX.toast(m, o) : null);
+
+  // =================================================================
+  // 16. テーマ: 「手動」「端末に合わせる」「時間帯で自動（6時〜18時はライト）」と、アクセントカラー
+  //   settings.js（歯車）は netrify_theme を読むので、自動のときはそこに書いてから反映する。
+  // =================================================================
+  const ACCENTS = {
+    aurora: { accent: '#7b6bff', grad: 'linear-gradient(135deg,#3d7bff,#9a5bff 58%,#ff4f8b)' },
+    ocean: { accent: '#3d8bff', grad: 'linear-gradient(135deg,#00c6ff,#3d7bff 60%,#5b3dff)' },
+    sakura: { accent: '#ff5c9a', grad: 'linear-gradient(135deg,#ff9ac8,#ff5c9a 55%,#c13dff)' },
+    mint: { accent: '#16b98f', grad: 'linear-gradient(135deg,#3dffb8,#0daa93 60%,#2b7bff)' },
+    sunset: { accent: '#ff7a3d', grad: 'linear-gradient(135deg,#ffcc4d,#ff7a3d 55%,#ff3d6e)' },
+    mono: { accent: '#8a93a6', grad: 'linear-gradient(135deg,#5a6275,#8a93a6 60%,#c7ccd6)' }
+  };
+  let themeApplied = null;
+  function wantedTheme() {
+    const mode = lsGet('mixall.themeMode') || 'manual';
+    if (mode === 'system') return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    if (mode === 'time') { const h = new Date().getHours(); return h >= 6 && h < 18 ? 'light' : 'dark'; }
+    return null;
+  }
+  function applyTheme() {
+    const html = document.documentElement;
+    // 自動にしているのに歯車で切り替えた → 手動に戻す
+    if (themeApplied && html.dataset.theme && html.dataset.theme !== themeApplied && (lsGet('mixall.themeMode') || 'manual') !== 'manual') lsSet('mixall.themeMode', 'manual');
+    const t = wantedTheme();
+    if (t) { lsSet('netrify_theme', t); html.dataset.theme = t; themeApplied = t; } else themeApplied = null;
+    const a = ACCENTS[lsGet('mixall.accent') || 'aurora'] || ACCENTS.aurora;
+    let st = document.getElementById('mx-accent');
+    if (!st) { st = document.createElement('style'); st.id = 'mx-accent'; (document.head || document.documentElement).appendChild(st); }
+    st.textContent = (lsGet('mixall.accent') || 'aurora') === 'aurora' ? '' : `:root,html[data-theme="light"]{--accent:${a.accent};--mx-grad:${a.grad}}`;
+  }
+  applyTheme();
+  setInterval(applyTheme, 5 * 60 * 1000);
+  if (window.matchMedia) { try { window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', applyTheme); } catch (_) { /* ignore */ } }
   const ready = (fn) => (document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn, { once: true }) : fn());
 
   // =================================================================
@@ -76,6 +110,7 @@
       setBadge(document.querySelector('.ghost-bottom-nav a[href*="notifications"]'), d.sns);
       decoratePanel();
       if (navigator.setAppBadge) { if (d.total) navigator.setAppBadge(d.total).catch(() => {}); else navigator.clearAppBadge().catch(() => {}); }
+      if (d.warnings) showWarnings();
     } catch (_) { /* オフラインなど */ }
   }
 
@@ -156,6 +191,24 @@
         catch (e) { toast(e.message, { kind: 'error' }); readAll.disabled = false; }
       };
     } catch (e) { list.innerHTML = `<p class="mx-notif-empty">${esc(e.message)}</p>`; }
+  }
+
+  // =================================================================
+  // 20. 運営からの警告: 確認ボタンを押すまで閉じられない表示で出す
+  // =================================================================
+  let showingWarnings = false;
+  async function showWarnings() {
+    if (showingWarnings || !window.MixAllDialog) return;
+    showingWarnings = true;
+    try {
+      const d = await plus('myWarnings', {}, 'GET');
+      for (const w of d.items) {
+        const head = { notice: '運営からのお知らせ', warning: '運営からの警告', final: '運営からの最終警告' }[w.level] || '運営からのお知らせ';
+        await window.MixAllDialog.confirm(`${head}：${w.title}\n${w.body}\n\n（${new Date(w.createdAt).toLocaleString('ja-JP')}）`, { okLabel: '確認しました', noCancel: true, danger: w.level === 'final', icon: w.level === 'notice' ? '📢' : '⚠️' });
+        await plus('ackWarning', { id: w.id });
+      }
+    } catch (_) { /* 次回もう一度 */ }
+    finally { showingWarnings = false; }
   }
 
   // 下のバーのメニューを開いたとき、どの項目に未読があるかも数字で出す
@@ -498,7 +551,12 @@
       if (!hero) { hero = document.createElement('section'); hero.id = 'mx-profile-hero'; hero.className = 'mx-profile-hero'; main.prepend(hero); }
       const color = plusInfo.color || '#8b6bff';
       hero.style.setProperty('--mx-profile-color', color);
+      // Coinショップの装飾（枠・名前の色）
+      hero.classList.toggle('mx-framed-hero', Boolean(plusInfo.frame));
+      if (plusInfo.frame) hero.style.setProperty('--mx-frame', plusInfo.frame);
+      const nameStyle = plusInfo.nameColor ? ` style="background-image:${esc(plusInfo.nameColor)}"` : '';
       hero.innerHTML = `<div class="mx-profile-banner"${plusInfo.headerUrl ? ` style="background-image:url('${esc(plusInfo.headerUrl)}')"` : ''}></div>
+        ${profile.displayName ? `<div class="mx-profile-name${plusInfo.nameColor ? ' gx-name-color' : ''}"${nameStyle}>${esc(profile.displayName)}</div>` : ''}
         <div class="mx-profile-meta">
           ${(plusInfo.badges || []).map((b) => `<span class="mx-profile-badge" title="${esc(b.label)}">${esc(b.icon)} ${esc(b.label)}</span>`).join('')}
           ${plusInfo.link ? `<a class="mx-profile-link" href="${esc(plusInfo.link)}" target="_blank" rel="noopener nofollow">🔗 ${esc(plusInfo.link.replace(/^https?:\/\//, '').slice(0, 40))}</a>` : ''}
