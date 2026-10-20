@@ -286,6 +286,7 @@ async function handle(payload, actorEmail) {
     const key='email:settings';
     const current=await getEmailSettings();
     const mask=(value)=>value?`${String(value).slice(0,4)}••••${String(value).slice(-4)}`:'';
+    if(action==='getEmailSettings'&&current.provider==='agentmail'&&!current.webhookSecret){try{await require('../lib/email-integration').ensureAgentMailWebhook();Object.assign(current,await getEmailSettings());}catch(error){console.error('agentmail webhook setup failed:',error.message);}}
     if(action==='getEmailSettings') return json(200,{settings:{provider:current.provider,from:current.from,mailgunDomain:current.mailgunDomain,mailgunHostRegion:current.mailgunHostRegion,providerApiKey:mask(current.providerApiKey),secret:mask(current.secret),webhook:Boolean(current.webhookSecret),configured:!(!current.provider||!current.providerApiKey||(!current.secret&&!['brevo','agentmail'].includes(current.provider))||!current.from)}});
     const existing=await getJSON(STORE_NAMES.ADMIN_SECRETS,key)||{};
     const provider=String(payload.provider||'').toLowerCase();

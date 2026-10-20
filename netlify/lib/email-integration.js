@@ -89,6 +89,7 @@ function escapeHtml(value) {
 }
 
 async function sendViaAgentMail(settings, { to, subject, parameters, attachments, replyToMessageId }) {
+  if (!settings.webhookSecret) { try { await ensureAgentMailWebhook(); } catch (error) { console.error('agentmail webhook setup failed:', error.message); } }
   const params = parameters || {};
   let text; let html;
   if (params.senderAccount) {
@@ -116,4 +117,21 @@ function normalizeAgentMailResult(data) {
   return { provider: 'agentmail', messageId: data?.message_id || null, threadId: data?.thread_id || null };
 }
 
-module.exports = { buildSiteUrl, sendEmailTemplate, emailConfigurationMissing, getEmailSettings, agentMailRequest };
+// 返信を取り込むWebhookがまだ無ければ登録する（受信箱限定キーでは inbox_ids を付けられないので付けずに再試行）
+async function ensureAgentMailWebhook({ force = false } = {}) {
+  const stored = await getJSON(STORE_NAMES.ADMIN_SECRETS, 'email:settings');
+  if (!stored || stored.provider !== 'agentmail' || !stored.providerApiKey || !stored.from) return { ok: false, reason: 'not agentmail' };
+  if (stored.webhookSecret && !force) return { ok: true, existing: true };
+  const apiBase = String(process.env.MIXALL_API_BASE || '').replace(/\/+$/, '');
+  if (!apiBase) return { ok: false, reason: 'MIXALL_API_BASE missing' };
+  if (stored.webhookId) { try { await agentMailRequest(stored.providerApiKey, 'DELETE', `/webhooks/${encodeURIComponent(stored.webhookId)}`); } catch (_) {} }
+  const body = { url: `${apiBase}/agentmail-webhook`, event_types: ['message.received'] };
+  let hook;
+  try { hook = await agentMailRequest(stored.providerApiKey, 'POST', '/webhooks', { ...body, inbox_ids: [stored.from] }); }
+  catch (error) { if (error.status !== 403) throw error; hook = await agentMailRequest(stored.providerApiKey, 'POST', '/webhooks', body); }
+  const { setJSON } = require('./store');
+  await setJSON(STORE_NAMES.ADMIN_SECRETS, 'email:settings', { ...stored, webhookId: hook?.webhook_id || null, webhookSecret: hook?.secret || '' });
+  return { ok: Boolean(hook?.secret), webhookId: hook?.webhook_id || null };
+}
+
+module.exports = { buildSiteUrl, sendEmailTemplate, emailConfigurationMissing, getEmailSettings, agentMailRequest, ensureAgentMailWebhook };

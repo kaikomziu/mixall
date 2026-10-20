@@ -154,6 +154,7 @@ async function handle(request) {
     try { await require('./plus').cleanup(); } catch (error) { console.error('[plus cleanup]', error); }
     try { await require('./plus').checkUsage(); } catch (error) { console.error('[plus usage]', error); }
     try { await require('./plus2').replyReminders(); } catch (error) { console.error('[plus reminders]', error); }
+    try { await require('../netlify/lib/email-integration').ensureAgentMailWebhook(); } catch (error) { console.error('[agentmail webhook]', error.message); }
   }
 
   // 予約投稿の公開（1分ごとの定期処理に相乗り）
