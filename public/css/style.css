@@ -974,3 +974,4 @@ a.button.secondary, .button.secondary { color: var(--text); }
   position: absolute !important; display: grid !important; top: 3px; left: calc(50% + 4px); z-index: 3; max-width: none; overflow: visible;
   font-size: 10.5px !important; font-weight: 800 !important; letter-spacing: 0; line-height: 1 !important; color: #fff !important;
 }
+.mx-logout-btn { gap: 6px; }

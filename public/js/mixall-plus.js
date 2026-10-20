@@ -369,9 +369,57 @@
     ready(apply);
   }
 
+  // =================================================================
+  // ログイン中は「ログイン」「新規登録」ボタンを「ログアウト」ボタンにする
+  // =================================================================
+  function authTarget(a) {
+    try {
+      let p = new URL(a.getAttribute('href'), location.href).pathname;
+      if (BASE && (p === BASE || p.startsWith(BASE + '/'))) p = p.slice(BASE.length) || '/';
+      p = p.replace(/\/index\.html$/i, '').replace(/\/+$/, '').toLowerCase();
+      return p === '/login' ? 'login' : p === '/register' ? 'register' : '';
+    } catch (_) { return ''; }
+  }
+  async function logout() {
+    const ok = window.MixAllDialog ? await window.MixAllDialog.confirm('ログアウトしますか？\nこの端末に保存したチャットはそのまま残ります。', { okLabel: 'ログアウト', icon: '👋' }) : true;
+    if (!ok) return;
+    try {
+      if (window.Netrify && window.Netrify.logout) await window.Netrify.logout();
+      else {
+        const s = session();
+        if (s && s.token) await fetch(`${API}/auth`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout', token: s.token }) }).catch(() => {});
+        localStorage.removeItem('netrify_session');
+      }
+    } catch (_) { try { localStorage.removeItem('netrify_session'); } catch (__) { /* ignore */ } }
+    location.href = `${BASE}/`;
+  }
+  function swapAuthButtons() {
+    if (!session()) return;
+    // ログイン・新規登録ページ自体は、別アカウントの追加ログインにも使うので変えない
+    let here = location.pathname; if (BASE && here.startsWith(BASE)) here = here.slice(BASE.length);
+    if (/^\/(login|register)(\/|$)/i.test(here)) return;
+    const links = [...document.querySelectorAll('a[href]')].filter((a) => authTarget(a) && !a.hasAttribute('data-auth-mode') && !a.closest('header.top nav.services, .mixall-nav-panel'));
+    if (!links.length) return;
+    const done = new Set();
+    for (const a of links) {
+      const parent = a.parentElement;
+      if (done.has(parent)) { a.remove(); continue; }
+      done.add(parent);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `${a.className.replace(/\bsecondary\b/, '').trim()} secondary mx-logout-btn`.trim();
+      btn.textContent = 'ログアウト';
+      btn.onclick = logout;
+      a.replaceWith(btn);
+      // 同じ並びにある、もう片方（ログイン／新規登録）は消す
+      parent.querySelectorAll('a[href]').forEach((other) => { if (authTarget(other)) other.remove(); });
+    }
+  }
+
   window.MixAllPlus = { api: plus, push: Push, openSearch, refreshBadges, syncMutes, getMutes: () => mutes, setMutes: (m) => { mutes = m; lsSet('mixall.mutes', JSON.stringify(m)); } };
 
   ready(() => {
+    swapAuthButtons();
     addSearchButton();
     showAnnouncement();
     startBadges();
