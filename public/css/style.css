@@ -740,7 +740,7 @@ body {
 ::selection { background: rgba(139, 107, 255, .35); color: inherit; }
 
 /* ページを開いたときにふわっと表示 */
-main { animation: mx-page-in .38s cubic-bezier(.2, .8, .2, 1) both; }
+main { animation: mx-page-in .38s cubic-bezier(.2, .8, .2, 1) backwards; } /* both だと transform が残り、main 内の position:fixed が効かなくなる */
 @keyframes mx-page-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* ヘッダー: すりガラス */
@@ -1091,3 +1091,98 @@ a.button.secondary, .button.secondary { color: var(--text); }
 input[type="url"], input[type="datetime-local"], input[type="number"], input[type="date"], input[type="time"], input[type="search"] {
   width: 100%; padding: 10px 12px; margin-bottom: 10px; color: var(--text); font: inherit;
 }
+
+/* ===== UI/UX 改善（第3弾） ===== */
+/* 種類の指定がない入力欄・ファイル・スライダー・複数選択もサイトの見た目にそろえる */
+input:not([type]), input[type="tel"], input[type="datetime-local"], input[type="time"], input[type="month"], input[type="week"] {
+  width: 100%; padding: 10px 12px; margin-bottom: 10px; border-radius: 12px; color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  background: color-mix(in srgb, var(--panel-2) 88%, transparent);
+  transition: border-color .15s, box-shadow .15s;
+}
+.row > input:not([type]), .row > input[type="text"] { margin-bottom: 0; }
+input[type="range"] { accent-color: #8b6bff; }
+input[type="file"] { max-width: 100%; color: var(--text-dim); font-size: .85rem; }
+input[type="file"]::file-selector-button {
+  margin-right: 10px; padding: 8px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-weight: 700; color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent); border: 1px solid var(--border); transition: background .15s;
+}
+input[type="file"]::file-selector-button:hover { background: var(--mx-grad-soft); }
+select[multiple] { padding: 6px; min-height: 110px; }
+select[multiple] option { padding: 6px 10px; border-radius: 8px; margin: 1px 0; }
+select[multiple] option:checked { background: color-mix(in srgb, #8b6bff 40%, transparent); color: var(--text); }
+input[type="checkbox"], input[type="radio"] { width: 18px !important; height: 18px; vertical-align: -3px; margin-right: 6px; cursor: pointer; }
+label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) { cursor: pointer; }
+.mx-visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 2px solid #8b6bff; outline-offset: 2px; }
+
+/* Mail: スマホではフォルダーボタンを横並びの小さなタブに */
+@media (max-width: 680px) {
+  .mail-sidebar { flex-wrap: wrap; align-items: center; padding: 10px !important; }
+  .mail-sidebar .mail-brand { width: 100%; margin: 0 0 2px; font-size: 1.05rem; }
+  .mail-sidebar .button { flex: 1 1 auto; min-height: 40px !important; height: auto; padding: 8px 12px !important; margin: 0 !important; display: inline-flex; align-items: center; justify-content: center; font-size: .85rem; white-space: nowrap; }
+  .mail-sidebar .compose-button { width: 100%; flex-basis: 100%; }
+  .mail-sidebar > p { display: none; }
+}
+
+/* ぽけっと: 入力欄をメッセージのすぐ下に置き、画面下に固定 */
+.mx-composer { position: sticky; bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 6; padding: 10px 12px !important;
+  background: color-mix(in srgb, var(--panel) 92%, transparent) !important; backdrop-filter: blur(14px); box-shadow: 0 -6px 24px rgba(0,0,0,.18); }
+.mx-composer-main { display: flex; gap: 8px; align-items: flex-end; }
+.mx-composer-main textarea { flex: 1; margin: 0 !important; min-height: 44px !important; max-height: 160px; field-sizing: content; resize: none; line-height: 1.5; }
+.mx-composer-main #msgSubmit { flex: none; min-width: 64px; min-height: 44px; }
+.mx-composer-tools { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+.mx-composer-tools::-webkit-scrollbar { display: none; }
+.mx-tool-btn { flex: none; display: inline-flex; align-items: center; gap: 4px; min-height: 32px !important; padding: 4px 12px !important; border-radius: 999px !important; font-size: .8rem !important; font-weight: 700;
+  color: var(--text) !important; background: color-mix(in srgb, var(--text) 6%, transparent) !important; border: 1px solid var(--border) !important; box-shadow: none !important; cursor: pointer; }
+.mx-composer .typing-indicator:empty, .mx-composer .error:empty { display: none; }
+.mx-room-more > summary { cursor: pointer; font-weight: 800; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+.mx-room-more > summary::after { content: "▾"; color: var(--text-dim); transition: transform .2s; }
+.mx-room-more[open] > summary::after { transform: rotate(180deg); }
+.mx-room-more > summary::-webkit-details-marker { display: none; }
+.mx-room-more[open] > summary { margin-bottom: 12px; }
+.mx-room-more > .card { margin: 0 0 10px; box-shadow: none !important; background: color-mix(in srgb, var(--panel-2) 60%, transparent) !important; }
+/* 既存の「入力欄を画面最下部に固定」をタブバーの上へずらし、新しい並びに合わせる */
+body:has(#messageList) main > .card.mx-composer { position: fixed; left: 0; right: 0; bottom: calc(80px + env(safe-area-inset-bottom)); z-index: 24; max-width: 744px; margin: 0 auto; padding: 8px 10px !important;
+  border-radius: 18px; border: 1px solid var(--border); background: color-mix(in srgb, var(--panel) 94%, transparent) !important; backdrop-filter: blur(14px); box-shadow: 0 -6px 24px rgba(0,0,0,.2); }
+@media (max-width: 760px) { body:has(#messageList) main > .card.mx-composer { left: 8px; right: 8px; } }
+body:has(#messageList) main { padding-bottom: calc(230px + env(safe-area-inset-bottom)); }
+body:has(#messageList) #messageList { min-height: 0; }
+body:has(#messageList) .mx-composer #msgBody { padding: 10px 14px; max-height: 140px; }
+body:has(#messageList) .mx-composer #msgSubmit { position: static; flex: none; min-width: 0; width: 44px; height: 44px; min-height: 44px; }
+body:has(#messageList) .mx-composer #stampPicker { margin-bottom: 8px; }
+body:has(#messageList) main > .card.mx-composer { bottom: calc(84px + env(safe-area-inset-bottom)); }
+/* 入力欄の横に差し込まれる「特殊言語」ボタンは小さなアイコンに（どのページでも） */
+.language-input-wrap { width: 100%; margin: 0 0 10px !important; align-items: flex-end !important; }
+.language-input-wrap > input, .language-input-wrap > textarea { margin-bottom: 0 !important; min-width: 0; }
+.row > .language-input-wrap { width: auto; flex: 1; margin-bottom: 0 !important; }
+.language-input-btn { flex: none; width: 42px !important; height: 42px !important; min-height: 42px !important; padding: 0 !important; border-radius: 12px !important; font-size: 0 !important;
+  color: var(--text-dim) !important; background: color-mix(in srgb, var(--text) 6%, transparent) !important; border: 1px solid var(--border) !important; box-shadow: none !important; }
+.language-input-btn::before { content: "あ"; font-size: 1rem; font-weight: 800; }
+.language-input-btn:hover { color: var(--text) !important; background: var(--mx-grad-soft) !important; }
+.mx-composer-main > .language-input-wrap { flex: 1; margin: 0 !important; }
+.mx-composer-main .language-input-btn { width: 44px !important; height: 44px !important; border-radius: 50% !important; }
+/* アカウント: プロフィール画像の切り抜き設定 */
+.mx-crop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 14px; margin-top: 4px; font-size: .8rem; }
+.mx-crop-grid label { display: grid; gap: 2px; }
+.mx-crop-grid input[type="range"] { width: 100%; margin: 0; }
+.mx-crop-time { display: flex; align-items: center; gap: 6px; }
+.mx-crop-time input { flex: 1; min-width: 0; width: auto !important; margin: 0 !important; padding: 6px 8px !important; }
+@media (max-width: 520px) {
+  .mx-profile-editor { flex-direction: column; align-items: stretch !important; }
+  .mx-profile-editor #avatarPreviewWrap { align-self: center; }
+  .mx-profile-editor #avatarPreview { width: 96px !important; height: 96px !important; }
+}
+/* ツールセンター: ダークテーマでは写真を暗く沈めて文字を読みやすく */
+:root:not([data-theme="light"]) .tools-hero { background: linear-gradient(90deg, rgba(14,16,24,.94) 0%, rgba(14,16,24,.82) 55%, rgba(14,16,24,.35) 100%), url(/images/toolbox-workspace.jpg) center 52% / cover !important; color: var(--text) !important; }
+:root:not([data-theme="light"]) .tools-hero .muted { color: var(--text-dim) !important; }
+:root:not([data-theme="light"]) .tools-hero input { background: rgba(255,255,255,.08) !important; }
+/* お知らせバナー: スマホでは1行に縮め、タップで全文 */
+@media (max-width: 600px) {
+  .mx-announce { padding: 7px 8px 7px 12px; gap: 8px; font-size: .84rem; cursor: pointer; }
+  .mx-announce-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+  .mx-announce.mx-expanded .mx-announce-text { white-space: normal; }
+}
+/* 既存ルール（:has(#msgBody) でID並みに強い）に負けないよう明示 */
+body:has(#messageList) main > .card.mx-composer { bottom: calc(84px + env(safe-area-inset-bottom)) !important; z-index: 24 !important; border-radius: 18px !important; }
+@media (max-width: 760px) { body:has(#messageList) main > .card.mx-composer { left: 8px !important; right: 8px !important; } }

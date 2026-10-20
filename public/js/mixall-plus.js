@@ -80,6 +80,7 @@
       <span class="mx-announce-text">${esc(a.text)}</span>
       ${a.link ? `<a class="mx-announce-link" href="${esc(a.link)}">くわしく</a>` : ''}
       <button type="button" class="mx-announce-close" aria-label="お知らせを閉じる">×</button>`;
+    bar.querySelector('.mx-announce-text').onclick = () => bar.classList.toggle('mx-expanded');
     bar.querySelector('.mx-announce-close').onclick = () => { lsSet('mixall.announcement.closed', a.id); bar.classList.add('leaving'); setTimeout(() => bar.remove(), 200); };
     const header = document.querySelector('header.top');
     if (header) header.insertAdjacentElement('afterend', bar); else document.body.prepend(bar);

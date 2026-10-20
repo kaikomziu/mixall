@@ -243,7 +243,7 @@
   function decorateLoading(root) {
     if (!root || root.nodeType !== 1) return;
     const check = (el) => {
-      if (el.children.length) return;
+      if (el.children.length) { el.classList.remove('mx-loading'); return; }
       const text = (el.textContent || '').trim();
       if (LOADING_RE.test(text)) el.classList.add('mx-loading');
       else if (el.classList.contains('mx-loading')) el.classList.remove('mx-loading');
@@ -257,6 +257,7 @@
       for (const r of records) {
         if (r.type === 'characterData') { if (r.target.parentElement) decorateLoading(r.target.parentElement); continue; }
         if (r.target && r.target.nodeType === 1 && r.addedNodes.length) {
+          if (r.target.classList && r.target.classList.contains('mx-loading')) decorateLoading(r.target);
           r.addedNodes.forEach((n) => { if (n.nodeType === 1) decorateLoading(n); else if (n.parentElement) decorateLoading(n.parentElement); });
         }
       }

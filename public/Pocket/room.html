@@ -73,6 +73,24 @@
     <div id="messageList"></div>
   </div>
 
+  <div class="card mx-composer" id="composerCard">
+    <div id="replyInfo" class="muted" style="display:none;margin-bottom:8px;"></div>
+    <div id="msgFilePreview" class="attachment-preview"></div>
+    <div id="stampPicker" style="display:none; max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:10px;">
+      <div id="stampPickerGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(60px,1fr)); gap:8px;"><p class="muted">読み込み中...</p></div>
+    </div>
+    <div class="mx-composer-tools">
+      <label class="mx-tool-btn" for="msgFile" title="ファイルを添付">📎<span>添付</span></label><input type="file" id="msgFile" accept="*/*" class="mx-visually-hidden" />
+      <button type="button" class="secondary mx-tool-btn" id="stampToggleBtn">😀 スタンプ</button><button type="button" class="secondary mx-tool-btn" id="pollButton">投票</button><button type="button" class="secondary mx-tool-btn" id="locationButton">位置情報</button><button type="button" class="secondary mx-tool-btn" id="recordButton">録音開始</button>
+    </div>
+    <div class="mx-composer-main">
+      <textarea id="msgBody" rows="1" placeholder="メッセージ（@アドレスでメンション）"></textarea>
+      <button id="msgSubmit" aria-label="送信">送信</button>
+    </div>
+    <div id="typingIndicator" class="typing-indicator" aria-live="polite"></div>
+    <div class="error" id="msgError"></div>
+  </div>
+
   <div class="card" id="threadCard" style="display:none;">
     <div class="row" style="justify-content:space-between;align-items:center;"><h3 id="threadTitle">スレッド</h3><button type="button" class="ghost" id="closeThreadButton">閉じる</button></div>
     <div id="threadParent" class="muted"></div>
@@ -82,22 +100,10 @@
     <button type="button" id="threadSubmit">スレッドへ送信</button>
   </div>
 
+  <details class="card mx-room-more" id="roomMore">
+    <summary>📞 通話・ノート・このルームの設定</summary>
   <div class="card"><h3>メンバーへ通話</h3><p class="muted">音声・ビデオ・画面共有はWebRTCで接続し、接続情報は一時的なNetlify Blobへ保存して再接続を補助します。相手がオフラインの場合は未通話履歴に保存されます。</p><div id="callMembers"></div></div>
 
-  <div class="card">
-    <div id="replyInfo" class="muted" style="display:none;margin-bottom:8px;"></div>
-    <textarea id="msgBody" placeholder="メッセージを入力"></textarea><div id="typingIndicator" class="typing-indicator" aria-live="polite"></div><p class="muted">メンション: <code>@メールアドレス</code>（例: @user@example.com）</p>
-    <input type="file" id="msgFile" accept="*/*" />
-    <div id="msgFilePreview" class="attachment-preview"></div>
-    <div class="row" style="margin:8px 0;">
-      <button type="button" class="secondary" id="stampToggleBtn">😀 スタンプ</button><button type="button" class="secondary" id="pollButton">投票</button><button type="button" class="secondary" id="locationButton">位置情報</button><button type="button" class="secondary" id="recordButton">録音開始</button>
-    </div>
-    <div id="stampPicker" style="display:none; max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:10px;">
-      <div id="stampPickerGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(60px,1fr)); gap:8px;"><p class="muted">読み込み中...</p></div>
-    </div>
-    <div class="error" id="msgError"></div>
-    <button id="msgSubmit">送信</button>
-  </div>
 
   <div class="card">
     <h3>自分用の地雷フィルター</h3>
@@ -117,6 +123,8 @@
   </div>
 
   <div class="card"><h3>ノート</h3><p class="muted">Xのように投稿する、ルーム専用の共有フィードです。</p><input id="pocketNoteSearch" placeholder="ノートを検索"><textarea id="pocketNoteBody" placeholder="投稿内容"></textarea><input type="file" id="pocketNoteFiles" accept="image/*,video/*,image/gif" multiple><button type="button" class="secondary" id="pocketNoteSave">投稿する</button><div id="pocketNotes" style="margin-top:12px"></div><hr style="border-color:var(--border);margin:16px 0"><h4>アルバム</h4><p class="muted">画像をまとめて送り、あとから同じアルバムへ追加できます。</p><div class="row"><input id="pocketAlbumTitle" placeholder="アルバム名" style="flex:1"><input type="file" id="pocketAlbumFiles" accept="image/*" multiple><button type="button" class="secondary" id="pocketAlbumCreate">アルバム送信</button></div><div id="pocketAlbums" style="margin-top:12px"></div></div>
+  </details>
+
   <div class="card" id="manageCard" style="display:none;">
     <h3>メンバー・ロール管理</h3>
     <div id="roomNameEditor" style="display:none;margin-bottom:14px;"><div class="row"><input type="text" id="roomNameInput" placeholder="ルーム名" style="flex:1;" /><button type="button" class="secondary" id="roomNameSubmit">保存</button></div><div class="error" id="roomNameError"></div></div>
