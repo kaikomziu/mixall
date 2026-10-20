@@ -221,13 +221,14 @@ async function badges(email) {
     if (last && last.authorEmail !== email && Date.parse(last.createdAt) > readAt) mail += 1;
   }
   // Uch の返信・メンション通知（Pocket の通知は上の未読数と重なるので数えない）
-  let uch = 0;
+  let uch = 0; let other = 0;
   for (const key of await listKeys(STORE_NAMES.NOTIFICATIONS, `${email}:`)) {
     const n = await getJSON(STORE_NAMES.NOTIFICATIONS, key);
-    if (n && !n.read && n.type === 'uchPost') uch += 1;
+    if (!n || n.read || n.type === 'pocketMessage') continue;
+    if (n.type === 'uchPost') uch += 1; else other += 1;
   }
   const ghost = await ghostActivity(email);
-  return { chat: chat + mail + uch, pocket: chat, mail, uch, sns: ghost.unread, ghostComments: ghost.unreadComments, ghostLikes: ghost.unreadLikes, total: chat + mail + uch + ghost.unread };
+  return { chat: chat + mail + uch, pocket: chat, mail, uch, sns: ghost.unread, ghostComments: ghost.unreadComments, ghostLikes: ghost.unreadLikes, other, total: chat + mail + uch + ghost.unread + other };
 }
 
 // Ghost の通知: 自分の投稿についた、他の人のコメントといいね。
@@ -448,6 +449,51 @@ exports.handler = async (event) => {
   // ---- 未読バッジ ----
   if (action === 'badges') return json(200, await badges(email));
   if (action === 'ghostActivity') return json(200, await ghostActivity(email));
+  // 右上の通知パネル用: すべての未読をまとめて返す（チャット本文は含めない）
+  if (action === 'notifCenter') {
+    const counts = await badges(email);
+    const ghost = await ghostActivity(email);
+    const items = [];
+    for (const c of ghost.items.slice(0, 15)) items.push({ kind: 'ghostComment', title: `${c.author} さんがコメントしました`, body: c.text, sub: `「${c.postTitle}」`, url: `/Ghost/post.html?id=${encodeURIComponent(c.postId)}`, at: c.createdAt, unread: c.unread });
+    if (ghost.unreadLikes) items.push({ kind: 'ghostLike', title: `いいねが ${ghost.unreadLikes} 件増えました`, body: '', sub: 'Ghost の通知を開く', url: '/Ghost/notifications.html', at: new Date().toISOString(), unread: true });
+    for (const key of await listKeys(STORE_NAMES.NOTIFICATIONS, `${email}:`)) {
+      const n = await getJSON(STORE_NAMES.NOTIFICATIONS, key);
+      if (!n || n.type === 'pocketMessage') continue;
+      items.push({ kind: n.type || 'other', id: n.id, title: String(n.title || 'お知らせ').slice(0, 80), body: n.type === 'uchPost' ? 'スレッドに新しい書き込みがあります' : String(n.body || '').slice(0, 120), sub: n.type === 'uchPost' ? 'Uch' : '', url: n.url || '/', at: n.createdAt, unread: !n.read });
+    }
+    // Pocket・Mail はルーム／スレッドごとの未読数だけ（本文は端末にしかない）
+    for (const key of await listKeys(STORE_NAMES.POCKET_ROOMS)) {
+      const room = await getJSON(STORE_NAMES.POCKET_ROOMS, key);
+      if (!room || !Array.isArray(room.memberEmails) || !room.memberEmails.includes(email)) continue;
+      const unread = (room.messages || []).filter((m) => !m.deleted && m.authorEmail !== email && !(m.readBy || []).includes(email));
+      if (!unread.length) continue;
+      const last = unread[unread.length - 1];
+      let name = room.title;
+      if (!name) { const other = room.memberEmails.find((x) => x !== email); const acc = other ? await getJSON(STORE_NAMES.ACCOUNTS, other) : null; name = (room.nicknames && room.nicknames[other]) || acc?.displayName || (other || '').split('@')[0] || 'チャット'; }
+      items.push({ kind: 'pocket', title: `${name}`, body: `新しいメッセージが ${unread.length} 件`, sub: 'ぽけっと', url: `/Pocket/room.html?id=${encodeURIComponent(room.id)}`, at: last.createdAt, unread: true, count: unread.length });
+    }
+    for (const key of await listKeys(STORE_NAMES.MAIL_THREADS)) {
+      const t = await getJSON(STORE_NAMES.MAIL_THREADS, key);
+      if (!t || !Array.isArray(t.memberEmails) || !t.memberEmails.includes(email)) continue;
+      const last = (t.messages || [])[t.messages.length - 1];
+      const readAt = t.readBy && t.readBy[email] ? Date.parse(t.readBy[email]) : 0;
+      if (!last || last.authorEmail === email || Date.parse(last.createdAt) <= readAt) continue;
+      const acc = await getJSON(STORE_NAMES.ACCOUNTS, last.authorEmail);
+      items.push({ kind: 'mail', title: `${acc?.displayName || String(last.authorEmail || '').split('@')[0]} さんからのメール`, body: '新しいメールが届いています', sub: 'Mail', url: `/Mail/thread.html?id=${encodeURIComponent(t.id)}`, at: last.createdAt, unread: true });
+    }
+    items.sort((a, b) => (b.unread - a.unread) || (Date.parse(b.at) - Date.parse(a.at)));
+    return json(200, { counts, items: items.slice(0, 40) });
+  }
+  // 右上の「すべて既読」: Ghost の通知とお知らせ類を既読にする（チャット・メールは開いたときに既読になる）
+  if (action === 'markAllRead') {
+    const g = await ghostActivity(email);
+    await setJSON(S.SEEN, email, { ...((await getJSON(S.SEEN, email)) || {}), ghostAt: Date.now(), likesTotal: g.likesTotal, likes: Object.fromEntries(g.likesByPost.map((x) => [x.postId, x.likes])) });
+    for (const key of await listKeys(STORE_NAMES.NOTIFICATIONS, `${email}:`)) {
+      const n = await getJSON(STORE_NAMES.NOTIFICATIONS, key);
+      if (n && !n.read && n.type !== 'pocketMessage') { n.read = true; await setJSON(STORE_NAMES.NOTIFICATIONS, key, n); }
+    }
+    return json(200, { ok: true, counts: await badges(email) });
+  }
   // 通知ページを開いた: ここまでを既読にする
   if (action === 'markGhostSeen') {
     const g = await ghostActivity(email);

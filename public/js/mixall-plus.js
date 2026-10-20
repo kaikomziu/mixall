@@ -69,12 +69,93 @@
     try {
       const d = await plus('badges', {}, 'GET');
       lastBadges = d;
+      updateBell(d.total);
+      if (notifPanel) fillNotifPanel();
       setBadge(document.querySelector('.mixall-bottom-nav [data-nav-group="chat"]'), d.chat);
       setBadge(document.querySelector('.mixall-bottom-nav [data-nav-group="sns"]'), d.sns);
       setBadge(document.querySelector('.ghost-bottom-nav a[href*="notifications"]'), d.sns);
       decoratePanel();
       if (navigator.setAppBadge) { if (d.total) navigator.setAppBadge(d.total).catch(() => {}); else navigator.clearAppBadge().catch(() => {}); }
     } catch (_) { /* オフラインなど */ }
+  }
+
+  // =================================================================
+  // 右上の通知ベル（どのページでも表示。未読の合計を数字で）
+  // =================================================================
+  const BELL_SVG = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>';
+  const KIND_ICON = { ghostComment: '💬', ghostLike: '♥', pocket: '🗨️', mail: '✉️', uchPost: '📋', usageAlert: '⚠️', test: '🔔' };
+  function addBell() {
+    if (!session() || document.querySelector('.mx-bell')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'mx-bell'; btn.setAttribute('aria-label', '通知'); btn.setAttribute('aria-haspopup', 'dialog'); btn.title = '通知';
+    btn.innerHTML = BELL_SVG;
+    btn.onclick = (e) => { e.stopPropagation(); toggleNotifPanel(); };
+    const header = document.querySelector('header.top');
+    if (header) {
+      const anchor = header.querySelector('.settings-widget');
+      if (anchor) anchor.insertAdjacentElement('beforebegin', btn); else header.appendChild(btn);
+    } else {
+      // ヘッダーのないページでも右上に浮かべて出す
+      btn.classList.add('floating');
+      document.body.appendChild(btn);
+    }
+  }
+  function updateBell(total) {
+    const btn = document.querySelector('.mx-bell');
+    if (!btn) return;
+    setBadge(btn, total);
+    btn.classList.toggle('has-unread', Boolean(total));
+    btn.setAttribute('aria-label', total ? `通知（未読${total}件）` : '通知');
+  }
+  function ago(iso) {
+    const t = (Date.now() - new Date(iso)) / 1000;
+    if (!Number.isFinite(t)) return '';
+    return t < 60 ? 'たった今' : t < 3600 ? `${Math.floor(t / 60)}分前` : t < 86400 ? `${Math.floor(t / 3600)}時間前` : new Date(iso).toLocaleDateString('ja-JP');
+  }
+  let notifPanel = null;
+  function closeNotifPanel() {
+    if (!notifPanel) return;
+    notifPanel.classList.add('leaving');
+    const p = notifPanel; notifPanel = null;
+    setTimeout(() => p.remove(), 160);
+    document.removeEventListener('pointerdown', outside, true);
+    document.removeEventListener('keydown', escKey, true);
+  }
+  function outside(e) { if (notifPanel && !notifPanel.contains(e.target) && !e.target.closest('.mx-bell')) closeNotifPanel(); }
+  function escKey(e) { if (e.key === 'Escape') closeNotifPanel(); }
+  async function toggleNotifPanel() {
+    if (notifPanel) { closeNotifPanel(); return; }
+    notifPanel = document.createElement('div');
+    notifPanel.className = 'mx-notif-panel';
+    notifPanel.setAttribute('role', 'dialog');
+    notifPanel.setAttribute('aria-label', '通知');
+    notifPanel.innerHTML = '<div class="mx-notif-head"><strong>通知</strong><button type="button" class="mx-notif-readall" disabled>すべて既読</button></div><div class="mx-notif-list"><p class="mx-notif-empty">読み込み中...</p></div>';
+    document.body.appendChild(notifPanel);
+    document.addEventListener('pointerdown', outside, true);
+    document.addEventListener('keydown', escKey, true);
+    await fillNotifPanel();
+  }
+  async function fillNotifPanel() {
+    const panel = notifPanel;
+    if (!panel) return;
+    const list = panel.querySelector('.mx-notif-list');
+    try {
+      const d = await plus('notifCenter', {}, 'GET');
+      if (panel !== notifPanel) return;
+      lastBadges = d.counts; updateBell(d.counts.total);
+      list.innerHTML = d.items.length ? d.items.map((it) => `<a class="mx-notif-item${it.unread ? ' unread' : ''}" href="${esc(BASE + it.url)}">
+          <span class="mx-notif-icon k-${esc(it.kind)}">${KIND_ICON[it.kind] || '🔔'}</span>
+          <span class="mx-notif-body"><span class="mx-notif-title">${esc(it.title)}</span>${it.body ? `<span class="mx-notif-text">${esc(it.body)}</span>` : ''}<span class="mx-notif-sub">${esc([it.sub, ago(it.at)].filter(Boolean).join(' ・ '))}</span></span>
+          ${it.count ? `<b class="mx-item-badge">${it.count > 99 ? '99+' : it.count}</b>` : (it.unread ? '<i class="mx-notif-dot" aria-label="未読"></i>' : '')}</a>`).join('')
+        : '<p class="mx-notif-empty">新しい通知はありません 🎉</p>';
+      const readAll = panel.querySelector('.mx-notif-readall');
+      readAll.disabled = !d.items.some((it) => it.unread && !['pocket', 'mail'].includes(it.kind));
+      readAll.onclick = async () => {
+        readAll.disabled = true;
+        try { const r = await plus('markAllRead', {}); lastBadges = r.counts; updateBell(r.counts.total); refreshBadges(); fillNotifPanel(); }
+        catch (e) { toast(e.message, { kind: 'error' }); readAll.disabled = false; }
+      };
+    } catch (e) { list.innerHTML = `<p class="mx-notif-empty">${esc(e.message)}</p>`; }
   }
 
   // 下のバーのメニューを開いたとき、どの項目に未読があるかも数字で出す
@@ -134,7 +215,7 @@
   function startBadges() {
     if (!session()) return;
     // 下のバーは mixall-nav.js が後から作るので少し待つ
-    setTimeout(refreshBadges, 1500);
+    setTimeout(refreshBadges, 600);
     clearInterval(badgeTimer);
     badgeTimer = setInterval(refreshBadges, 60 * 1000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshBadges(); });
@@ -478,6 +559,7 @@
   ready(() => {
     swapAuthButtons();
     addSearchButton();
+    addBell();
     watchPanel();
     markCurrentScopeRead();
     showAnnouncement();

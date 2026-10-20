@@ -980,3 +980,42 @@ a.button.secondary, .button.secondary { color: var(--text); }
   font-size: .75rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, #ff5f6d, #e5294b); box-shadow: 0 3px 8px rgba(229, 41, 75, .4); }
 .mixall-nav-link span, .mixall-nav-subgroup-trigger span { flex: 1; }
 .mixall-nav-subgroup-trigger .mx-item-badge { margin-right: 6px; }
+
+/* ===== 右上の通知ベル ===== */
+.mx-bell { position: relative; display: inline-grid; place-items: center; flex: 0 0 auto; width: 38px; height: 38px; min-height: 0 !important; padding: 0 !important; margin-right: 6px; border-radius: 50% !important;
+  color: var(--text) !important; background: color-mix(in srgb, var(--text) 7%, transparent) !important; border: 1px solid color-mix(in srgb, var(--text) 12%, transparent) !important; box-shadow: none !important; }
+.mx-bell:hover { background: color-mix(in srgb, var(--text) 12%, transparent) !important; }
+.mx-bell.has-unread svg { animation: mx-ring 2.4s ease-in-out infinite; transform-origin: 50% 4px; }
+@keyframes mx-ring { 0%, 70%, 100% { transform: rotate(0); } 74% { transform: rotate(14deg); } 80% { transform: rotate(-12deg); } 86% { transform: rotate(8deg); } 92% { transform: rotate(-4deg); } }
+.mx-bell .mx-badge { position: absolute !important; top: -4px !important; left: auto !important; right: -6px; display: grid !important; }
+.mx-bell.floating { position: fixed; z-index: 120; top: calc(10px + env(safe-area-inset-top)); right: 12px; margin: 0; backdrop-filter: blur(12px); background: color-mix(in srgb, var(--panel) 80%, transparent) !important; }
+.mx-search-open + .mx-bell { margin-left: 0; }
+@media (max-width: 680px) {
+  header.top { grid-template-columns: auto minmax(0, 1fr) auto auto auto !important; }
+  header.top .mx-search-open { grid-column: 3; }
+  header.top .mx-bell { grid-column: 4; grid-row: 1; width: 36px; height: 36px; margin: 0; }
+  header.top .settings-widget { grid-column: 5 !important; }
+}
+/* 通知パネル */
+.mx-notif-panel { position: fixed; z-index: 280; top: calc(62px + env(safe-area-inset-top)); right: max(12px, calc((100vw - 1100px) / 2)); width: min(400px, calc(100vw - 20px));
+  max-height: min(70vh, 620px); display: flex; flex-direction: column; overflow: hidden; border-radius: 20px;
+  background: color-mix(in srgb, var(--panel) 97%, transparent); border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  box-shadow: 0 24px 60px rgba(4, 6, 20, .45); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); animation: mixall-dialog-pop .2s cubic-bezier(.2, .9, .3, 1.2); transform-origin: top right; }
+.mx-notif-panel.leaving { opacity: 0; transform: translateY(-6px) scale(.98); transition: .15s ease-in; }
+.mx-notif-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.mx-notif-head strong { font-size: 1.05rem; }
+.mx-notif-readall { min-height: 0 !important; padding: 6px 10px !important; font-size: .8rem !important; border-radius: 999px !important; color: var(--text) !important; background: color-mix(in srgb, var(--text) 8%, transparent) !important; border: 1px solid var(--border) !important; box-shadow: none !important; }
+.mx-notif-readall:disabled { opacity: .45; }
+.mx-notif-list { overflow-y: auto; padding: 6px; }
+.mx-notif-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; color: var(--text); text-decoration: none; }
+.mx-notif-item:hover, .mx-notif-item:focus { background: color-mix(in srgb, var(--text) 6%, transparent); outline: none; }
+.mx-notif-item.unread { background: var(--mx-grad-soft); }
+.mx-notif-icon { flex: 0 0 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 1.05rem; background: color-mix(in srgb, var(--text) 9%, transparent); }
+.mx-notif-icon.k-ghostLike { color: #ff4f8b; background: rgba(255, 79, 139, .15); }
+.mx-notif-body { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.mx-notif-title { font-weight: 750; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mx-notif-text { font-size: .88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mx-notif-sub { font-size: .76rem; color: var(--text-dim); }
+.mx-notif-dot { flex: 0 0 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #ff5f6d, #e5294b); box-shadow: 0 0 0 3px rgba(229, 41, 75, .18); }
+.mx-notif-empty { margin: 22px 12px; text-align: center; color: var(--text-dim); }
+@media (max-width: 480px) { .mx-notif-panel { left: 10px; right: 10px; width: auto; top: calc(58px + env(safe-area-inset-top)); } }
