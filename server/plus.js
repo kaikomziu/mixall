@@ -14,7 +14,8 @@ const S = {
   TRANSFER: 'mixall-transfers',
   MUTES: 'mixall-mutes',
   STORIES: 'mixall-stories',
-  ALERTS: 'mixall-usage-alerts'
+  ALERTS: 'mixall-usage-alerts',
+  SEEN: 'mixall-seen'
 };
 
 function json(statusCode, body) {
@@ -219,12 +220,43 @@ async function badges(email) {
     const readAt = t.readBy && t.readBy[email] ? Date.parse(t.readBy[email]) : 0;
     if (last && last.authorEmail !== email && Date.parse(last.createdAt) > readAt) mail += 1;
   }
-  let notifications = 0;
+  // Uch の返信・メンション通知（Pocket の通知は上の未読数と重なるので数えない）
+  let uch = 0;
   for (const key of await listKeys(STORE_NAMES.NOTIFICATIONS, `${email}:`)) {
     const n = await getJSON(STORE_NAMES.NOTIFICATIONS, key);
-    if (n && !n.read) notifications += 1;
+    if (n && !n.read && n.type === 'uchPost') uch += 1;
   }
-  return { chat: chat + mail, pocket: chat, mail, sns: notifications, total: chat + mail + notifications };
+  const ghost = await ghostActivity(email);
+  return { chat: chat + mail + uch, pocket: chat, mail, uch, sns: ghost.unread, ghostComments: ghost.unreadComments, ghostLikes: ghost.unreadLikes, total: chat + mail + uch + ghost.unread };
+}
+
+// Ghost の通知: 自分の投稿についた、他の人のコメントといいね。
+// 「最後に通知ページを見た時刻」より後のコメントと、そのとき以降に増えたいいねを未読とする。
+async function ghostActivity(email) {
+  const seen = (await getJSON(S.SEEN, email)) || {};
+  // まだ一度も通知ページを開いていない人は、直近7日のコメントだけを未読にする
+  const seenAt = Number(seen.ghostAt) || (Date.now() - 7 * 86400000);
+  const items = [];
+  let likesTotal = 0;
+  const likesByPost = [];
+  for (const key of await listKeys(STORE_NAMES.GHOST_POSTS)) {
+    if (key.includes(':')) continue;
+    const p = await getJSON(STORE_NAMES.GHOST_POSTS, key);
+    if (!p || p.deleted || p.authorEmail !== email) continue;
+    const title = String(p.title || p.text || '（画像・動画の投稿）').slice(0, 60);
+    const likes = (Array.isArray(p.likes) ? p.likes : []).filter((x) => x !== email).length;
+    likesTotal += likes;
+    if (likes) likesByPost.push({ postId: p.id, title, likes, previous: Number(seen.likes?.[p.id]) || 0 });
+    for (const c of p.comments || []) {
+      if (!c || c.deleted || c.authorEmail === email || c.isLiveChat) continue;
+      const at = Date.parse(c.createdAt) || 0;
+      items.push({ type: 'comment', postId: p.id, postTitle: title, author: c.authorName || '誰か', text: String(c.text || '').slice(0, 120), createdAt: c.createdAt, unread: at > seenAt });
+    }
+  }
+  items.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  const unreadComments = items.filter((x) => x.unread).length;
+  const unreadLikes = seen.likesTotal === undefined ? 0 : Math.max(0, likesTotal - Number(seen.likesTotal));
+  return { items: items.slice(0, 100), likesByPost: likesByPost.sort((a, b) => (b.likes - b.previous) - (a.likes - a.previous)), likesTotal, unreadComments, unreadLikes, unread: unreadComments + unreadLikes, seenAt };
 }
 
 // =====================================================================
@@ -415,6 +447,25 @@ exports.handler = async (event) => {
 
   // ---- 未読バッジ ----
   if (action === 'badges') return json(200, await badges(email));
+  if (action === 'ghostActivity') return json(200, await ghostActivity(email));
+  // 通知ページを開いた: ここまでを既読にする
+  if (action === 'markGhostSeen') {
+    const g = await ghostActivity(email);
+    const likes = Object.fromEntries(g.likesByPost.map((x) => [x.postId, x.likes]));
+    await setJSON(S.SEEN, email, { ...((await getJSON(S.SEEN, email)) || {}), ghostAt: Date.now(), likesTotal: g.likesTotal, likes });
+    return json(200, { ok: true });
+  }
+  // Uch のスレッドや Pocket のルームを開いた: その場所の通知を既読にする
+  if (action === 'markScopeRead') {
+    const scope = String(payload.scope || '').slice(0, 200);
+    if (!/^(uch|pocket):[A-Za-z0-9_-]+$/.test(scope)) return json(400, { error: '不正な指定です' });
+    let n = 0;
+    for (const key of await listKeys(STORE_NAMES.NOTIFICATIONS, `${email}:`)) {
+      const item = await getJSON(STORE_NAMES.NOTIFICATIONS, key);
+      if (item && !item.read && item.scope === scope) { item.read = true; await setJSON(STORE_NAMES.NOTIFICATIONS, key, item); n += 1; }
+    }
+    return json(200, { ok: true, marked: n });
+  }
 
   // ---- 端末の引き継ぎ ----
   if (action === 'transferCreate') {

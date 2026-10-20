@@ -24,5 +24,42 @@
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="/manifest.webmanifest">
-</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Ghost/notifications.html" class="active">通知</a></nav></header><main><div class="card"><h2>通知</h2><div id="list"><p class="muted">読み込み中...</p></div></div></main><script src="/js/auth.js"></script><script>const s=Netrify.requireLogin();function esc(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}async function load(){if(!s)return;const r=await fetch('/.netlify/functions/ghost?notifications=1&token='+encodeURIComponent(s.token));const d=await r.json();document.getElementById('list').innerHTML=(d.notifications||[]).map(n=>{const target=n.postId?'/Ghost/post.html?id='+encodeURIComponent(n.postId):'';const body='<p>'+esc(n.text)+'</p><small class="muted">'+new Date(n.createdAt).toLocaleString('ja-JP')+'</small>';return target?'<a class="admin-item notification-link" href="'+target+'" aria-label="通知の投稿を開く">'+body+'</a>':'<div class="admin-item">'+body+'</div>';}).join('')||'<p class="muted">新しい通知はありません。</p>';}load();setInterval(load,10000);</script><script src="/js/ghost-nav.js"></script>
+</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Ghost/notifications.html" class="active">通知</a></nav></header><main><div class="card"><h2>通知</h2><div id="list"><p class="muted">読み込み中...</p></div></div></main><script src="/js/auth.js"></script><script>
+// Ghost の通知: 自分の投稿についた他の人のコメント・いいね（MixAll+）。開いた時点で既読にする。
+(function () {
+  const s = Netrify.requireLogin();
+  if (!s) return;
+  const esc = (x) => String(x ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ago = (iso) => { const t = (Date.now() - new Date(iso)) / 1000; return t < 60 ? 'たった今' : t < 3600 ? Math.floor(t / 60) + '分前' : t < 86400 ? Math.floor(t / 3600) + '時間前' : new Date(iso).toLocaleDateString('ja-JP'); };
+  async function load(markSeen) {
+    const list = document.getElementById('list');
+    try {
+      const d = await MixAllPlus.api('ghostActivity', {}, 'GET');
+      const likes = d.likesByPost.map((x) => {
+        const added = Math.max(0, x.likes - x.previous);
+        return `<a class="gn-item${added ? ' unread' : ''}" href="/Ghost/post.html?id=${encodeURIComponent(x.postId)}"><span class="gn-icon like">♥</span><span class="gn-body"><strong>${x.likes}件のいいね</strong>${added ? ` <span class="gn-new">+${added}</span>` : ''}<span class="gn-sub">「${esc(x.title)}」</span></span></a>`;
+      });
+      const comments = d.items.map((c) => `<a class="gn-item${c.unread ? ' unread' : ''}" href="/Ghost/post.html?id=${encodeURIComponent(c.postId)}"><span class="gn-icon comment">💬</span><span class="gn-body"><strong>${esc(c.author)}</strong> さんがコメントしました<span class="gn-text">${esc(c.text)}</span><span class="gn-sub">「${esc(c.postTitle)}」・${ago(c.createdAt)}</span></span></a>`);
+      list.innerHTML = (comments.length ? `<h3 class="gn-h">コメント</h3>${comments.join('')}` : '') + (likes.length ? `<h3 class="gn-h">いいね</h3>${likes.join('')}` : '')
+        || '<p class="muted">まだ通知はありません。投稿にコメントやいいねがつくと、ここに表示されます。</p>';
+      if (markSeen) { await MixAllPlus.api('markGhostSeen', {}); MixAllPlus.refreshBadges(); }
+    } catch (e) { list.innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
+  }
+  const start = () => { load(true); setInterval(() => { if (!document.hidden) load(false); }, 30000); };
+  if (window.MixAllPlus) start(); else window.addEventListener('load', start);
+})();
+</script>
+<style>
+.gn-h { margin: 14px 0 6px; font-size: .8rem; letter-spacing: .06em; color: var(--text-dim); }
+.gn-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 14px; color: var(--text); text-decoration: none; border: 1px solid transparent; transition: background .15s; }
+.gn-item:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.gn-item.unread { background: var(--mx-grad-soft); border-color: color-mix(in srgb, #8b6bff 30%, transparent); }
+.gn-icon { flex: 0 0 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 1rem; color: #fff; background: var(--mx-grad); }
+.gn-icon.like { background: linear-gradient(135deg, #ff6ab4, #ff3366); }
+.gn-body { min-width: 0; display: grid; gap: 2px; }
+.gn-text { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gn-sub { color: var(--text-dim); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gn-new { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .75rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, #ff5f6d, #e5294b); }
+</style>
+<script src="/js/ghost-nav.js"></script>
 </body></html>

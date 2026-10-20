@@ -975,3 +975,8 @@ a.button.secondary, .button.secondary { color: var(--text); }
   font-size: 10.5px !important; font-weight: 800 !important; letter-spacing: 0; line-height: 1 !important; color: #fff !important;
 }
 .mx-logout-btn { gap: 6px; }
+/* メニュー内の項目ごとの未読数 */
+.mx-item-badge { margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; display: inline-grid; place-items: center;
+  font-size: .75rem; font-weight: 800; color: #fff; background: linear-gradient(135deg, #ff5f6d, #e5294b); box-shadow: 0 3px 8px rgba(229, 41, 75, .4); }
+.mixall-nav-link span, .mixall-nav-subgroup-trigger span { flex: 1; }
+.mixall-nav-subgroup-trigger .mx-item-badge { margin-right: 6px; }

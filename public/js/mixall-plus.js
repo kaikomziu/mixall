@@ -68,11 +68,68 @@
     if (!s || !s.token || document.hidden) return;
     try {
       const d = await plus('badges', {}, 'GET');
+      lastBadges = d;
       setBadge(document.querySelector('.mixall-bottom-nav [data-nav-group="chat"]'), d.chat);
       setBadge(document.querySelector('.mixall-bottom-nav [data-nav-group="sns"]'), d.sns);
       setBadge(document.querySelector('.ghost-bottom-nav a[href*="notifications"]'), d.sns);
+      decoratePanel();
       if (navigator.setAppBadge) { if (d.total) navigator.setAppBadge(d.total).catch(() => {}); else navigator.clearAppBadge().catch(() => {}); }
     } catch (_) { /* オフラインなど */ }
+  }
+
+  // 下のバーのメニューを開いたとき、どの項目に未読があるかも数字で出す
+  let lastBadges = null;
+  function itemCount(href) {
+    if (!lastBadges) return 0;
+    let p = '';
+    try { p = new URL(href, location.href).pathname; } catch (_) { return 0; }
+    if (BASE && p.startsWith(BASE)) p = p.slice(BASE.length);
+    p = p.replace(/\/index\.html$/i, '').replace(/\/+$/, '').toLowerCase();
+    if (p === '/pocket') return lastBadges.pocket || 0;
+    if (p === '/mail') return lastBadges.mail || 0;
+    if (p === '/uch') return lastBadges.uch || 0;
+    if (p === '/ghost/notifications.html') return lastBadges.sns || 0;
+    return 0;
+  }
+  function decoratePanel() {
+    const panel = document.getElementById('mixall-nav-panel');
+    if (!panel || panel.hidden) return;
+    panel.querySelectorAll('a.mixall-nav-link[href]').forEach((a) => {
+      const n = itemCount(a.getAttribute('href'));
+      let b = a.querySelector('.mx-item-badge');
+      if (!n) { if (b) b.remove(); return; }
+      if (!b) { b = document.createElement('b'); b.className = 'mx-item-badge'; a.appendChild(b); }
+      b.textContent = n > 99 ? '99+' : String(n);
+      b.setAttribute('aria-label', `未読${n}件`);
+    });
+    // 折りたたみ（例: 「Ghost内メニュー」「ぽけっと」）にも中の合計を出す
+    panel.querySelectorAll('.mixall-nav-subgroup').forEach((g) => {
+      const total = [...g.querySelectorAll('a.mixall-nav-link[href]')].reduce((sum, a) => sum + itemCount(a.getAttribute('href')), 0);
+      const trigger = g.querySelector('.mixall-nav-subgroup-trigger');
+      if (!trigger) return;
+      let b = trigger.querySelector('.mx-item-badge');
+      if (!total) { if (b) b.remove(); return; }
+      if (!b) { b = document.createElement('b'); b.className = 'mx-item-badge'; trigger.insertBefore(b, trigger.lastElementChild); }
+      b.textContent = total > 99 ? '99+' : String(total);
+    });
+  }
+  // メニューの中身はタップのたびに作り直されるので、変化を見て付け直す
+  function watchPanel() {
+    const panel = document.getElementById('mixall-nav-panel');
+    if (!panel) { setTimeout(watchPanel, 800); return; }
+    new MutationObserver(() => decoratePanel()).observe(panel, { childList: true, attributes: true, attributeFilter: ['hidden'] });
+  }
+
+  // 開いたページの通知を既読にする（Uch のスレッド・Pocket のルーム）
+  function markCurrentScopeRead() {
+    if (!session()) return;
+    let p = location.pathname; if (BASE && p.startsWith(BASE)) p = p.slice(BASE.length);
+    const q = new URLSearchParams(location.search);
+    let scope = '';
+    if (/^\/uch\/thread\.html$/i.test(p) && q.get('id')) scope = `uch:${q.get('id')}`;
+    if (/^\/pocket\/(room|thread)\.html$/i.test(p) && (q.get('id') || q.get('roomId'))) scope = `pocket:${q.get('id') || q.get('roomId')}`;
+    if (!scope || !/^(uch|pocket):[A-Za-z0-9_-]+$/.test(scope)) return;
+    plus('markScopeRead', { scope }).then(() => setTimeout(refreshBadges, 1500)).catch(() => {});
   }
   function startBadges() {
     if (!session()) return;
@@ -421,6 +478,8 @@
   ready(() => {
     swapAuthButtons();
     addSearchButton();
+    watchPanel();
+    markCurrentScopeRead();
     showAnnouncement();
     startBadges();
     syncMutes();
