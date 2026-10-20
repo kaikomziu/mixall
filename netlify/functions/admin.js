@@ -307,7 +307,11 @@ async function handle(payload, actorEmail) {
       if(existing.webhookId&&existing.providerApiKey){try{await agentMailRequest(existing.providerApiKey,'DELETE',`/webhooks/${encodeURIComponent(existing.webhookId)}`);}catch(_){}}
       if(apiBase){
         try{
-          const hook=await agentMailRequest(providerApiKey,'POST','/webhooks',{url:`${apiBase}/agentmail-webhook`,event_types:['message.received'],inbox_ids:[from]});
+          const body={url:`${apiBase}/agentmail-webhook`,event_types:['message.received']};
+          // 受信箱限定のAPIキーでは inbox_ids を指定できない（その受信箱だけが対象になる）
+          let hook;
+          try{hook=await agentMailRequest(providerApiKey,'POST','/webhooks',{...body,inbox_ids:[from]});}
+          catch(error){if(error.status!==403)throw error;hook=await agentMailRequest(providerApiKey,'POST','/webhooks',body);}
           settings.webhookId=hook?.webhook_id||null;settings.webhookSecret=hook?.secret||'';
           webhookNote='返信の取り込みも設定しました';
         }catch(error){webhookNote=`返信の取り込み設定に失敗しました（${error.message}）`;}
