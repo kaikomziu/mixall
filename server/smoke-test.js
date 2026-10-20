@@ -164,5 +164,48 @@ async function register(name) {
   // 運営からの警告: 一般ユーザーは送れない
   assert.equal((await plus({ action: 'sendWarning', token: bob, email: 'alice@bix.3erver', body: 'x' })).status, 403);
 
+  // ---- AgentMail: 外部宛て送信 → 相手の返信をWebhookで取り込む ----
+  const crypto = require('crypto');
+  const store = require('../netlify/lib/store');
+  const whsec = `whsec_${Buffer.from('test-webhook-secret-123456').toString('base64')}`;
+  await store.setJSON(STORE_NAMES.ADMIN_SECRETS, 'email:settings', { provider: 'agentmail', providerApiKey: 'am_test', from: 'agent-3097@agentmail.to', webhookSecret: whsec });
+  const realFetch = globalThis.fetch;
+  const amCalls = [];
+  globalThis.fetch = async (url, init) => {
+    if (String(url).startsWith('https://api.agentmail.to/')) {
+      amCalls.push({ url: String(url), body: JSON.parse(init.body || '{}') });
+      return new Response(JSON.stringify({ message_id: `<m${amCalls.length}@agentmail.to>`, thread_id: 'th-1' }), { status: 200 });
+    }
+    return realFetch(url, init);
+  };
+  const ext = await call('mail', { action: 'send', token: alice, to: 'friend@example.com', subject: 'こんにちは', body: '外部への本文' }, { device: 'alice-phone-1' });
+  assert.equal(ext.status, 201, JSON.stringify(ext.data));
+  assert.ok(amCalls[0].url.endsWith('/inboxes/agent-3097%40agentmail.to/messages/send'), amCalls[0].url);
+  assert.equal(amCalls[0].body.subject, 'こんにちは');
+  assert.ok(amCalls[0].body.text.includes('外部への本文') && amCalls[0].body.text.includes('alice@bix.3erver'));
+  const extId = ext.data.thread.id;
+  const hook = async (payload, secret = whsec) => {
+    const raw = JSON.stringify(payload); const id = `msg_${crypto.randomBytes(6).toString('hex')}`; const ts = String(Math.floor(Date.now() / 1000));
+    const sig = crypto.createHmac('sha256', Buffer.from(secret.replace(/^whsec_/, ''), 'base64')).update(`${id}.${ts}.${raw}`).digest('base64');
+    const res = await handle(new Request(`${BASE}/agentmail-webhook`, { method: 'POST', headers: { 'content-type': 'application/json', 'svix-id': id, 'svix-timestamp': ts, 'svix-signature': `v1,${sig}` }, body: raw }));
+    return { status: res.status, data: await res.json() };
+  };
+  const inbound = { type: 'event', event_type: 'message.received', event_id: 'ev-1', message: { thread_id: 'th-1', message_id: '<r1@example.com>', from: 'Friend <friend@example.com>', subject: 'Re: こんにちは', text: 'お返事です！\n\nOn Mon, Oct 20, 2026 alice wrote:\n> 外部への本文' } };
+  assert.equal((await hook(inbound, `whsec_${Buffer.from('wrong-secret').toString('base64')}`)).status, 401, 'bad signature rejected');
+  assert.equal((await hook(inbound)).status, 200);
+  assert.equal((await hook(inbound)).data.duplicate, true, 'retries are deduplicated');
+  const spoof = await hook({ ...inbound, event_id: 'ev-2', message: { ...inbound.message, from: 'evil@example.com' } });
+  assert.equal(spoof.data.ignored, true, 'other senders ignored');
+  const extPull = await call('chat', { action: 'pull', token: alice }, { device: 'alice-phone-1' });
+  assert.ok(extPull.data.__vault.items.some((x) => x.fields.text === 'お返事です！'), 'inbound reply delivered to device without quote');
+  const extThread = await store.getJSON(STORE_NAMES.MAIL_THREADS, extId);
+  assert.equal(extThread.messages.length, 2);
+  assert.equal(extThread.messages[1].text, '', 'inbound body not kept on server');
+  // 返信はAgentMailのreply APIで同じスレッドに
+  const rep = await call('mail', { action: 'reply', token: alice, threadId: extId, subject: 'こんにちは', body: 'ありがとう' });
+  assert.equal(rep.status, 200, JSON.stringify(rep.data));
+  assert.ok(amCalls[1].url.includes('/messages/%3Cr1%40example.com%3E/reply'), amCalls[1].url);
+  globalThis.fetch = realFetch;
+
   console.log('smoke test OK');
 })().catch((error) => { console.error(error); process.exit(1); });

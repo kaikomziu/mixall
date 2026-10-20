@@ -286,19 +286,36 @@ async function handle(payload, actorEmail) {
     const key='email:settings';
     const current=await getEmailSettings();
     const mask=(value)=>value?`${String(value).slice(0,4)}••••${String(value).slice(-4)}`:'';
-    if(action==='getEmailSettings') return json(200,{settings:{provider:current.provider,from:current.from,mailgunDomain:current.mailgunDomain,mailgunHostRegion:current.mailgunHostRegion,providerApiKey:mask(current.providerApiKey),secret:mask(current.secret),configured:!(!current.provider||!current.providerApiKey||!current.secret||!current.from)}});
+    if(action==='getEmailSettings') return json(200,{settings:{provider:current.provider,from:current.from,mailgunDomain:current.mailgunDomain,mailgunHostRegion:current.mailgunHostRegion,providerApiKey:mask(current.providerApiKey),secret:mask(current.secret),webhook:Boolean(current.webhookSecret),configured:!(!current.provider||!current.providerApiKey||(!current.secret&&!['brevo','agentmail'].includes(current.provider))||!current.from)}});
     const existing=await getJSON(STORE_NAMES.ADMIN_SECRETS,key)||{};
     const provider=String(payload.provider||'').toLowerCase();
-    if(!['mailgun','sendgrid','postmark','brevo'].includes(provider)) return json(400,{error:'メールプロバイダーはMailgun・SendGrid・Postmarkから選択してください'});
+    if(!['mailgun','sendgrid','postmark','brevo','agentmail'].includes(provider)) return json(400,{error:'メールプロバイダーはAgentMail・Brevo・Mailgun・SendGrid・Postmarkから選択してください'});
     const providerApiKey=String(payload.providerApiKey||existing.providerApiKey||current.providerApiKey||'').trim();
     const secret=String(payload.secret||existing.secret||current.secret||'').trim();
     const from=String(payload.from||'').trim();
-    if(!providerApiKey||(!secret && provider!=='brevo')||!from||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(from)) return json(400,{error:'APIキー・連携シークレット・認証済み送信元メールアドレスを入力してください'});
+    if(!providerApiKey||(!secret && !['brevo','agentmail'].includes(provider))||!from||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(from)) return json(400,{error:'APIキー・連携シークレット・認証済み送信元メールアドレスを入力してください'});
     const settings={provider,providerApiKey,secret,from,mailgunDomain:String(payload.mailgunDomain||existing.mailgunDomain||current.mailgunDomain||'').trim(),mailgunHostRegion:String(payload.mailgunHostRegion||existing.mailgunHostRegion||current.mailgunHostRegion||'').trim(),updatedAt:new Date().toISOString(),updatedBy:actorEmail};
     if(provider==='mailgun'&&(!settings.mailgunDomain||!['eu','non-eu'].includes(settings.mailgunHostRegion))) return json(400,{error:'Mailgunの場合はドメインとホスト地域（eu / non-eu）が必要です'});
+    let webhookNote='';
+    if(provider==='agentmail'){
+      // 返信を取り込むWebhookをAgentMailに登録し直す（秘密値はこの設定と一緒に保存）
+      const { agentMailRequest } = require('../lib/email-integration');
+      const apiBase=String(process.env.MIXALL_API_BASE||'').replace(/\/+$/,'');
+      try{
+        await agentMailRequest(providerApiKey,'GET',`/inboxes/${encodeURIComponent(from)}`);
+      }catch(error){return json(400,{error:`AgentMailの受信箱 ${from} を確認できませんでした。APIキーと受信箱アドレスを確かめてください（${error.message}）`});}
+      if(existing.webhookId&&existing.providerApiKey){try{await agentMailRequest(existing.providerApiKey,'DELETE',`/webhooks/${encodeURIComponent(existing.webhookId)}`);}catch(_){}}
+      if(apiBase){
+        try{
+          const hook=await agentMailRequest(providerApiKey,'POST','/webhooks',{url:`${apiBase}/agentmail-webhook`,event_types:['message.received'],inbox_ids:[from]});
+          settings.webhookId=hook?.webhook_id||null;settings.webhookSecret=hook?.secret||'';
+          webhookNote='返信の取り込みも設定しました';
+        }catch(error){webhookNote=`返信の取り込み設定に失敗しました（${error.message}）`;}
+      }
+    }
     await setJSON(STORE_NAMES.ADMIN_SECRETS,key,settings);
     await recordAudit(actorEmail,'saveEmailSettings','emailSettings',key,'メール送信プロバイダー設定を更新（秘密値は監査記録に保存しない）');
-    return json(200,{ok:true,settings:{provider,from,mailgunDomain:settings.mailgunDomain,mailgunHostRegion:settings.mailgunHostRegion,providerApiKey:mask(providerApiKey),secret:mask(secret),configured:true}});
+    return json(200,{ok:true,settings:{provider,from,mailgunDomain:settings.mailgunDomain,mailgunHostRegion:settings.mailgunHostRegion,providerApiKey:mask(providerApiKey),secret:mask(secret),configured:true,webhook:Boolean(settings.webhookSecret),webhookNote}});
   }
   if (['getGeminiSettings','saveGeminiSettings'].includes(action)) {
     const key = 'gemini:runtimeSettings';

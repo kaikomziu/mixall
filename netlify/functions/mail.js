@@ -70,6 +70,17 @@ async function reserveExternalSend(senderEmail, recipientEmail) {
   return {allowed:true};
 }
 
+function safeMailUrl(event) {
+  try { return buildSiteUrl(event, '/Mail/'); } catch { return ''; }
+}
+
+// AgentMailのスレッドとMailのスレッドを結びつける（相手の返信をWebhookで戻すため）
+async function linkAgentMail(thread, sent) {
+  if (!sent || sent.provider !== 'agentmail' || !sent.threadId) return;
+  thread.agentmail = { threadId: sent.threadId, lastMessageId: sent.messageId || thread.agentmail?.lastMessageId || null };
+  await setJSON(STORE_NAMES.AGENTMAIL, `thread:${sent.threadId}`, { mailThreadId: thread.id, externalRecipient: thread.externalRecipient, updatedAt: new Date().toISOString() });
+}
+
 exports.handler = async (event) => {
 
   try {
@@ -211,8 +222,9 @@ async function handle(event) {
     if(external){
       const sender=await getAccountProfile(email);
       try{
-        await sendEmailTemplate(event,{template:'mail-message',to,subject,parameters:{subject,senderName:String(sender.displayName||email).slice(0,80),senderAccount:email,body:body||'（本文はありません。添付ファイルをご確認ください。）',mailUrl:buildSiteUrl(event,'/Mail/Inbox/')},attachments});
-        thread.externalDelivery={status:'sent',provider:'netlify-email',updatedAt:new Date().toISOString()};
+        const sent=await sendEmailTemplate(event,{template:'mail-message',to,subject,parameters:{subject,senderName:String(sender.displayName||email).slice(0,80),senderAccount:email,body:body||'（本文はありません。添付ファイルをご確認ください。）',mailUrl:safeMailUrl(event)},attachments});
+        thread.externalDelivery={status:'sent',provider:sent?.provider||'netlify-email',updatedAt:new Date().toISOString()};
+        await linkAgentMail(thread,sent);
         thread.messages[0].externalDeliveryStatus='sent';
         await setJSON(STORE_NAMES.MAIL_THREADS,id,thread);
       }catch(error){
@@ -261,8 +273,11 @@ async function handle(event) {
     if(externalReply){
       const sender=await getAccountProfile(email);
       try{
-        await sendEmailTemplate(event,{template:'mail-message',to:thread.externalRecipient,subject:normalizeSubject(`Re: ${thread.subject}`),parameters:{subject:normalizeSubject(`Re: ${thread.subject}`),senderName:String(sender.displayName||email).slice(0,80),senderAccount:email,body:body||'（本文はありません。添付ファイルをご確認ください。）',mailUrl:buildSiteUrl(event,'/Mail/Inbox/')},attachments:externalAttachments});
-        message.externalDeliveryStatus='sent';thread.externalDelivery={status:'sent',provider:'netlify-email',updatedAt:new Date().toISOString()};
+        // 件名はサーバーに残していない（端末保存）ため、端末から送られた件名を使う
+        const replySubject=normalizeSubject(`Re: ${String(payload.subject||thread.subject||'').replace(/^(re:\s*)+/i,'')}`);
+        const sent=await sendEmailTemplate(event,{template:'mail-message',to:thread.externalRecipient,subject:replySubject,replyToMessageId:thread.agentmail?.lastMessageId||null,parameters:{subject:replySubject,senderName:String(sender.displayName||email).slice(0,80),senderAccount:email,body:body||'（本文はありません。添付ファイルをご確認ください。）',mailUrl:safeMailUrl(event)},attachments:externalAttachments});
+        message.externalDeliveryStatus='sent';thread.externalDelivery={status:'sent',provider:sent?.provider||'netlify-email',updatedAt:new Date().toISOString()};
+        await linkAgentMail(thread,sent);
       }catch(error){
         message.externalDeliveryStatus='failed';thread.externalDelivery={status:'failed',updatedAt:new Date().toISOString()};
         await setJSON(STORE_NAMES.MAIL_THREADS,payload.threadId,thread);

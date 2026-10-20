@@ -21,6 +21,7 @@ const handlers = {
   'lending-data': () => require('../netlify/functions/lending-data'),
   lending: () => require('../netlify/functions/lending'),
   mail: () => require('../netlify/functions/mail'),
+  'agentmail-webhook': () => require('../netlify/functions/agentmail-webhook'),
   media: () => require('../netlify/functions/media'),
   notifications: () => require('../netlify/functions/notifications'),
   'ogp-post': () => require('../netlify/functions/ogp-post'),
