@@ -134,6 +134,10 @@ function keywordsFor(rel) {
   return [...new Set([...BASE_KEYWORDS, ...(SECTION_KEYWORDS[top] || SECTION_KEYWORDS[''])])].join(',');
 }
 const NOINDEX = new Set(['404.html', 'site-view/index.html']);
+// ログインしないと中身が見られない・個人用のページは検索に出さない
+const PRIVATE_PAGES = new Set(['account/index.html', 'admin/index.html', 'admin/ghost-age.html', 'age.html', 'reset-password/index.html', 'Webhook/index.html',
+  'Mail/index.html', 'Mail/thread.html', 'Pocket/index.html', 'Pocket/room.html', 'Pocket/thread.html', 'Pocket/stamps.html',
+  'Ghost/compose.html', 'Ghost/notifications.html', 'Ghost/bookmarks.html', 'Ghost/chat.html', 'Ghost/stamps.html', 'Coin/index.html', 'lending/index.html', 'Custom/builder.html']);
 // ?id= などで中身が変わるページは、正規URLを1つに決められないので canonical を付けない
 const QUERY_PAGES = new Set(['Ghost/post.html', 'Ghost/profile.html', 'Ghost/watch.html', 'Ghost/chat.html', 'Ghost/live.html', 'Pocket/room.html', 'Pocket/thread.html', 'Uch/thread.html', 'Mail/thread.html', 'Custom/room.html', 'Custom/builder.html']);
 function attr(value) { return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
@@ -144,6 +148,8 @@ function seoTags(html, rel) {
   if (NOINDEX.has(rel)) {
     if (!/name="robots"/i.test(html)) add.push('<meta name="robots" content="noindex">');
   } else {
+    if (!/name="robots"/i.test(html)) add.push(PRIVATE_PAGES.has(rel) ? '<meta name="robots" content="noindex, follow">' : '<meta name="robots" content="index, follow, max-image-preview:large">');
+    if (/property="og:title"/i.test(html) && !/property="og:site_name"/i.test(html)) add.push('<meta property="og:site_name" content="MixAll +">');
     if (!/name="keywords"/i.test(html)) add.push(`<meta name="keywords" content="${attr(keywordsFor(rel))}">`);
     if (!QUERY_PAGES.has(rel) && !/rel="canonical"/i.test(html)) add.push(`<link rel="canonical" href="${attr(url)}">`);
     if (!/name="description"/i.test(html)) {
@@ -228,7 +234,7 @@ writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="
 // 検索エンジン用サイトマップ（ログインなしで中身が見えるページだけ）。
 // ルートの robots.txt（kaikomziu.github.io）は別リポジトリなので、Search Console から送信する。
 const today = new Date().toISOString().slice(0, 10);
-const publicPages = ['/', '/login/', '/register/', '/emergency.html'];
+const publicPages = ['/', '/login/', '/register/', '/emergency.html', '/Uch/', '/Ghost/', '/Ghost/videos.html', '/Tools/', '/Create/', '/Custom/', '/Calendar/', '/Language/', '/Extensions/'];
 writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${publicPages.map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod>${p === '/' ? '<priority>1.0</priority>' : ''}</url>`).join('\n')}
