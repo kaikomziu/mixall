@@ -112,6 +112,27 @@ const DESCRIPTIONS = {
   'Extensions/index.html': 'MixAll+ の拡張機能。自分好みの機能を追加して、MixAll+ をもっと便利に使えます。',
   'reset-password/index.html': 'MixAll+ のパスワード再設定ページです。登録した回復用メールアドレスから再設定できます。'
 };
+// 検索ワード（keywords）。全ページ共通の語に、サービスごとの語を足す
+const BASE_KEYWORDS = ['MixAll+', 'MixAll プラス', 'ミックスオールプラス', 'MixAll', 'ミックスオール'];
+const SECTION_KEYWORDS = {
+  '': ['掲示板', 'チャット', 'SNS', 'コミュニティ', '無料'],
+  Uch: ['Uch', '掲示板', '匿名掲示板', 'スレッド'],
+  Pocket: ['ぽけっと', 'チャット', 'グループチャット', '通話'],
+  Ghost: ['Ghost', 'SNS', 'タイムライン', '投稿', 'ショート動画'],
+  Mail: ['Mail', 'メール', 'Webメール'],
+  Create: ['Creator Studio', '画像作成', '作品'],
+  Custom: ['Custom', '3Dワールド', 'Three.js'],
+  Tools: ['ツール', '便利ツール', '画像変換', 'ポモドーロタイマー'],
+  Calendar: ['共有カレンダー', '予定表'],
+  Coin: ['Coin', 'ショップ'],
+  Language: ['特殊言語', '辞書'],
+  Extensions: ['拡張機能'],
+  lending: ['貸し出しサーバー']
+};
+function keywordsFor(rel) {
+  const top = rel.includes('/') ? rel.split('/')[0] : '';
+  return [...new Set([...BASE_KEYWORDS, ...(SECTION_KEYWORDS[top] || SECTION_KEYWORDS[''])])].join(',');
+}
 const NOINDEX = new Set(['404.html', 'site-view/index.html']);
 // ?id= などで中身が変わるページは、正規URLを1つに決められないので canonical を付けない
 const QUERY_PAGES = new Set(['Ghost/post.html', 'Ghost/profile.html', 'Ghost/watch.html', 'Ghost/chat.html', 'Ghost/live.html', 'Pocket/room.html', 'Pocket/thread.html', 'Uch/thread.html', 'Mail/thread.html', 'Custom/room.html', 'Custom/builder.html']);
@@ -123,6 +144,7 @@ function seoTags(html, rel) {
   if (NOINDEX.has(rel)) {
     if (!/name="robots"/i.test(html)) add.push('<meta name="robots" content="noindex">');
   } else {
+    if (!/name="keywords"/i.test(html)) add.push(`<meta name="keywords" content="${attr(keywordsFor(rel))}">`);
     if (!QUERY_PAGES.has(rel) && !/rel="canonical"/i.test(html)) add.push(`<link rel="canonical" href="${attr(url)}">`);
     if (!/name="description"/i.test(html)) {
       const og = /property="og:description"\s+content="([^"]*)"/i.exec(html);
