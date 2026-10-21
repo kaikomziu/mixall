@@ -104,6 +104,35 @@ function rewrite(text, ext) {
   return out;
 }
 
+// 検索・SNS向けのタグを補う（ページに既にあるものは触らない）
+const DESCRIPTIONS = {
+  'emergency.html': 'MixAll+ の緊急連絡ページ。通信が不安定なときでも、端末どうしで連絡を取り合えます。',
+  'emergency-peer.html': 'MixAll+ の緊急連絡（端末どうしの直接接続）ページです。',
+  'downloads/mixall-emergency.html': 'オフラインでも開ける MixAll+ 緊急連絡ページのダウンロード版です。',
+  'Extensions/index.html': 'MixAll+ の拡張機能。自分好みの機能を追加して、MixAll+ をもっと便利に使えます。',
+  'reset-password/index.html': 'MixAll+ のパスワード再設定ページです。登録した回復用メールアドレスから再設定できます。'
+};
+const NOINDEX = new Set(['404.html', 'site-view/index.html']);
+// ?id= などで中身が変わるページは、正規URLを1つに決められないので canonical を付けない
+const QUERY_PAGES = new Set(['Ghost/post.html', 'Ghost/profile.html', 'Ghost/watch.html', 'Ghost/chat.html', 'Ghost/live.html', 'Pocket/room.html', 'Pocket/thread.html', 'Uch/thread.html', 'Mail/thread.html', 'Custom/room.html', 'Custom/builder.html']);
+function attr(value) { return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function seoTags(html, rel) {
+  if (!/<head[^>]*>/i.test(html)) return html;
+  const add = [];
+  const url = `${SITE}/${rel.replace(/(^|\/)index\.html$/, '$1')}`;
+  if (NOINDEX.has(rel)) {
+    if (!/name="robots"/i.test(html)) add.push('<meta name="robots" content="noindex">');
+  } else {
+    if (!QUERY_PAGES.has(rel) && !/rel="canonical"/i.test(html)) add.push(`<link rel="canonical" href="${attr(url)}">`);
+    if (!/name="description"/i.test(html)) {
+      const og = /property="og:description"\s+content="([^"]*)"/i.exec(html);
+      const desc = DESCRIPTIONS[rel] || (og && og[1]);
+      if (desc) add.push(`<meta name="description" content="${og && !DESCRIPTIONS[rel] ? desc : attr(desc)}">`);
+    }
+  }
+  return add.length ? html.replace(/<\/head>/i, `${add.join('')}</head>`) : html;
+}
+
 const TEXT = new Set(['.html', '.js', '.css', '.json', '.webmanifest']);
 const SKIP_JS = new Set(['js/vendor/fflate.min.js', 'js/mixall-base.js', 'js/chat-vault.js', 'js/google-drive-sync.js', 'js/mixall-ux.js', 'js/mixall-plus.js', 'js/ghost-stories.js', 'js/account-plus.js', 'js/admin-plus.js', 'js/coin-plus.js', 'js/coin-shop.js', 'js/ghost-plus.js', 'js/pocket-plus.js']);
 function walk(dir) {
@@ -113,7 +142,9 @@ function walk(dir) {
     const ext = extname(name).toLowerCase();
     const rel = relative(OUT, full).replace(/\\/g, '/');
     if (!TEXT.has(ext) || SKIP_JS.has(rel)) continue;
-    writeFileSync(full, rewrite(readFileSync(full, 'utf8'), ext));
+    let text = rewrite(readFileSync(full, 'utf8'), ext);
+    if (ext === '.html') text = seoTags(text, rel);
+    writeFileSync(full, text);
   }
 }
 walk(OUT);
@@ -128,7 +159,7 @@ const pages = [];
   }
 })(OUT);
 
-const router = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll</title>
+const router = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll</title><meta name="robots" content="noindex">
 <script>
 (function () {
   var BASE = ${JSON.stringify(BASE)}, API = ${JSON.stringify(API)}, PAGES = ${JSON.stringify(pages)};
@@ -158,7 +189,7 @@ writeFileSync(join(OUT, '404.html'), router);
 
 // 貸し出しサイト /site-view/<slug>: Supabaseの関数URLはHTMLを text/plain で返すため、ページ側で描画する
 mkdirSync(join(OUT, 'site-view'), { recursive: true });
-writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAllサイト</title>
+writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAllサイト</title><meta name="robots" content="noindex">
 <meta property="og:image" content="${SITE}/ogp/14-website-creation.jpg?v=20261013-1"></head><body style="margin:0;background:#0f1115;color:#eee;font-family:sans-serif">
 <p id="s" style="padding:24px">読み込み中...</p>
 <script>
