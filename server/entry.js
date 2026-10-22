@@ -155,6 +155,9 @@ async function handle(request) {
     try { await require('./plus').checkUsage(); } catch (error) { console.error('[plus usage]', error); }
     try { await require('./plus2').replyReminders(); } catch (error) { console.error('[plus reminders]', error); }
     try { await require('../netlify/lib/email-integration').ensureAgentMailWebhook(); } catch (error) { console.error('[agentmail webhook]', error.message); }
+    // 重いファイル類を GitHub のデータ置き場へ（レスポンス後も続ける）
+    const archiveWork = require('./archive-job').archiveColdFiles().then((r) => console.log('[archive-job]', JSON.stringify(r))).catch((error) => console.error('[archive-job]', error.message));
+    if (globalThis.EdgeRuntime?.waitUntil) globalThis.EdgeRuntime.waitUntil(archiveWork);
   }
 
   // 予約投稿の公開（1分ごとの定期処理に相乗り）

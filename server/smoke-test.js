@@ -207,5 +207,29 @@ async function register(name) {
   assert.ok(amCalls[1].url.includes('/messages/%3Cr1%40example.com%3E/reply'), amCalls[1].url);
   globalThis.fetch = realFetch;
 
+  // ---- GitHub のデータ置き場: 移した後も getJSON で元の値が読め、削除するとあちらも消える ----
+  process.env.MIXALL_GH_DATA_TOKEN = 'github_pat_test'; process.env.MIXALL_GH_DATA_REPO = 'kaikomziu/mixall-data';
+  const repoFiles = new Map(); const ghCalls = [];
+  globalThis.fetch = async (url, init = {}) => {
+    const u = String(url);
+    if (!u.startsWith('https://api.github.com/repos/kaikomziu/mixall-data/contents/')) return realFetch(url, init);
+    const path = decodeURIComponent(u.split('/contents/')[1].split('?')[0]);
+    ghCalls.push(`${init.method || 'GET'} ${path}`);
+    if ((init.method || 'GET') === 'PUT') { const body = JSON.parse(init.body); repoFiles.set(path, Buffer.from(body.content, 'base64').toString('utf8')); return new Response(JSON.stringify({ content: { sha: 'sha1' } })); }
+    if (init.method === 'DELETE') { repoFiles.delete(path); return new Response('{}'); }
+    if (!repoFiles.has(path)) return new Response('{}', { status: 404 });
+    return new Response(/raw/.test(init.headers?.Accept || '') ? repoFiles.get(path) : JSON.stringify({ sha: 'sha1' }));
+  };
+  const gha = require('../netlify/lib/github-archive');
+  const big = { data: 'x'.repeat(50000) };
+  await store.setJSON(STORE_NAMES.FILE_CHUNKS, 'f1:chunk:0', big);
+  const stubbed = await gha.archive(STORE_NAMES.FILE_CHUNKS, 'f1:chunk:0', big);
+  await store.db().set(STORE_NAMES.FILE_CHUNKS, 'f1:chunk:0', stubbed);
+  assert.ok(!JSON.stringify(await store.db().get(STORE_NAMES.FILE_CHUNKS, 'f1:chunk:0')).includes('xxxx'), 'DBには目印だけ');
+  assert.equal((await store.getJSON(STORE_NAMES.FILE_CHUNKS, 'f1:chunk:0')).data.length, 50000, 'GitHubから元の値を復元');
+  await store.deleteKey(STORE_NAMES.FILE_CHUNKS, 'f1:chunk:0');
+  assert.equal(repoFiles.size, 0, 'GitHub側も削除');
+  globalThis.fetch = realFetch;
+
   console.log('smoke test OK');
 })().catch((error) => { console.error(error); process.exit(1); });

@@ -439,6 +439,41 @@ exports.handler = async (event) => {
     if (!isOperator(info)) return json(403, { error: '運営のみ閲覧できます' });
     return json(200, await adminStats());
   }
+  // ---- GitHub のデータ置き場（重いファイル類の退避先） ----
+  if (action === 'archiveStatus') {
+    if (!isOperator(info)) return json(403, { error: '運営のみ閲覧できます' });
+    const gha = require('../netlify/lib/github-archive');
+    const { sql } = db();
+    const stores = [...require('../netlify/lib/store').ARCHIVE_STORES];
+    const [r] = await sql`select count(*) filter (where value ? '__archived')::int as archived,
+        coalesce(sum((value->'__archived'->>'bytes')::bigint) filter (where value ? '__archived'), 0)::bigint as archived_bytes,
+        count(*) filter (where not (value ? '__archived') and bytes >= 16384)::int as pending,
+        coalesce(sum(bytes) filter (where not (value ? '__archived') and bytes >= 16384), 0)::bigint as pending_bytes
+      from public.mixall_kv where store = any(${stores})`;
+    const cfg = gha.config();
+    const token = cfg.token ? `${cfg.token.slice(0, 11)}••••${cfg.token.slice(-4)}` : '';
+    return json(200, { configured: cfg.enabled, repo: cfg.repo, token, archived: r.archived, archivedBytes: Number(r.archived_bytes), pending: r.pending, pendingBytes: Number(r.pending_bytes) });
+  }
+  if (action === 'saveArchiveSettings') {
+    if (!info.isAdmin) return json(403, { error: '管理者のみ設定できます' });
+    const repo = String(payload.repo || '').trim();
+    const token = String(payload.token || '').trim() || String(process.env.MIXALL_GH_DATA_TOKEN || '');
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) return json(400, { error: 'リポジトリ名（例: kaikomziu/mixall-data）とトークンを入れてください' });
+    const res = await fetch(`https://api.github.com/repos/${repo}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'User-Agent': 'mixall-api' } });
+    const meta = await res.json().catch(() => ({}));
+    if (!res.ok) return json(400, { error: `リポジトリを確認できませんでした（${res.status}）。リポジトリ名とトークンの対象リポジトリを確かめてください` });
+    if (!meta.private) return json(400, { error: 'このリポジトリは公開されています。添付ファイルを置くので、非公開リポジトリにしてください' });
+    if (meta.permissions && meta.permissions.push === false) return json(400, { error: 'トークンに書き込み権限（Contents: Read and write）がありません' });
+    const env = (await db().get('mixall-config', 'env')) || {};
+    env.MIXALL_GH_DATA_REPO = repo; env.MIXALL_GH_DATA_TOKEN = token;
+    await db().set('mixall-config', 'env', env);
+    process.env.MIXALL_GH_DATA_REPO = repo; process.env.MIXALL_GH_DATA_TOKEN = token;
+    return json(200, { ok: true });
+  }
+  if (action === 'runArchive') {
+    if (!isOperator(info)) return json(403, { error: '運営のみ操作できます' });
+    return json(200, await require('./archive-job').archiveColdFiles({ limit: 15, timeBudgetMs: 50 * 1000 }));
+  }
   if (action === 'checkUsage') {
     if (!isOperator(info)) return json(403, { error: '運営のみ操作できます' });
     return json(200, await checkUsage());

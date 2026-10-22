@@ -21,6 +21,9 @@ const STORE_NAMES = {
   PLUS_POLLS: 'mixall-polls', PLUS_REACTIONS: 'mixall-reactions', PLUS_SCHEDULED: 'mixall-scheduled-posts', PLUS_NOTES: 'mixall-bookmark-notes', PLUS_WARNINGS: 'mixall-warnings', AGENTMAIL: 'mixall-agentmail'
 };
 
+// GitHub のデータ置き場へ移す対象（大きくて、書き換えがほぼ無いファイル類）
+const ARCHIVE_STORES = new Set([STORE_NAMES.FILE_CHUNKS, STORE_NAMES.ADMIN_FILES, STORE_NAMES.ATTACHMENTS]);
+
 // ---- バックエンド -------------------------------------------------------
 // MIXALL_STORE=memory のときはプロセス内Map（ローカル検証用）。それ以外はPostgres。
 let backend = null;
@@ -136,19 +139,28 @@ function withRequestCache(fn) { return requestCache.run(new Map(), fn); }
 
 // ---- 公開API ------------------------------------------------------------
 
+// GitHub のデータ置き場へ移したファイル類は、目印（スタブ）から元の値を取り出して返す
+let archiveLib = null;
+async function unarchive(value) {
+  if (!value || typeof value !== 'object' || !value.__archived) return value;
+  if (!archiveLib) archiveLib = require('./github-archive');
+  return archiveLib.isStub(value) ? archiveLib.restore(value) : value;
+}
+
 async function getJSON(storeName, key) {
   const cache = requestCache.getStore();
   const id = cacheId(storeName, key);
-  if (cache && cache.has(id)) return cloneValue(cache.get(id));
+  if (cache && cache.has(id)) return unarchive(cloneValue(cache.get(id)));
   const value = await db().get(storeName, String(key));
   if (cache) cache.set(id, cloneValue(value));
-  return value;
+  return unarchive(value);
 }
 
 async function getManyJSON(storeName, keys) {
   const found = await db().getMany(storeName, keys.map(String));
   const cache = requestCache.getStore();
   if (cache) for (const key of keys) cache.set(cacheId(storeName, key), found.has(String(key)) ? cloneValue(found.get(String(key))) : null);
+  for (const [key, value] of found) if (value && value.__archived) found.set(key, await unarchive(value));
   return found;
 }
 
@@ -163,6 +175,11 @@ async function setJSON(storeName, key, value) {
 }
 
 async function deleteKey(storeName, key) {
+  if (ARCHIVE_STORES.has(storeName)) {
+    // GitHub へ移した後のファイルなら、あちらも消す
+    const current = await db().get(storeName, String(key)).catch(() => null);
+    if (current && current.__archived) { if (!archiveLib) archiveLib = require('./github-archive'); await archiveLib.remove(current); }
+  }
   await db().del(storeName, String(key));
   const cache = requestCache.getStore();
   if (cache) cache.set(cacheId(storeName, key), null);
@@ -213,4 +230,4 @@ async function deleteChunked(storeName, fileId) {
   await deleteKey(storeName, `meta:${fileId}`);
 }
 
-module.exports = { STORE_NAMES, getJSON, getManyJSON, setJSON, deleteKey, listKeys, putChunkedText, getChunkedText, deleteChunked, db, withRequestCache };
+module.exports = { STORE_NAMES, ARCHIVE_STORES, getJSON, getManyJSON, setJSON, deleteKey, listKeys, putChunkedText, getChunkedText, deleteChunked, db, withRequestCache };

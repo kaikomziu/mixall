@@ -114,6 +114,38 @@
       catch (e) { toast(e.message, { kind: 'error' }); }
     };
     loadWarns();
+
+    // ---- GitHub のデータ置き場（添付ファイルなど重いものの退避先） ----
+    const arch = document.createElement('div');
+    arch.className = 'card';
+    el.appendChild(arch);
+    const mb = (b) => `${(Number(b || 0) / 1048576).toFixed(1)}MB`;
+    const loadArch = async () => {
+      let st;
+      try { st = await plus('archiveStatus', {}, 'GET'); } catch (e) { arch.innerHTML = `<p class="muted">${esc(e.message)}</p>`; return; }
+      arch.innerHTML = `<h2 style="margin-top:0">🗄️ データ置き場（GitHub）</h2>
+        <p class="muted">添付ファイルなど重いデータは、保存から1時間たつと非公開のGitHubリポジトリへ自動で移り、Supabaseには目印だけが残ります。開くときはサーバーがGitHubから取ってきます。</p>
+        <div class="mx-stat-grid">
+          <div class="mx-stat"><b>${st.archived}</b><span>GitHubへ移した数（${mb(st.archivedBytes)}）</span></div>
+          <div class="mx-stat"><b>${st.pending}</b><span>まだSupabaseにある数（${mb(st.pendingBytes)}）</span></div>
+        </div>
+        <p>${st.configured ? `設定済み: <strong>${esc(st.repo)}</strong>（トークン ${esc(st.token)}）` : '<span class="error">まだ設定されていません</span>'}</p>
+        <input type="text" id="mxArchRepo" placeholder="非公開リポジトリ（例: kaikomziu/mixall-data）" value="${esc(st.repo || '')}">
+        <input type="password" id="mxArchToken" autocomplete="new-password" placeholder="fine-grained token（変更するときだけ入力）">
+        <div class="row"><button type="button" id="mxArchSave">設定を保存</button>${st.configured ? '<button type="button" class="secondary" id="mxArchRun">今すぐ移す</button>' : ''}</div>`;
+      arch.querySelector('#mxArchSave').onclick = async () => {
+        try { await plus('saveArchiveSettings', { repo: arch.querySelector('#mxArchRepo').value, token: arch.querySelector('#mxArchToken').value }); toast('保存しました'); loadArch(); }
+        catch (e) { toast(e.message, { kind: 'error' }); }
+      };
+      const run = arch.querySelector('#mxArchRun');
+      if (run) run.onclick = async () => {
+        run.disabled = true; run.textContent = '移しています…';
+        try { const r = await plus('runArchive', {}); toast(r.errors && r.errors.length ? `一部失敗: ${r.errors[0]}` : `${r.moved}件（${mb(r.freedBytes)}）移しました。残り ${r.remaining}件`); }
+        catch (e) { toast(e.message, { kind: 'error' }); }
+        loadArch();
+      };
+    };
+    loadArch();
     el.querySelector('#mxCheckUsage').onclick = async () => { try { const r = await plus('checkUsage', {}); toast(r.alerts.length ? `通知しました: ${r.alerts.join(' / ')}` : '使用量は問題ありません'); } catch (e) { toast(e.message, { kind: 'error' }); } };
     const send = async (text) => {
       try {
