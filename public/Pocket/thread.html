@@ -566,7 +566,7 @@ document.getElementById('inviteSubmit').onclick = async () => {
 
 setupThreadContextMenu();
 loadRoom();
-setInterval(loadRoom, 4000);
+MixAllBase.poll(loadRoom, 5000);
 setInterval(()=>{ if(window.NetrifyOgp) NetrifyOgp.hydrate(document, (url)=>Netrify.api('/.netlify/functions/pocket',{action:'urlPreview',token:session.token,url})); }, 4000); // 常時更新: 4秒ごとに裏で読み込んで反映
 </script>
 </body>

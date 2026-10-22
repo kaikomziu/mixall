@@ -158,7 +158,7 @@ async function loadRooms() {
 }
 
 loadRooms();
-setInterval(loadRooms, 8000);
+MixAllBase.poll(loadRooms, 20000);
 </script>
 </body>
 </html>

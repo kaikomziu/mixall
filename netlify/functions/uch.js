@@ -653,6 +653,7 @@ async function handle(event) {
 
     if (!existing) bots.push(bot);
     await setJSON(STORE_NAMES.UCH_BOTS, threadId, bots);
+    await require('../../server/cron-gate').wake('scheduled-tokibou-background');
     return json(existing ? 200 : 201, { bot: publicBot(threadId, bot) });
   }
 
@@ -665,6 +666,7 @@ async function handle(event) {
     const bots = await getBots(threadId);
     const filtered = bots.filter((b) => b.id !== payload.botId);
     await setJSON(STORE_NAMES.UCH_BOTS, threadId, filtered);
+    await require('../../server/cron-gate').wake('scheduled-tokibou-background');
     return json(200, { bots: filtered });
   }
 

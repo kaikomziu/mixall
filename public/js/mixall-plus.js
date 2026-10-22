@@ -271,8 +271,7 @@
     // 下のバーは mixall-nav.js が後から作るので少し待つ
     setTimeout(refreshBadges, 600);
     clearInterval(badgeTimer);
-    badgeTimer = setInterval(refreshBadges, 60 * 1000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshBadges(); });
+    badgeTimer = window.MixAllBase && MixAllBase.poll ? MixAllBase.poll(refreshBadges, 60 * 1000) : setInterval(refreshBadges, 60 * 1000);
   }
 
   // =================================================================

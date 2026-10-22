@@ -22,7 +22,22 @@
     return base + value;
   }
 
-  window.MixAllBase = { base, api, path, fix };
+  // 定期更新: 画面が見えていないときは止め、3分操作が無ければ間隔を4倍に延ばす（API呼び出しの節約）。
+  // 画面に戻ったときは、前回から間が空いていればすぐ1回更新する。
+  let lastActive = Date.now();
+  ['pointerdown', 'keydown', 'scroll', 'touchstart', 'wheel'].forEach((name) => addEventListener(name, () => { lastActive = Date.now(); }, { passive: true, capture: true }));
+  function poll(fn, ms) {
+    let last = Date.now();
+    const run = () => { last = Date.now(); try { const r = fn(); if (r && r.catch) r.catch(() => {}); } catch (error) { console.error(error); } };
+    const id = setInterval(() => {
+      if (document.hidden) return;
+      const wait = Date.now() - lastActive > 3 * 60 * 1000 ? ms * 4 : ms;
+      if (Date.now() - last >= wait - 50) run();
+    }, ms);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - last > ms) { lastActive = Date.now(); run(); } });
+    return id;
+  }
+  window.MixAllBase = { base, api, path, fix, poll };
 
   document.addEventListener('click', (event) => {
     const anchor = event.target && event.target.closest ? event.target.closest('a[href]') : null;

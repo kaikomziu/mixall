@@ -54,13 +54,49 @@ function scheduledSlots(bot, from, to) {
   return slots;
 }
 
-exports.handler = async (event) => {
+// 次に投稿すべき時刻（最大7日先まで）。時報botが無ければ null
+function nextSlotAt(bots, now) {
+  let best = null;
+  const from = new Date(now.getTime() + 60 * 1000);
+  const to = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  for (const bot of bots) {
+    if (bot.triggerType !== 'routine' || !Array.isArray(bot.times) || !bot.times.length) continue;
+    const slot = firstSlot(bot, from, to);
+    if (slot && (!best || slot < best)) best = slot;
+  }
+  return best;
+}
 
+function firstSlot(bot, from, to) {
+  const cursor = new Date(from);
+  cursor.setUTCSeconds(0, 0);
+  while (cursor <= to) {
+    const parts = tokyoParts(cursor);
+    if (matchesDay(bot, parts) && matchesOnceDate(bot, parts) && bot.times.includes(`${parts.hour}:${parts.minute}`)) return cursor.getTime();
+    cursor.setUTCMinutes(cursor.getUTCMinutes() + 1);
+  }
+  return null;
+}
+
+exports.handler = async (event) => {
   const now = new Date();
+  const allBots = [];
+  try { return await run(now, allBots); }
+  finally {
+    // 予約投稿の次の公開時刻もあわせて、いちばん早い予定まで定期実行を止める（最長6時間ごとには確認）
+    let next = nextSlotAt(allBots, now);
+    try { const at = await require('../../server/plus2').nextScheduledAt(); if (at && (!next || at < next)) next = at; } catch (_) {}
+    const cap = now.getTime() + 6 * 60 * 60 * 1000;
+    await require('../../server/cron-gate').sleepUntil('scheduled-tokibou-background', Math.min(next || cap, cap) - 30 * 1000, now.getTime());
+  }
+};
+
+async function run(now, allBots) {
   const threadIds = await listKeys(STORE_NAMES.UCH_BOTS);
 
   for (const threadId of threadIds) {
     const bots = (await getJSON(STORE_NAMES.UCH_BOTS, threadId)) || [];
+    allBots.push(...bots);
     const routineBots = bots.filter((bot) => bot.triggerType === 'routine');
     if (routineBots.length === 0) continue;
 
@@ -101,4 +137,4 @@ exports.handler = async (event) => {
   }
 
   return { statusCode: 200, body: 'ok' };
-};
+}

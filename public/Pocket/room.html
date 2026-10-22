@@ -918,9 +918,9 @@ document.getElementById('messageList').addEventListener('scroll', () => {
 });
 MixAllNotifications.init(`pocket:${roomId}`, 'notificationSettings');
 MixAllNotifications.poll(`pocket:${roomId}`);
-setInterval(() => MixAllNotifications.poll(`pocket:${roomId}`), 15000);
+MixAllBase.poll(() => MixAllNotifications.poll(`pocket:${roomId}`), 30000);
 loadRoom();
-setInterval(loadRoom, 4000); // 常時更新: 4秒ごとに裏で読み込んで反映
+MixAllBase.poll(loadRoom, 4000); // 常時更新: 4秒ごとに裏で読み込んで反映
 </script>
 </body>
 </html>

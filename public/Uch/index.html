@@ -128,7 +128,7 @@ loadThreads();
 document.getElementById('threadSearch').addEventListener('input', loadThreads);
 document.getElementById('threadTagFilter').addEventListener('change',loadThreads);
 document.getElementById('matchAllTags').addEventListener('change',loadThreads);
-setInterval(loadThreads, 8000); // 常時更新
+MixAllBase.poll(loadThreads, 15000); // 常時更新
 </script>
 </body>
 </html>

@@ -650,9 +650,9 @@ document.getElementById('uchNoteSave').onclick=async()=>{try{const s=Netrify.req
 loadUchNotes();
 MixAllNotifications.init(`uch:${threadId}`, 'notificationSettings');
 MixAllNotifications.poll(`uch:${threadId}`);
-setInterval(() => MixAllNotifications.poll(`uch:${threadId}`), 15000);
+MixAllBase.poll(() => MixAllNotifications.poll(`uch:${threadId}`), 30000);
 loadThread();
-setInterval(loadThread, 8000); // 常時更新: 5秒ごとに裏で読み込んで反映
+MixAllBase.poll(loadThread, 8000); // 常時更新: 5秒ごとに裏で読み込んで反映
 </script>
 </body>
 </html>

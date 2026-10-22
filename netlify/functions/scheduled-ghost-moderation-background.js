@@ -92,7 +92,12 @@ exports.handler = async (event) => {
   const month = monthKey(now);
   let state = await getJSON(STORE_NAMES.GHOST_MODERATION, STATE_KEY);
   if (!state || (state.month !== month && state.status === 'complete')) state = await beginAudit(month);
-  if (state.status === 'complete') return { statusCode:200, body:'monthly Ghost age audit already complete' };
+  if (state.status === 'complete') {
+    // 今月分は終わったので、来月1日まで定期実行を止める
+    const nextMonth = Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 1);
+    await require('../../server/cron-gate').sleepUntil('scheduled-ghost-moderation-background', nextMonth, now.getTime());
+    return { statusCode:200, body:'monthly Ghost age audit already complete' };
+  }
   if (Number(state.lockUntil || 0) > Date.now()) return { statusCode:200, body:'Ghost age audit worker already running' };
 
   state.lockUntil = Date.now() + 120000;

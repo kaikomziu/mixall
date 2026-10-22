@@ -106,7 +106,7 @@ document.getElementById('mailSearchBtn').onclick = () => loadInbox(currentView);
 document.getElementById('mailSearch').addEventListener('keydown', e => { if (e.key === 'Enter') loadInbox(currentView); });
 document.getElementById('mailSubmit').onclick = async () => { const err = document.getElementById('mailError'); err.textContent = ''; const to = document.getElementById('mailTo').value.trim(); const subject = document.getElementById('mailSubject').value.trim(); const body = document.getElementById('mailBody').value.trim(); if (!to || (!body && !mailAttachment)) { err.textContent = '宛先と本文または添付ファイルが必要です'; return; } try { const data = await Netrify.api('/.netlify/functions/mail', { action:'send', token:session.token, to, subject, body, displayName:session.displayName, attachment:mailAttachment }); window.location.href = '/Mail/thread.html?id=' + encodeURIComponent(data.thread.id); } catch(e) { err.textContent = e.message; } };
 if(requestedView==='compose')setCompose(true);else loadInbox(currentView);
-if(requestedView!=='compose')setInterval(() => loadInbox(currentView), 8000);
+if(requestedView!=='compose')MixAllBase.poll(() => loadInbox(currentView), 20000);
 </script>
 </body>
 </html>

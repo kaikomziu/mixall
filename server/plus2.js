@@ -81,6 +81,13 @@ async function cosmeticsOf(email) {
 // =====================================================================
 // 13. 予約投稿（1分ごとの定期処理から公開する）
 // =====================================================================
+// いちばん早い予約投稿の公開時刻（定期実行を眠らせる目安）
+async function nextScheduledAt() {
+  let best = null;
+  for (const k of await listKeys(S.SCHEDULED)) { const job = await getJSON(S.SCHEDULED, k); if (job && Number(job.at) && (!best || job.at < best)) best = Number(job.at); }
+  return best;
+}
+
 async function publishScheduled() {
   const now = Date.now();
   const keys = await listKeys(S.SCHEDULED);
@@ -324,6 +331,7 @@ async function handle(action, payload, info) {
     const id = newId(6);
     delete body.token; delete body.action;
     await setJSON(S.SCHEDULED, `${email}:${id}`, { id, email, at, payload: body, poll: payload.poll || null, createdAt: Date.now() });
+    await require('./cron-gate').wake('scheduled-tokibou-background');
     return json(200, { id, at });
   }
   if (action === 'scheduledPosts') {
@@ -402,4 +410,4 @@ async function unackedWarnings(email) {
   return n;
 }
 
-module.exports = { handle, publishScheduled, replyReminders, unackedWarnings, cosmeticsOf, STORES: S, SHOP_ITEMS: SHOP };
+module.exports = { handle, publishScheduled, nextScheduledAt, replyReminders, unackedWarnings, cosmeticsOf, STORES: S, SHOP_ITEMS: SHOP };

@@ -30,7 +30,11 @@ exports.handler = async (event) => {
   if (!state || state.month !== month) state = await beginAudit(month, await targetsForMonth(month));
   else if (state.status === 'complete') {
     const pending = await targetsForMonth(month);
-    if (!pending.length) return { statusCode:200, body:JSON.stringify({ month, status:'complete', reviewedCount:state.reviewedCount || 0 }) };
+    if (!pending.length) {
+      // 新しい審査対象が無いので、1時間は定期実行を止める
+      await require('../../server/cron-gate').sleepUntil('scheduled-program-review-background', Date.now() + 60 * 60 * 1000, now.getTime());
+      return { statusCode:200, body:JSON.stringify({ month, status:'complete', reviewedCount:state.reviewedCount || 0 }) };
+    }
     state = await beginAudit(month, pending);
   }
   if (Number(state.lockUntil || 0) > Date.now()) return { statusCode:200, body:'program review worker already running' };

@@ -132,7 +132,7 @@ document.getElementById('createSubmit').onclick = async () => {
 };
 
 loadRooms();
-setInterval(loadRooms, 8000); // 常時更新
+MixAllBase.poll(loadRooms, 12000); // 常時更新
 </script>
 </body>
 </html>
