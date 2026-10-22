@@ -443,13 +443,13 @@ exports.handler = async (event) => {
   if (action === 'archiveStatus') {
     if (!isOperator(info)) return json(403, { error: '運営のみ閲覧できます' });
     const gha = require('../netlify/lib/github-archive');
-    const { sql } = db();
     const stores = [...require('../netlify/lib/store').ARCHIVE_STORES];
-    const [r] = await sql`select count(*) filter (where value ? '__archived')::int as archived,
+    let r = { archived: 0, archived_bytes: 0, pending: 0, pending_bytes: 0 };
+    try { [r] = await db().sql`select count(*) filter (where value ? '__archived')::int as archived,
         coalesce(sum((value->'__archived'->>'bytes')::bigint) filter (where value ? '__archived'), 0)::bigint as archived_bytes,
         count(*) filter (where not (value ? '__archived') and bytes >= 16384)::int as pending,
         coalesce(sum(bytes) filter (where not (value ? '__archived') and bytes >= 16384), 0)::bigint as pending_bytes
-      from public.mixall_kv where store = any(${stores})`;
+      from public.mixall_kv where store = any(${stores})`; } catch (error) { console.error('[archiveStatus]', error.message); }
     const cfg = gha.config();
     const token = cfg.token ? `${cfg.token.slice(0, 11)}••••${cfg.token.slice(-4)}` : '';
     return json(200, { configured: cfg.enabled, repo: cfg.repo, token, archived: r.archived, archivedBytes: Number(r.archived_bytes), pending: r.pending, pendingBytes: Number(r.pending_bytes) });
@@ -457,7 +457,7 @@ exports.handler = async (event) => {
   if (action === 'saveArchiveSettings') {
     if (!info.isAdmin) return json(403, { error: '管理者のみ設定できます' });
     const repo = String(payload.repo || '').trim();
-    const token = String(payload.token || '').trim() || String(process.env.MIXALL_GH_DATA_TOKEN || '');
+    const token = String(payload.ghToken || '').trim() || String(process.env.MIXALL_GH_DATA_TOKEN || '');
     if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) return json(400, { error: 'リポジトリ名（例: kaikomziu/mixall-data）とトークンを入れてください' });
     const res = await fetch(`https://api.github.com/repos/${repo}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'User-Agent': 'mixall-api' } });
     const meta = await res.json().catch(() => ({}));
