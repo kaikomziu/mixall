@@ -35,6 +35,7 @@ function memoryBackend() {
   const id = (s, k) => `${s}\u0000${k}`;
   return {
     async get(s, k) { const v = data.get(id(s, k)); return v === undefined ? null : JSON.parse(v); },
+    async getWithout(s, k, fields) { const v = data.get(id(s, k)); if (v === undefined) return null; const value = JSON.parse(v); if (value && typeof value === 'object') for (const f of fields) delete value[f]; return value; },
     async getMany(s, keys) { const out = new Map(); for (const k of keys) { const v = data.get(id(s, k)); if (v !== undefined) out.set(k, JSON.parse(v)); } return out; },
     async set(s, k, v) { data.set(id(s, k), JSON.stringify(v)); },
     async del(s, k) { data.delete(id(s, k)); },
@@ -74,6 +75,11 @@ function postgresBackend() {
   return {
     async get(s, k) {
       const rows = await sql`select value from public.mixall_kv where store = ${s} and key = ${k}`;
+      return rows.length ? rows[0].value : null;
+    },
+    // 大きい項目（アイコン画像のdata URLなど）をDB側で取り除いてから受け取る（転送量の削減）
+    async getWithout(s, k, fields) {
+      const rows = await sql`select value - ${fields}::text[] as value from public.mixall_kv where store = ${s} and key = ${k}`;
       return rows.length ? rows[0].value : null;
     },
     async getMany(s, keys) {
@@ -156,6 +162,19 @@ async function getJSON(storeName, key) {
   return unarchive(value);
 }
 
+// 指定した項目を除いて読む。除いた値はリクエスト内キャッシュに入れない（全体を読む getJSON と混ざらないように）。
+// 書き戻し（setJSON）には使わないこと。除いた項目が消えてしまう。
+async function getJSONWithout(storeName, key, fields) {
+  const cache = requestCache.getStore();
+  const id = cacheId(storeName, key);
+  if (cache && cache.has(id)) {
+    const value = cloneValue(cache.get(id));
+    if (value && typeof value === 'object') for (const f of fields) delete value[f];
+    return unarchive(value);
+  }
+  return unarchive(await db().getWithout(storeName, String(key), fields));
+}
+
 async function getManyJSON(storeName, keys) {
   const found = await db().getMany(storeName, keys.map(String));
   const cache = requestCache.getStore();
@@ -230,4 +249,4 @@ async function deleteChunked(storeName, fileId) {
   await deleteKey(storeName, `meta:${fileId}`);
 }
 
-module.exports = { STORE_NAMES, ARCHIVE_STORES, getJSON, getManyJSON, setJSON, deleteKey, listKeys, putChunkedText, getChunkedText, deleteChunked, db, withRequestCache };
+module.exports = { STORE_NAMES, ARCHIVE_STORES, getJSON, getJSONWithout, getManyJSON, setJSON, deleteKey, listKeys, putChunkedText, getChunkedText, deleteChunked, db, withRequestCache };

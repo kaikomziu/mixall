@@ -260,7 +260,7 @@ async function handle(event) {
   const email = await requireSession(token);
   if (!email) return json(401, { error: 'ログインが必要です' });
   const isAdmin = Boolean(await requireAdmin(token));
-  const isOfficial = Boolean((await getAccountProfile(email))?.isOfficial);
+  const isOfficial = Boolean((await getAccountProfile(email, { avatar:false }))?.isOfficial);
 
   // ---------- GET: ルーム一覧 or 詳細 ----------
   if (method === 'GET') {

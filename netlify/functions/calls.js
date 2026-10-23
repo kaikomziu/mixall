@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { STORE_NAMES, getJSON, setJSON, listKeys } = require('../lib/store');
+const { STORE_NAMES, getJSON, setJSON, listKeys, db } = require('../lib/store');
 const { requireSession, getAccountProfile } = require('../lib/session');
 
 const RING_TTL_MS = 2 * 60 * 1000;
@@ -25,6 +25,38 @@ async function listCallsFor(email) {
   return calls.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
+// 着信待ちの定期確認（poll）用。自分が関わる「呼び出し中」か、自分宛ての「未確認の不在着信」の通話だけを、
+// シグナリングデータ（signals）を除いてDBから取る。全通話を毎回読んでいたのを減らし、転送量を抑える。
+async function listIncomingFor(email) {
+  const store = db();
+  if (typeof store.sql !== 'function' || !store.getWithout) return listCallsFor(email);
+  let rows;
+  try {
+    rows = await store.sql`select key, value - 'signals' as value from public.mixall_kv
+      where store = ${STORE_NAMES.CALLS} and key like 'call:%'
+        and ((value->>'calleeEmail' = ${email}
+              and (value->>'status' = 'ringing' or (value->>'status' = 'missed' and coalesce(value->>'missedReadAt', '') = '')))
+          -- 自分がかけた呼び出し中の通話も、時間切れなら「不在」に切り替えるため対象にする（従来の挙動を維持）
+          or (value->>'callerEmail' = ${email} and value->>'status' = 'ringing'))`;
+  } catch (_) {
+    return listCallsFor(email); // メモリ版など SQL が使えないときは従来どおり
+  }
+  const calls = [];
+  for (const row of rows) {
+    let call = row.value;
+    if (!call) continue;
+    if (call.expiresAt < Date.now() && call.status === 'ringing') {
+      // 状態を書き換えるときは signals を消さないよう全体を読み直す
+      const full = await getJSON(STORE_NAMES.CALLS, row.key);
+      if (!full) continue;
+      full.status = 'missed'; full.updatedAt = new Date().toISOString(); await setJSON(STORE_NAMES.CALLS, row.key, full);
+      call = full;
+    }
+    calls.push(call);
+  }
+  return calls.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
 exports.handler = async (event) => {
 
   if (event.httpMethod !== 'POST') return json(405, { error: 'POSTのみ対応しています' });
@@ -36,8 +68,8 @@ exports.handler = async (event) => {
     if (action === 'start') {
       const calleeEmail = normalizeEmail(payload.calleeEmail);
       if (!calleeEmail || calleeEmail === email) return json(400, { error: '相手のアカウントが不正です' });
-      const profile = await getAccountProfile(calleeEmail);
-      const callerProfile = await getAccountProfile(email);
+      const profile = await getAccountProfile(calleeEmail, { avatar:false });
+      const callerProfile = await getAccountProfile(email, { avatar:false });
       if (!profile.createdAt) return json(404, { error: '相手のアカウントが見つかりません' });
       const now = new Date().toISOString();
       const call = { id:newId(), callerEmail:email, calleeEmail, callerPeerId: callerProfile.peerId, calleePeerId: profile.peerId, mode:['audio','video','screen'].includes(payload.mode) ? payload.mode : 'audio', status:profile.online ? 'ringing' : 'missed', createdAt:now, updatedAt:now, expiresAt:Date.now() + (profile.online ? RING_TTL_MS : 0), signals:[], transport:'temporary-netlify-blob-signaling', stateExpiresAt:Date.now()+TEMP_BLOB_TTL_MS, missedReadAt:null };
@@ -45,7 +77,7 @@ exports.handler = async (event) => {
       return json(201, { call:publicCall(call), recipientOnline:profile.online });
     }
     if (action === 'poll') {
-      const calls = await listCallsFor(email);
+      const calls = await listIncomingFor(email);
       return json(200, { incoming:calls.filter((call) => call.calleeEmail === email && call.status === 'ringing').map(publicCall), missed:calls.filter((call) => call.calleeEmail === email && call.status === 'missed' && !call.missedReadAt).map(publicCall) });
     }
     const callId = String(payload.callId || '');

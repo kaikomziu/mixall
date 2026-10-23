@@ -30,7 +30,7 @@ async function resolveUchMentions(text) {
   const ids = Array.from(new Set(String(text || '').match(/@[a-z0-9]{3,20}/gi) || [])).map((value) => value.slice(1).toLowerCase());
   if (!ids.length) return [];
   const found = [];
-  for (const key of await listKeys(STORE_NAMES.ACCOUNTS)) { const account = await getJSON(STORE_NAMES.ACCOUNTS, key); const profile = await getAccountProfile(key); if (profile.uchId && ids.includes(profile.uchId.toLowerCase())) found.push(key); }
+  for (const key of await listKeys(STORE_NAMES.ACCOUNTS)) { const profile = await getAccountProfile(key, { avatar:false }); if (profile.uchId && ids.includes(profile.uchId.toLowerCase())) found.push(key); }
   return found;
 }
 
@@ -291,7 +291,7 @@ async function handle(event) {
     if (qs.token) await requireSession(qs.token);
     if (qs.profile === 'me') {
       const viewer = await requireSession(qs.token); if (!viewer) return json(401, { error:'ログインが必要です' });
-      const profile = await getAccountProfile(viewer); return json(200, { profile: { name: profile.uchName, uchId: profile.uchId } });
+      const profile = await getAccountProfile(viewer, { avatar:false }); return json(200, { profile: { name: profile.uchName, uchId: profile.uchId } });
     }
     if (qs.threadId) {
       const thread = await getThread(qs.threadId);
@@ -368,7 +368,7 @@ async function handle(event) {
   if (action === 'saveUchProfile') {
     const account = await getJSON(STORE_NAMES.ACCOUNTS, email); if (!account) return json(404, { error:'アカウントが見つかりません' });
     const name = String(payload.name || '').trim().slice(0, 40); if (!name) return json(400, { error:'Uch名を入力してください' });
-    account.uchName = name; await setJSON(STORE_NAMES.ACCOUNTS, email, account); const profile = await getAccountProfile(email); return json(200, { profile:{ name:profile.uchName, uchId:profile.uchId } });
+    account.uchName = name; await setJSON(STORE_NAMES.ACCOUNTS, email, account); const profile = await getAccountProfile(email, { avatar:false }); return json(200, { profile:{ name:profile.uchName, uchId:profile.uchId } });
   }
   if (action === 'report') {
     const thread = await getThread(payload.threadId);
@@ -389,7 +389,7 @@ async function handle(event) {
     if(action==='listNotes')return json(200,{notes:thread.notes});
     if(action==='shareNote'){const note=thread.notes.find(n=>n.id===payload.noteId);if(!note)return json(404,{error:'ノートが見つかりません'});thread.posts.push({id:newId(),author:email,authorEmail:email,text:'',attachment:{isNote:true,noteId:note.id},createdAt:new Date().toISOString(),isBot:false});await setJSON(STORE_NAMES.UCH_THREADS,thread.id,thread);return json(200,{ok:true});}
     if(action==='deleteNote'){thread.notes=thread.notes.filter(n=>n.id!==payload.noteId);await setJSON(STORE_NAMES.UCH_THREADS,thread.id,thread);return json(200,{notes:thread.notes});}
-    const profile=await getAccountProfile(email); const media=(Array.isArray(payload.media)?payload.media:[]).filter(x=>x&&x.dataUrl&&String(x.dataUrl).length<3*1024*1024).slice(0,20); const note={id:newId(),title:String(payload.title||'').slice(0,120),body:String(payload.body||'').slice(0,10000),media,authorEmail:email,authorName:profile.uchName,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}; if(!note.title&&!note.body&&!note.media.length)return json(400,{error:'投稿内容を入力してください'});thread.notes.unshift(note);await setJSON(STORE_NAMES.UCH_THREADS,thread.id,thread);return json(200,{note,notes:thread.notes});
+    const profile=await getAccountProfile(email, { avatar:false }); const media=(Array.isArray(payload.media)?payload.media:[]).filter(x=>x&&x.dataUrl&&String(x.dataUrl).length<3*1024*1024).slice(0,20); const note={id:newId(),title:String(payload.title||'').slice(0,120),body:String(payload.body||'').slice(0,10000),media,authorEmail:email,authorName:profile.uchName,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}; if(!note.title&&!note.body&&!note.media.length)return json(400,{error:'投稿内容を入力してください'});thread.notes.unshift(note);await setJSON(STORE_NAMES.UCH_THREADS,thread.id,thread);return json(200,{note,notes:thread.notes});
   }
   if (action === 'search') {
     const thread = await getThread(payload.threadId); if (!thread) return json(404,{error:'スレッドが見つかりません'});
@@ -467,7 +467,7 @@ async function handle(event) {
       id,
       title,
       tags,
-      author: (await getAccountProfile(email)).uchName,
+      author: (await getAccountProfile(email, { avatar:false })).uchName,
       authorEmail: email,
       createdAt: new Date().toISOString(),
       parentThreadId,
@@ -479,7 +479,7 @@ async function handle(event) {
         ? [
             {
               id: newId(),
-              author: (await getAccountProfile(email)).uchName,
+              author: (await getAccountProfile(email, { avatar:false })).uchName,
               authorEmail: email,
               text: body,
               createdAt: new Date().toISOString(),

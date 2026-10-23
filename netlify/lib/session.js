@@ -1,7 +1,10 @@
 const crypto = require('crypto');
 function stablePeerId(email) { return 'mixall-' + crypto.createHash('sha256').update(String(email)).digest('hex').slice(0, 24); }
 function stableUchId(email, createdAt) { return 'u' + crypto.createHmac('sha256', process.env.UCH_ID_SECRET || 'mixall-uch-id-v1').update(`${String(email)}|${String(createdAt || '')}`).digest('hex').slice(0, 10); }
-const { STORE_NAMES, getJSON, setJSON, deleteKey } = require('./store');
+const { STORE_NAMES, getJSON, getJSONWithout, setJSON, deleteKey } = require('./store');
+// アイコン画像はdata URLで数百KBあることがあり、毎リクエスト読むとSupabaseの転送量（Egress）を大きく消費する。
+// ログイン確認や名前だけ必要な場面では、DB側でこの項目を除いて読む。
+const HEAVY_ACCOUNT_FIELDS = ['avatarDataUrl'];
 const { getAgeFromBirthDate } = require('./ghost-age');
 function tokenFingerprint(token) { return crypto.createHash('sha256').update(String(token)).digest('hex'); }
 
@@ -19,13 +22,15 @@ async function getSessionInfo(token) {
     return null;
   }
 
-  const account = await getJSON(STORE_NAMES.ACCOUNTS, session.email);
+  // アイコン画像を除いて読む（呼び出し側はアイコンを使っていない）
+  const account = await getJSONWithout(STORE_NAMES.ACCOUNTS, session.email, HEAVY_ACCOUNT_FIELDS);
   if (!account) return null;
   const age = getAgeFromBirthDate(account.birthDate);
   if (age === null) return null;
   if (account.age !== age) {
-    account.age = age;
-    await setJSON(STORE_NAMES.ACCOUNTS, session.email, account);
+    // 書き戻すときは、アイコンを消さないよう全体を読み直してから保存する
+    const full = await getJSON(STORE_NAMES.ACCOUNTS, session.email);
+    if (full) { full.age = age; await setJSON(STORE_NAMES.ACCOUNTS, session.email, full); }
   }
   const now = Date.now();
   // 最終利用時刻・オンライン表示（90秒以内でオンライン）の更新は30秒に1回で十分。
@@ -43,7 +48,8 @@ async function getSessionInfo(token) {
     email: session.email,
     displayName: account.displayName || session.email.split('@')[0],
     age,
-    avatarUrl: account.avatarDataUrl || null,
+    // アイコン本体は読んでいないので返さない（必要な画面は getAccountProfile やログイン応答で受け取る）
+    avatarUrl: null,
     avatarType: account.avatarType || null,
     avatarCrop: account.avatarCrop || null,
     uchName: account.uchName || account.displayName || session.email.split('@')[0],
@@ -66,10 +72,13 @@ async function requireAdmin(token) {
   return info && info.isOperator ? info : null;
 }
 
-async function getAccountProfile(email) {
+// options.avatar === false のときはアイコン画像を読まない（名前・権限・オンライン状態だけ必要な場面用）
+async function getAccountProfile(email, options = {}) {
   const normalized = String(email || '').trim().toLowerCase();
   if (!normalized) return { email: normalized, displayName: normalized, isAdmin: false, isOfficial: false };
-  const account = await getJSON(STORE_NAMES.ACCOUNTS, normalized);
+  const account = options.avatar === false
+    ? await getJSONWithout(STORE_NAMES.ACCOUNTS, normalized, HEAVY_ACCOUNT_FIELDS)
+    : await getJSON(STORE_NAMES.ACCOUNTS, normalized);
   const presence = await getJSON(STORE_NAMES.PRESENCE, normalized);
   return {
     email: normalized,

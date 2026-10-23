@@ -210,7 +210,7 @@ async function handle(event) {
         {
           id: newId(),
           authorEmail: email,
-          authorName: (await getAccountProfile(email)).displayName || email,
+          authorName: (await getAccountProfile(email, { avatar:false })).displayName || email,
           text: body,
           attachment,
           createdAt
@@ -259,7 +259,7 @@ async function handle(event) {
     const message={
       id: newId(),
       authorEmail: email,
-      authorName: (await getAccountProfile(email)).displayName || email,
+      authorName: (await getAccountProfile(email, { avatar:false })).displayName || email,
       text: body,
       attachment,
       createdAt: new Date().toISOString()
