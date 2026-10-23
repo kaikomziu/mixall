@@ -2,7 +2,10 @@
 // 掲示板「Uch」: スレッド作成・投稿・bot(時報/キーワード/典型)の管理と実行
 
 const crypto = require('crypto');
-const { STORE_NAMES, getJSON, setJSON, deleteKey, listKeys } = require('../lib/store');
+const { STORE_NAMES, getJSON, getJSONWithout, setJSON, deleteKey, listKeys } = require('../lib/store');
+// 読むだけの場面では、アカウントのアイコン画像（data URL・数百KBになる）をDB側で除いて読む（転送量の節約）。
+// この形で読んだアカウントは書き戻さないこと（アイコンが消える）。
+const NO_AVATAR = ['avatarDataUrl'];
 const { requireSession, requireAdmin, getAccountProfile } = require('../lib/session');
 const { createReport } = require('../lib/reports');
 const { notifyRecipients } = require('../lib/notifications');
@@ -121,7 +124,7 @@ function geminiContextScore(text, prompt, emailQuestion, sameAuthor) {
 
 async function collectGeminiContext({ prompt, threadId, requesterEmail, targetAuthorEmail, currentThread, settings }) {
   const emailQuestion = /メール|email|アドレス/i.test(String(prompt || ''));
-  const requester = await getJSON(STORE_NAMES.ACCOUNTS, requesterEmail);
+  const requester = await getJSONWithout(STORE_NAMES.ACCOUNTS, requesterEmail, NO_AVATAR);
   const requesterAge = getAgeFromBirthDate(requester?.birthDate);
   const candidates = [];
   const add = (candidate) => {
@@ -189,7 +192,7 @@ async function runAiBots(threadId, postText, authorEmail = '', replyTo = null, u
       const identityCache = new Map();
       const uchIdentity = async (post) => {
         const email = String(post?.authorEmail || '').toLowerCase();
-        if (email && !identityCache.has(email)) identityCache.set(email, await getAccountProfile(email));
+        if (email && !identityCache.has(email)) identityCache.set(email, await getAccountProfile(email, { avatar:false }));
         const profile = email ? identityCache.get(email) : null;
         const rawName = profile?.uchName || profile?.displayName || post?.author || '不明';
         const name = String(rawName).includes('@') ? '不明' : rawName;
@@ -199,7 +202,7 @@ async function runAiBots(threadId, postText, authorEmail = '', replyTo = null, u
       const historyPosts = (thread?.posts || []).filter((post) => post.text && !post.deleted).slice(-12);
       const history = await Promise.all(historyPosts.map(async (post) => ({ role: post.isBot ? 'model' : 'user', parts: [{ text: `送信者（Uch上の情報のみ）: ${await uchIdentity(post)}\n${String(post.text).slice(0, 3000)}` }] })));
       const replyTarget = replyTo ? (thread?.posts || []).find((post) => post.id === replyTo) : null;
-      const currentProfile = authorEmail ? await getAccountProfile(authorEmail) : null;
+      const currentProfile = authorEmail ? await getAccountProfile(authorEmail, { avatar:false }) : null;
       const currentIdentity = `名前: ${String(currentProfile?.uchName || currentProfile?.displayName || '不明').slice(0, 80)} / Uch ID: ${String(currentProfile?.uchId || '不明').slice(0, 40)}`;
       const replyIdentity = replyTarget ? await uchIdentity(replyTarget) : 'なし';
       const botConversationTarget = repliesToBot && requestedReplyTarget?.replyTo ? (thread?.posts || []).find((post) => post.id === requestedReplyTarget.replyTo) : null;
@@ -302,7 +305,7 @@ async function handle(event) {
       const bots = await getPublicBots(qs.threadId);
       const participantEmails = Array.from(new Set([thread.authorEmail, ...(thread.posts || []).map((post) => post.authorEmail)].filter(Boolean)));
       const profiles = {};
-      for (const participantEmail of participantEmails) profiles[participantEmail] = await getAccountProfile(participantEmail);
+      for (const participantEmail of participantEmails) profiles[participantEmail] = await getAccountProfile(participantEmail, { avatar:false });
       const allThreadKeys = await listKeys(STORE_NAMES.UCH_THREADS);
       const nestedThreads = [];
       for (const key of allThreadKeys) { const child = await getJSON(STORE_NAMES.UCH_THREADS, key); if (child && child.parentThreadId === thread.id) nestedThreads.push({ id:child.id, title:child.title, parentPostId:child.parentPostId, postCount:(child.posts || []).length, createdAt:child.createdAt }); }
@@ -347,7 +350,7 @@ async function handle(event) {
       }
     }
     threads.sort((a, b) => new Date(b.lastPostAt) - new Date(a.lastPostAt));
-    for (const item of threads) item.authorProfile = item.authorEmail ? await getAccountProfile(item.authorEmail) : null;
+    for (const item of threads) item.authorProfile = item.authorEmail ? await getAccountProfile(item.authorEmail, { avatar:false }) : null;
     return json(200, { threads, total:visibleThreadCount, availableTags:[...availableTags].sort((a,b)=>a.localeCompare(b,'ja')) });
   }
 
@@ -513,7 +516,7 @@ async function handle(event) {
     }
     if (!rawText && !attachment) return json(400, { error: '本文か添付ファイルのどちらかを入力してください' });
 
-    const uchProfile = await getAccountProfile(email);
+    const uchProfile = await getAccountProfile(email, { avatar:false });
     const userPostId = newId();
     const { text, deleted, autoReplies } = await runKeywordBots(threadId, rawText, email);
 

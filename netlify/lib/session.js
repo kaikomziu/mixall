@@ -139,4 +139,4 @@ async function getAccountProfile(email, options = {}) {
   };
 }
 
-module.exports = { getSessionInfo, getAccountProfile, requireSession, requireAdmin };
+module.exports = { getSessionInfo, getAccountProfile, readAccountWithAvatarKey, requireSession, requireAdmin };

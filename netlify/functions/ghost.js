@@ -3,7 +3,10 @@
 // フィード表示、いいね、コメント。
 
 const crypto = require('crypto');
-const { STORE_NAMES, getJSON, setJSON, deleteKey, listKeys, putChunkedText, getChunkedText, deleteChunked } = require('../lib/store');
+const { STORE_NAMES, getJSON, getJSONWithout, setJSON, deleteKey, listKeys, putChunkedText, getChunkedText, deleteChunked } = require('../lib/store');
+// 読むだけの場面では、アカウントのアイコン画像（data URL・数百KBになる）をDB側で除いて読む（転送量の節約）。
+// この形で読んだアカウントは書き戻さないこと（アイコンが消える）。
+const NO_AVATAR = ['avatarDataUrl'];
 const { getSessionInfo, requireSession, requireAdmin, getAccountProfile } = require('../lib/session');
 const { createReport } = require('../lib/reports');
 const { callGemini, getGeminiRuntimeSettings } = require('../lib/gemini');
@@ -52,8 +55,8 @@ function publicGhostProfile(account, email) {
 async function hydrateGhostMedia(media, token) { return Promise.all((media || []).map(async (item) => ['imageBlob', 'videoBlob'].includes(item?.kind) ? { ...item, mediaUrl: `${process.env.MIXALL_API_BASE || '/.netlify/functions'}/ghost?media=${encodeURIComponent(item.fileId)}&size=${encodeURIComponent(item.size || 0)}&token=${encodeURIComponent(token || '')}` } : item)); }
 async function hydrateGhostComments(comments) {
   return Promise.all((comments || []).map(async (comment) => {
-    const profile = await getAccountProfile(comment.authorEmail);
-    const account = await getJSON(STORE_NAMES.ACCOUNTS, comment.authorEmail);
+    const profile = await getAccountProfile(comment.authorEmail, { avatar:false });
+    const account = await getJSONWithout(STORE_NAMES.ACCOUNTS, comment.authorEmail, NO_AVATAR);
     const authorProfile = comment.isBot
       ? { displayName:comment.authorName || 'Ghost bot', handle:null, avatarUrl:null, bio:'', followingCount:0 }
       : account?.ghostHandle
@@ -182,8 +185,8 @@ async function handle(event) {
         for (const postId of [...list.postIds].reverse()) {
           const post = await getJSON(STORE_NAMES.GHOST_POSTS, postId);
           if (!post || post.deleted || !canViewAgeReviewed(post, viewer.age)) continue;
-          const profile = await getAccountProfile(post.authorEmail);
-          const authorAccount = await getJSON(STORE_NAMES.ACCOUNTS, post.authorEmail);
+          const profile = await getAccountProfile(post.authorEmail, { avatar:false });
+          const authorAccount = await getJSONWithout(STORE_NAMES.ACCOUNTS, post.authorEmail, NO_AVATAR);
           posts.push({ ...post, comments:await hydrateGhostComments(visibleComments(post.comments, viewer.age)), media:await hydrateGhostMedia(post.media, qs.token), authorProfile:authorAccount?.ghostHandle ? publicGhostProfile(authorAccount, post.authorEmail) : { displayName:profile.displayName, handle:null, avatarUrl:null, bio:'', followingCount:0 } });
         }
       }
@@ -274,17 +277,17 @@ async function handle(event) {
       if (!viewer) return json(401, { error:'ログインして年齢を設定してください。', ageRequired:true });
       const post = await getJSON(STORE_NAMES.GHOST_POSTS, String(qs.post));
       if (!post || post.deleted || !canViewAgeReviewed(post, viewer.age)) return json(404, { error:'投稿が見つかりません' });
-      const profile = await getAccountProfile(post.authorEmail);
-      const account = await getJSON(STORE_NAMES.ACCOUNTS, post.authorEmail);
+      const profile = await getAccountProfile(post.authorEmail, { avatar:false });
+      const account = await getJSONWithout(STORE_NAMES.ACCOUNTS, post.authorEmail, NO_AVATAR);
       const authorProfile = post.isOfficial ? { displayName:post.authorName || '公式アカウント', handle:post.authorEmail.replace('official:', ''), avatarUrl:null, bio:'MixAll +公式アカウント', followingCount:0 } : (post.isBot ? { displayName:post.authorName || 'Gemini', handle:'gemini', avatarUrl:null, bio:'Ghost AI', followingCount:0 } : (account?.ghostHandle ? publicGhostProfile(account, post.authorEmail) : { displayName:profile.displayName, handle:null, avatarUrl:null, bio:'', followingCount:0 }));
       return json(200, { post:{ ...post, media:await hydrateGhostMedia(post.media, qs.token), comments:await hydrateGhostComments(visibleComments(post.comments, viewer.age)), authorProfile } });
     }
     if (qs.profile) {
       const requested = String(qs.profile).trim().replace(/^@/, '').toLowerCase();
       const keys = await listKeys(STORE_NAMES.ACCOUNTS); let found = null; let foundEmail = '';
-      for (const key of keys) { const account = await getJSON(STORE_NAMES.ACCOUNTS, key); if (account && ((requested === 'me' && key === viewerEmail) || account.ghostHandle === requested)) { found = account; foundEmail = key; break; } }
+      for (const key of keys) { const account = await getJSONWithout(STORE_NAMES.ACCOUNTS, key, NO_AVATAR); if (account && ((requested === 'me' && key === viewerEmail) || account.ghostHandle === requested)) { found = account; foundEmail = key; break; } }
       if (!found) return json(404, { error:'Ghostアカウントが見つかりません' });
-      let followers = 0; for (const key of keys) { const account = await getJSON(STORE_NAMES.ACCOUNTS, key); if (Array.isArray(account?.ghostFollowing) && account.ghostFollowing.includes(foundEmail)) followers += 1; }
+      let followers = 0; for (const key of keys) { const account = await getJSONWithout(STORE_NAMES.ACCOUNTS, key, NO_AVATAR); if (Array.isArray(account?.ghostFollowing) && account.ghostFollowing.includes(foundEmail)) followers += 1; }
       const posts = []; for (const key of await listGhostPostKeys()) { const post = await getJSON(STORE_NAMES.GHOST_POSTS, key); if (post?.authorEmail === foundEmail && !post.deleted) posts.push(post); }
       // MixAll+: ヘッダー画像・テーマカラー・バッジ
       let plus = null; try { plus = await require('../../server/plus').profileExtras(foundEmail); } catch (_) { plus = null; }
@@ -294,8 +297,8 @@ async function handle(event) {
       const accountKeys = await listKeys(STORE_NAMES.ACCOUNTS);
       const accounts = [];
       for (const key of accountKeys) {
-        const account = await getJSON(STORE_NAMES.ACCOUNTS, key);
-        const profile = await getAccountProfile(key);
+        const account = await getJSONWithout(STORE_NAMES.ACCOUNTS, key, NO_AVATAR);
+        const profile = await getAccountProfile(key, { avatar:false });
         const q = String(qs.q || '').trim().toLowerCase();
         const publicProfile = account?.ghostHandle ? publicGhostProfile(account, key) : { handle:null, displayName:profile.displayName, avatarUrl:null, bio:'', followingCount:0 };
         if (!q || publicProfile.displayName.toLowerCase().includes(q) || String(publicProfile.handle || '').includes(q.replace(/^@/, ''))) accounts.push(publicProfile);
@@ -306,9 +309,9 @@ async function handle(event) {
     if (!viewer) return json(401, { error:'ログインして年齢を設定してください。', ageRequired:true });
     const keys = await listGhostPostKeys();
     let authorEmailFilter = null;
-    if (qs.authorHandle) { for (const accountKey of await listKeys(STORE_NAMES.ACCOUNTS)) { const account = await getJSON(STORE_NAMES.ACCOUNTS, accountKey); if (account?.ghostHandle === String(qs.authorHandle).replace(/^@/, '').toLowerCase()) { authorEmailFilter = accountKey; break; } } }
+    if (qs.authorHandle) { for (const accountKey of await listKeys(STORE_NAMES.ACCOUNTS)) { const account = await getJSONWithout(STORE_NAMES.ACCOUNTS, accountKey, NO_AVATAR); if (account?.ghostHandle === String(qs.authorHandle).replace(/^@/, '').toLowerCase()) { authorEmailFilter = accountKey; break; } } }
     const posts = [];
-    const viewerAccount = await getJSON(STORE_NAMES.ACCOUNTS, viewerEmail);
+    const viewerAccount = await getJSONWithout(STORE_NAMES.ACCOUNTS, viewerEmail, NO_AVATAR);
     const viewerBookmarkLists = normalizeBookmarkLists(viewerAccount);
     const query = parseSearchQuery(qs.q);
     const q = query.terms.join(' ');
@@ -321,8 +324,8 @@ async function handle(event) {
       if (qs.channel === 'video' && !['video','live'].includes(p.contentType)) continue;
       if (qs.channel === 'short' && p.contentType !== 'short') continue;
       if (authorEmailFilter && p.authorEmail !== authorEmailFilter) continue;
-      const profile = await getAccountProfile(p.authorEmail);
-      const authorAccount = await getJSON(STORE_NAMES.ACCOUNTS, p.authorEmail);
+      const profile = await getAccountProfile(p.authorEmail, { avatar:false });
+      const authorAccount = await getJSONWithout(STORE_NAMES.ACCOUNTS, p.authorEmail, NO_AVATAR);
       const publicProfile = p.isOfficial ? { displayName:p.authorName || '公式アカウント', handle:p.authorEmail.replace('official:', ''), avatarUrl:null, bio:'MixAll +公式アカウント', followingCount:0 } : (p.isBot ? { displayName:p.authorName || 'Gemini', handle:'gemini', avatarUrl:null, bio:'Ghost AI', followingCount:0 } : (authorAccount?.ghostHandle ? publicGhostProfile(authorAccount, p.authorEmail) : { displayName:profile.displayName, handle:null, avatarUrl:null, bio:'', followingCount:0 }));
       const comments = await hydrateGhostComments(visibleComments(p.comments, viewer.age));
       const searchable = [p.text, p.title, p.description, p.authorName, profile.displayName, profile.email, ...(p.tags || []), ...comments.map((c) => c.text)].join(' ').toLowerCase();
@@ -351,7 +354,7 @@ async function handle(event) {
   const email = await requireSession(payload.token);
   if (!email) return json(401, { error: 'ログインが必要です' });
   const isAdmin = Boolean(await requireAdmin(payload.token));
-  const actorAccount = await getJSON(STORE_NAMES.ACCOUNTS, email);
+  const actorAccount = await getJSONWithout(STORE_NAMES.ACCOUNTS, email, NO_AVATAR);
   const actorAge = getAgeFromBirthDate(actorAccount?.birthDate);
 
   if (action === 'manualAgeReview') {
@@ -455,7 +458,7 @@ async function handle(event) {
   if (action === 'saveGhostProfile') {
     const account = await getJSON(STORE_NAMES.ACCOUNTS, email); if (!account) return json(404, { error:'アカウントが見つかりません' });
     const handle = normalizeGhostHandle(payload.handle); if (!handle) return json(400, { error:'Ghost IDは英小文字・数字・アンダースコアの1〜20文字です' });
-    for (const key of await listKeys(STORE_NAMES.ACCOUNTS)) { if (key === email) continue; const other = await getJSON(STORE_NAMES.ACCOUNTS, key); if (other?.ghostHandle === handle) return json(409, { error:'そのGhost IDは既に使用されています' }); }
+    for (const key of await listKeys(STORE_NAMES.ACCOUNTS)) { if (key === email) continue; const other = await getJSONWithout(STORE_NAMES.ACCOUNTS, key, NO_AVATAR); if (other?.ghostHandle === handle) return json(409, { error:'そのGhost IDは既に使用されています' }); }
     const displayName = String(payload.displayName || '').trim().slice(0, 50); const bio = String(payload.bio || '').trim().slice(0, 160);
     if (account.ghostHandle && account.ghostHandle !== handle) { account.ghostName = displayName; account.ghostBio = bio; await setJSON(STORE_NAMES.ACCOUNTS, email, account); return json(202, { pending:true, message:'表示名とプロフィール情報は保存しました。Ghost IDの変更は運営への申請が必要です。', profile:publicGhostProfile(account, email) }); }
     account.ghostHandle = handle; account.ghostName = displayName; account.ghostBio = bio; account.ghostFollowing = Array.isArray(account.ghostFollowing) ? account.ghostFollowing : [];
@@ -466,7 +469,7 @@ async function handle(event) {
     if (!account?.ghostHandle) return json(400, { error:'先に現在のGhost IDを設定してください' });
     if (!nextHandle) return json(400, { error:'Ghost IDは英小文字・数字・アンダースコアの1〜20文字です' });
     if (nextHandle === account.ghostHandle) return json(400, { error:'現在と同じGhost IDです' });
-    for (const key of await listKeys(STORE_NAMES.ACCOUNTS)) { const other = await getJSON(STORE_NAMES.ACCOUNTS, key); if (other?.ghostHandle === nextHandle) return json(409, { error:'そのGhost IDは既に使用されています' }); }
+    for (const key of await listKeys(STORE_NAMES.ACCOUNTS)) { const other = await getJSONWithout(STORE_NAMES.ACCOUNTS, key, NO_AVATAR); if (other?.ghostHandle === nextHandle) return json(409, { error:'そのGhost IDは既に使用されています' }); }
     const pending = (await listKeys(STORE_NAMES.GHOST_ID_REQUESTS, 'request:')).map((key) => key.slice(8));
     for (const id of pending) { const request = await getJSON(STORE_NAMES.GHOST_ID_REQUESTS, `request:${id}`); if (request?.requesterEmail === email && request.status === 'pending') return json(409, { error:'未処理のID変更申請があります' }); }
     const id = newId(); const request = { id, requesterEmail:email, currentHandle:account.ghostHandle, requestedHandle:nextHandle, status:'pending', createdAt:new Date().toISOString() };
@@ -475,8 +478,8 @@ async function handle(event) {
 
   if (action === 'followAccount') {
     let targetEmail = String(payload.targetEmail || '').trim().toLowerCase();
-    if (!targetEmail && payload.targetHandle) { for (const key of await listKeys(STORE_NAMES.ACCOUNTS)) { const candidate = await getJSON(STORE_NAMES.ACCOUNTS, key); if (candidate?.ghostHandle === normalizeGhostHandle(payload.targetHandle)) { targetEmail = key; break; } } }
-    const target = await getJSON(STORE_NAMES.ACCOUNTS, targetEmail);
+    if (!targetEmail && payload.targetHandle) { for (const key of await listKeys(STORE_NAMES.ACCOUNTS)) { const candidate = await getJSONWithout(STORE_NAMES.ACCOUNTS, key, NO_AVATAR); if (candidate?.ghostHandle === normalizeGhostHandle(payload.targetHandle)) { targetEmail = key; break; } } }
+    const target = await getJSONWithout(STORE_NAMES.ACCOUNTS, targetEmail, NO_AVATAR);
     if (!target) return json(404, { error: 'アカウントが見つかりません' });
     const account = await getJSON(STORE_NAMES.ACCOUNTS, email);
     account.ghostFollowing = Array.isArray(account.ghostFollowing) ? account.ghostFollowing : [];
@@ -579,7 +582,7 @@ async function handle(event) {
     const post=await getJSON(STORE_NAMES.GHOST_POSTS,String(payload.postId||''));
     if(!isLivePost(post) || !canViewAgeReviewed(post, actorAge))return json(409,{error:'ライブチャットは配信中のみ、かつ閲覧できる場合に送信できます'});
     const text=String(payload.text||'').trim().slice(0,500);if(!text)return json(400,{error:'コメントを入力してください'});
-    const account=await getJSON(STORE_NAMES.ACCOUNTS,email);const profile=await getAccountProfile(email);const id=newId();
+    const account=await getJSONWithout(STORE_NAMES.ACCOUNTS, email, NO_AVATAR);const profile=await getAccountProfile(email, { avatar:false });const id=newId();
     const comment={id,authorEmail:email,authorName:account?.ghostName||account?.displayName||profile?.displayName||'ユーザー',text,createdAt:new Date().toISOString(),isLiveChat:true,ageReview:{status:'pending',categories:[]}};
     const earlyComment = await findKnownAgeSignatures(text, []);
     if (earlyComment.matches.length) comment.ageReview = { status:'signature_hold', categories:earlyComment.categories, matchedSignatures:earlyComment.matches, matchedAt:new Date().toISOString() };
@@ -749,8 +752,8 @@ async function handle(event) {
     post.comments = post.comments || [];
     let parentCommentId = payload.parentCommentId ? String(payload.parentCommentId).slice(0,80) : null;
     if (parentCommentId && !(post.comments || []).some((comment) => comment.id === parentCommentId)) return json(404,{error:'返信先コメントが見つかりません'});
-    const authorAccount = await getJSON(STORE_NAMES.ACCOUNTS, email);
-    const authorProfile = await getAccountProfile(email);
+    const authorAccount = await getJSONWithout(STORE_NAMES.ACCOUNTS, email, NO_AVATAR);
+    const authorProfile = await getAccountProfile(email, { avatar:false });
     const comment = {
       id: newId(),
       authorEmail: email,

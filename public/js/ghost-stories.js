@@ -9,6 +9,17 @@
   const STORY_MS = 5000;
   const BGS = ['#5b3dff', '#3d7bff', '#0daa93', '#ff4f8b', '#ff9f1a', '#111827'];
   let authors = [];
+  // 受け取ったアイコンを覚えておき、次からは目印(avatarKey)だけ送ってサーバーに本体を省いてもらう（通信量の節約）
+  // ページを移動しても使えるよう sessionStorage にも保存する（合計約2MBまで）
+  const AVATAR_STORE = 'mixall.storyAvatars';
+  const avatarCache = (() => { try { return new Map(JSON.parse(sessionStorage.getItem(AVATAR_STORE) || '[]')); } catch (_) { return new Map(); } })();
+  function saveAvatarCache() {
+    try {
+      const entries = Array.from(avatarCache.entries());
+      while (entries.length && JSON.stringify(entries).length > 2000000) entries.shift();
+      sessionStorage.setItem(AVATAR_STORE, JSON.stringify(entries));
+    } catch (_) { /* 保存できなくてもメモリ上では使える */ }
+  }
 
   function ago(ms) {
     const m = Math.floor((Date.now() - ms) / 60000);
@@ -19,9 +30,15 @@
     const strip = ensureStrip();
     if (!strip) return;
     try {
-      const d = await plus('stories', {}, 'GET');
+      const d = await plus('stories', avatarCache.size ? { avatars: Array.from(avatarCache.keys()).slice(-100).join(',') } : {}, 'GET');
       if (d.ageLimited) { strip.remove(); return; }
       authors = d.authors || [];
+      for (const a of authors) {
+        if (!a.avatarKey) continue;
+        if (a.avatarCached && avatarCache.has(a.avatarKey)) a.avatarUrl = avatarCache.get(a.avatarKey);
+        else if (a.avatarUrl) avatarCache.set(a.avatarKey, a.avatarUrl);
+      }
+      saveAvatarCache();
     } catch (_) { authors = []; }
     const mine = authors.find((a) => a.mine);
     strip.innerHTML = `<button type="button" class="mx-story-chip mx-story-add" data-add><span class="mx-story-ring"><span>＋</span></span><span class="mx-story-name">ストーリー</span></button>`

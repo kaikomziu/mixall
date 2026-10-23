@@ -118,7 +118,7 @@ async function handle(event) {
       const thread = await getJSON(STORE_NAMES.MAIL_THREADS, qs.threadId);
       if (!thread || !thread.memberEmails.includes(email)) return json(404, { error: 'スレッドが見つかりません' });
       const profiles = {};
-      for (const memberEmail of thread.memberEmails) profiles[memberEmail] = await getAccountProfile(memberEmail);
+      for (const memberEmail of thread.memberEmails) profiles[memberEmail] = await getAccountProfile(memberEmail, { avatar:false });
       return json(200, { thread: { ...thread, profiles, messages: thread.messages.map((message) => ({ ...message, authorProfile: profiles[message.authorEmail] || null })) } });
     }
     const keys = await listKeys(STORE_NAMES.MAIL_THREADS);
@@ -130,7 +130,7 @@ async function handle(event) {
       if (t && t.memberEmails.includes(email)) {
         const last = t.messages[t.messages.length - 1];
         const otherEmail = t.memberEmails.find((m) => m !== email) || email;
-        const profile = await getAccountProfile(otherEmail);
+        const profile = await getAccountProfile(otherEmail, { avatar:false });
         const hasIncoming = (t.messages || []).some((message) => message.authorEmail !== email);
         const hasOutgoing = (t.messages || []).some((message) => message.authorEmail === email);
         const sentByMe = hasOutgoing;
@@ -220,7 +220,7 @@ async function handle(event) {
     };
     await setJSON(STORE_NAMES.MAIL_THREADS, id, thread);
     if(external){
-      const sender=await getAccountProfile(email);
+      const sender=await getAccountProfile(email, { avatar:false });
       try{
         const sent=await sendEmailTemplate(event,{template:'mail-message',to,subject,parameters:{subject,senderName:String(sender.displayName||email).slice(0,80),senderAccount:email,body:body||'（本文はありません。添付ファイルをご確認ください。）',mailUrl:safeMailUrl(event)},attachments});
         thread.externalDelivery={status:'sent',provider:sent?.provider||'netlify-email',updatedAt:new Date().toISOString()};
@@ -271,7 +271,7 @@ async function handle(event) {
     thread.readBy[email] = new Date().toISOString();
     await setJSON(STORE_NAMES.MAIL_THREADS, payload.threadId, thread);
     if(externalReply){
-      const sender=await getAccountProfile(email);
+      const sender=await getAccountProfile(email, { avatar:false });
       try{
         // 件名はサーバーに残していない（端末保存）ため、端末から送られた件名を使う
         const replySubject=normalizeSubject(`Re: ${String(payload.subject||thread.subject||'').replace(/^(re:\s*)+/i,'')}`);

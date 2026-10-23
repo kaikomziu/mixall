@@ -5,7 +5,7 @@
 //   Ghostストーリー
 const crypto = require('crypto');
 const { STORE_NAMES, getJSON, setJSON, deleteKey, listKeys, getManyJSON, db } = require('../netlify/lib/store');
-const { getSessionInfo } = require('../netlify/lib/session');
+const { getSessionInfo, readAccountWithAvatarKey } = require('../netlify/lib/session');
 
 const S = {
   PROFILE: 'mixall-profile-extras',
@@ -346,7 +346,8 @@ function cleanMutes(input) {
 // 15. Ghostストーリー（24時間で消える）
 // =====================================================================
 const STORY_TTL = 24 * 3600 * 1000;
-async function listStories(viewer) {
+// knownAvatars: 端末がすでに持っているアイコンの目印（md5）。そのアイコンは本体を送らない（転送量の節約）
+async function listStories(viewer, knownAvatars = []) {
   const keys = await listKeys(S.STORIES);
   const now = Date.now();
   const byAuthor = new Map();
@@ -358,14 +359,17 @@ async function listStories(viewer) {
   }
   const authors = [];
   for (const [email, items] of byAuthor) {
-    const account = await getJSON(STORE_NAMES.ACCOUNTS, email);
+    const { account, avatarKey, avatarCached } = await readAccountWithAvatarKey(email, knownAvatars);
     items.sort((a, b) => a.createdAt - b.createdAt);
+    // Ghost用アイコンが無いときはアカウントのアイコンを使う。そのときだけ目印を付け、端末が持っていれば本体を省く
+    const usesAccountAvatar = !account?.ghostAvatarUrl && Boolean(avatarKey);
     authors.push({
       email: email === viewer.email ? email : undefined,
       mine: email === viewer.email,
       name: account?.ghostName || account?.displayName || email.split('@')[0],
       handle: account?.ghostHandle || null,
       avatarUrl: account?.ghostAvatarUrl || account?.avatarDataUrl || null,
+      ...(usesAccountAvatar ? { avatarKey, avatarCached } : {}),
       latestAt: items[items.length - 1].createdAt,
       stories: items.map((s) => ({ id: s.id, text: s.text, bg: s.bg, imageUrl: s.imageDataUrl || null, createdAt: s.createdAt, expiresAt: s.expiresAt, seen: (s.viewers || []).includes(viewer.email), views: email === viewer.email ? (s.viewers || []).length : undefined }))
     });
@@ -637,7 +641,8 @@ exports.handler = async (event) => {
   // ---- Ghostストーリー ----
   if (action === 'stories') {
     if (!(info.age >= 13)) return json(200, { authors: [], ageLimited: true });
-    return json(200, { authors: await listStories(info) });
+    const knownAvatars = String(payload.avatars || '').split(',').filter((key) => /^[0-9a-f]{32}$/.test(key)).slice(0, 100);
+    return json(200, { authors: await listStories(info, knownAvatars) });
   }
   if (action === 'createStory') {
     if (!(info.age >= 13)) return json(403, { error: 'ストーリーは13歳以上で利用できます' });
