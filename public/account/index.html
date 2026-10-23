@@ -253,12 +253,29 @@ let pendingAvatarType = null;
 function avatarCropValue() { return { x:Number(document.getElementById('avatarX').value), y:Number(document.getElementById('avatarY').value), size:Number(document.getElementById('avatarSize').value), start:Number(document.getElementById('avatarStart').value)||0, end:Number(document.getElementById('avatarEnd').value)||0 }; }
 function applyAvatarCrop() { const media=document.querySelector('#avatarPreviewWrap img,#avatarPreviewWrap video'); if (media) media.style.objectPosition=`${document.getElementById('avatarX').value}% ${document.getElementById('avatarY').value}%`; }
 ['avatarX','avatarY','avatarSize'].forEach((id) => document.getElementById(id).addEventListener('input', applyAvatarCrop));
+// 静止画のアイコンは保存前に縮小する（短い辺を256pxまで・WebP）。表示は最大72px程度なので見た目は変わらず、
+// 保存・配信するデータ量を大きく減らせる。GIF（アニメーション）と動画はそのまま。縦横比は保つので位置調整もそのまま効く
+const AVATAR_MAX_SIDE = 256;
+async function shrinkAvatarDataUrl(dataUrl, type) {
+  if (!/^image\/(png|jpeg|jpg|webp)$/i.test(type)) return dataUrl;
+  try {
+    const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = dataUrl; });
+    const scale = Math.min(1, AVATAR_MAX_SIDE / Math.min(img.naturalWidth, img.naturalHeight));
+    const w = Math.max(1, Math.round(img.naturalWidth * scale)), h = Math.max(1, Math.round(img.naturalHeight * scale));
+    const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d'); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, w, h);
+    let out = canvas.toDataURL('image/webp', 0.86);
+    // WebPに対応していないブラウザでは、透過のある形式はPNG、それ以外はJPEGにする
+    if (!out.startsWith('data:image/webp')) out = /png/i.test(type) ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.88);
+    return out.length < dataUrl.length ? out : dataUrl;
+  } catch (_) { return dataUrl; }
+}
 document.getElementById('avatarFile').addEventListener('change', (event) => {
   const file = event.target.files?.[0]; if (!file) return;
   const error = document.getElementById('profileError'); error.textContent = '';
   if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) { error.textContent = '画像・GIF・動画ファイルを選択してください'; return; }
   if (file.size > 8 * 1024 * 1024) { error.textContent = 'アイコン画像・動画は8MB以下にしてください'; event.target.value = ''; return; }
-  pendingAvatarType = file.type; const reader = new FileReader(); reader.onload = () => { pendingAvatar = String(reader.result); const wrap=document.getElementById('avatarPreviewWrap'); wrap.innerHTML=file.type.startsWith('video/') ? `<video id="avatarPreview" muted autoplay loop playsinline style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);"></video>` : `<img id="avatarPreview" alt="アイコン" src="${pendingAvatar}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);" />`; const media=document.getElementById('avatarPreview'); if (file.type.startsWith('video/')) media.src=pendingAvatar; applyAvatarCrop(); }; reader.readAsDataURL(file);
+  pendingAvatarType = file.type; const reader = new FileReader(); reader.onload = async () => { pendingAvatar = await shrinkAvatarDataUrl(String(reader.result), file.type); pendingAvatarType = pendingAvatar.slice(5, pendingAvatar.indexOf(';')) || file.type; const wrap=document.getElementById('avatarPreviewWrap'); wrap.innerHTML=file.type.startsWith('video/') ? `<video id="avatarPreview" muted autoplay loop playsinline style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);"></video>` : `<img id="avatarPreview" alt="アイコン" src="${pendingAvatar}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);" />`; const media=document.getElementById('avatarPreview'); if (file.type.startsWith('video/')) media.src=pendingAvatar; applyAvatarCrop(); }; reader.readAsDataURL(file);
 });
 document.getElementById('saveProfile').onclick = async () => {
   const s = Netrify.getSession(); if (!s) return;

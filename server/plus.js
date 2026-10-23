@@ -362,13 +362,15 @@ async function listStories(viewer, knownAvatars = []) {
     const { account, avatarKey, avatarCached } = await readAccountWithAvatarKey(email, knownAvatars);
     items.sort((a, b) => a.createdAt - b.createdAt);
     // Ghost用アイコンが無いときはアカウントのアイコンを使う。そのときだけ目印を付け、端末が持っていれば本体を省く
-    const usesAccountAvatar = !account?.ghostAvatarUrl && Boolean(avatarKey);
+    // 動画のアイコンはストーリーの丸アイコンに表示できない（以前も data:video は表示していなかった）ので送らない
+    const accountAvatarIsVideo = String(account?.avatarType || '').startsWith('video/');
+    const usesAccountAvatar = !account?.ghostAvatarUrl && Boolean(avatarKey) && !accountAvatarIsVideo;
     authors.push({
       email: email === viewer.email ? email : undefined,
       mine: email === viewer.email,
       name: account?.ghostName || account?.displayName || email.split('@')[0],
       handle: account?.ghostHandle || null,
-      avatarUrl: account?.ghostAvatarUrl || account?.avatarDataUrl || null,
+      avatarUrl: account?.ghostAvatarUrl || (accountAvatarIsVideo ? null : account?.avatarDataUrl) || null,
       ...(usesAccountAvatar ? { avatarKey, avatarCached } : {}),
       latestAt: items[items.length - 1].createdAt,
       stories: items.map((s) => ({ id: s.id, text: s.text, bg: s.bg, imageUrl: s.imageDataUrl || null, createdAt: s.createdAt, expiresAt: s.expiresAt, seen: (s.viewers || []).includes(viewer.email), views: email === viewer.email ? (s.viewers || []).length : undefined }))

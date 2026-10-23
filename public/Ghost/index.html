@@ -88,7 +88,8 @@
   const yt = (u) => { const m = String(u || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/); return m ? 'https://www.youtube.com/embed/' + m[1] : ''; };
   let channel = 'timeline'; let limit = 30; let loading = false;
   const me = document.getElementById('gfMe');
-  if (session.avatarUrl && /^data:image/.test(session.avatarUrl)) { me.style.backgroundImage = `url('${session.avatarUrl}')`; me.textContent = ''; }
+  // アイコンは Storage のURL（https）の場合もある。動画アイコンは背景にできないので除く
+  if (session.avatarUrl && (/^data:image/.test(session.avatarUrl) || (/^https:/.test(session.avatarUrl) && !String(session.avatarType || '').startsWith('video/')))) { me.style.backgroundImage = `url('${session.avatarUrl}')`; me.textContent = ''; }
 
   function ago(iso) {
     const s = (Date.now() - new Date(iso)) / 1000;

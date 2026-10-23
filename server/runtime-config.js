@@ -2,6 +2,7 @@
 // Edge Functionのシークレットに加え、mixall_kv の store='mixall-config' key='env' に置いた設定を
 // process.env へ読み込む（シークレット側が優先）。Supabaseの画面を開かずにSQLで設定を変えられるようにするため。
 const { db } = require('../netlify/lib/store');
+const { migrateDataUrlAvatars } = require('../netlify/lib/avatar-storage');
 
 let loadedAt = 0;
 const TTL_MS = 60 * 1000;
@@ -21,6 +22,8 @@ async function loadRuntimeConfig() {
   } catch (error) {
     console.error('runtime config load failed:', error.message);
   }
+  // data URL のまま残っているアカウントのアイコンを Storage へ移す（残っていなければ軽い確認だけ）
+  await migrateDataUrlAvatars();
 }
 
 module.exports = { loadRuntimeConfig };

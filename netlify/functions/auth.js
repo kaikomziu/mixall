@@ -5,6 +5,7 @@
 const crypto = require('crypto');
 const { STORE_NAMES, getJSON, setJSON, deleteKey, listKeys } = require('../lib/store');
 const { getSessionInfo } = require('../lib/session');
+const { isStoredAvatarUrl, storeAvatarDataUrl, removeStoredAvatar } = require('../lib/avatar-storage');
 const { getAgeFromBirthDate, isValidBirthDate } = require('../lib/ghost-age');
 const { handleRecoveryAction, clearRecoveryRecords } = require('../lib/account-recovery');
 
@@ -273,12 +274,18 @@ async function handlePost(event) {
     const avatar = payload.avatarDataUrl == null ? account.avatarDataUrl || null : String(payload.avatarDataUrl);
     const avatarType = payload.avatarType == null ? account.avatarType || null : String(payload.avatarType);
     const avatarCrop = payload.avatarCrop && typeof payload.avatarCrop === 'object' ? { x:Number(payload.avatarCrop.x)||50, y:Number(payload.avatarCrop.y)||50, size:Math.max(10, Math.min(100, Number(payload.avatarCrop.size)||80)), start:Math.max(0, Number(payload.avatarCrop.start)||0), end:Math.max(0, Number(payload.avatarCrop.end)||0) } : (account.avatarCrop || null);
-    if (avatar && (!/^data:(image\/(png|jpeg|jpg|webp|gif)|video\/(mp4|webm|ogg));base64,/i.test(avatar) || avatar.length > 8000000)) return json(400, { error: 'アイコン画像・動画は対応形式で8MB以下にしてください' });
+    // 保存済みのアイコン（Storage のURL）はそのまま使える。新しく送られたものは data URL のみ受け付ける
+    const avatarIsStored = avatar && avatar === account.avatarDataUrl && isStoredAvatarUrl(avatar);
+    if (avatar && !avatarIsStored && (!/^data:(image\/(png|jpeg|jpg|webp|gif)|video\/(mp4|webm|ogg));base64,/i.test(avatar) || avatar.length > 8000000)) return json(400, { error: 'アイコン画像・動画は対応形式で8MB以下にしてください' });
     account.displayName = String(payload.displayName || account.displayName || session.email.split('@')[0]).trim().slice(0, 80) || session.email.split('@')[0];
-    account.avatarDataUrl = avatar || null;
+    // 新しいアイコンは Storage に置き、アカウントにはURLだけを入れる（毎回の読み込み・応答を軽くする）
+    const previousAvatar = account.avatarDataUrl || null;
+    const storedAvatar = avatar && !avatarIsStored ? await storeAvatarDataUrl(session.email, avatar) : avatar;
+    account.avatarDataUrl = storedAvatar || null;
     account.avatarType = avatar ? avatarType : null;
     account.avatarCrop = avatar ? avatarCrop : null;
     await setJSON(STORE_NAMES.ACCOUNTS, session.email, account);
+    if (previousAvatar && previousAvatar !== account.avatarDataUrl) await removeStoredAvatar(previousAvatar);
     return json(200, { email: session.email, displayName: account.displayName, avatarUrl: account.avatarDataUrl, avatarType:account.avatarType, avatarCrop:account.avatarCrop, isAdmin: account.isAdmin === true, isDeputyAdmin: account.isDeputyAdmin === true, isOfficial: account.isOfficial === true || account.isAdmin === true });
   }
 
