@@ -3,7 +3,7 @@
 // ロール(主/副官/カスタムロール)管理。通話機能は別フェーズで追加予定。
 
 const crypto = require('crypto');
-const { STORE_NAMES, getJSON, setJSON, listKeys } = require('../lib/store');
+const { STORE_NAMES, getJSON, getJSONWithout, setJSON, listKeys } = require('../lib/store');
 const { requireSession, requireAdmin, getAccountProfile } = require('../lib/session');
 const { createReport } = require('../lib/reports');
 const { notifyRecipients } = require('../lib/notifications');
@@ -139,8 +139,12 @@ function normalizeEmail(input) {
   return String(input || '').trim().toLowerCase();
 }
 
-async function getRoom(roomId) {
-  const room = await getJSON(STORE_NAMES.POCKET_ROOMS, roomId);
+// options.light: 表示用の読み込み。ノート・アルバム（大きくなりやすい）をDB側で除いて読む。
+// light で読んだルームは書き戻さないこと（ノートが消える）。
+async function getRoom(roomId, options = {}) {
+  const room = options.light
+    ? await getJSONWithout(STORE_NAMES.POCKET_ROOMS, roomId, ['notes', 'albums'])
+    : await getJSON(STORE_NAMES.POCKET_ROOMS, roomId);
   if (!room) return null;
   room.memberEmails = Array.isArray(room.memberEmails) ? room.memberEmails : [];
   room.subHosts = Array.isArray(room.subHosts) ? room.subHosts : [];
@@ -265,7 +269,8 @@ async function handle(event) {
   // ---------- GET: ルーム一覧 or 詳細 ----------
   if (method === 'GET') {
     if (qs.roomId) {
-      const room = await getRoom(qs.roomId);
+      // 定期更新で毎回読むので、ノート等を除いて軽く読む（このGETではルームを書き戻さない）
+      const room = await getRoom(qs.roomId, { light:true });
       if (!room || !room.memberEmails.includes(email)) {
         return json(404, { error: 'ルームが見つかりません' });
       }
@@ -276,17 +281,19 @@ async function handle(event) {
       const end = beforeIndex >= 0 ? beforeIndex : visibleMessages.length;
       const start = Math.max(0, end - limit);
       const pageMessages = visibleMessages.slice(start, end);
+      // 端末がすでに持っているアイコン（目印のmd5）は本体を送らない。4秒ごとの更新で毎回数百KB送っていたのを防ぐ
+      const knownAvatars = String(qs.avatars || '').split(',').filter((key) => /^[0-9a-f]{32}$/.test(key)).slice(0, 100);
       const profiles = {};
-      for (const memberEmail of room.memberEmails) profiles[memberEmail] = await getAccountProfile(memberEmail);
+      for (const memberEmail of room.memberEmails) profiles[memberEmail] = await getAccountProfile(memberEmail, { knownAvatars });
       for (const message of pageMessages) {
-        if (!profiles[message.authorEmail]) profiles[message.authorEmail] = await getAccountProfile(message.authorEmail);
+        if (!profiles[message.authorEmail]) profiles[message.authorEmail] = await getAccountProfile(message.authorEmail, { knownAvatars });
       }
       const settings = await getMinefieldSettings(email);
       const displayMessages = await transformMessagesForViewer(pageMessages, email, room, profiles, settings, isAdmin);
       const messages = displayMessages.map((m) => ({
         ...m,
-        authorName: room.nicknames[m.authorEmail] || m.authorName,
-        authorProfile: profiles[m.authorEmail]
+        // 送信者のプロフィール（アイコン入り）はメッセージごとに重複させず、room.profiles だけで返す（画面もそちらを使う）
+        authorName: room.nicknames[m.authorEmail] || m.authorName
       }));
       return json(200, {
         room: {

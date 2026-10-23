@@ -247,15 +247,27 @@ document.getElementById('stampToggleBtn').onclick = () => {
   picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
 };
 
+// 受け取ったアイコンを覚えておき、次からは目印(avatarKey)だけ送ってサーバーに本体を省いてもらう（通信量の節約）
+const avatarCache = new Map();
+function avatarQuery() { return avatarCache.size ? '&avatars=' + Array.from(avatarCache.keys()).slice(-100).join(',') : ''; }
+function fillAvatars(room) {
+  for (const profile of Object.values(room?.profiles || {})) {
+    if (!profile || !profile.avatarKey) continue;
+    if (profile.avatarCached && avatarCache.has(profile.avatarKey)) profile.avatarUrl = avatarCache.get(profile.avatarKey);
+    else if (profile.avatarUrl) avatarCache.set(profile.avatarKey, profile.avatarUrl);
+  }
+}
+
 async function loadRoom() {
   if (!session) return;
   loadPocketStamps();
-  const res = await fetch('/.netlify/functions/pocket?roomId=' + encodeURIComponent(roomId) + '&limit=60&token=' + encodeURIComponent(session.token));
+  const res = await fetch('/.netlify/functions/pocket?roomId=' + encodeURIComponent(roomId) + '&limit=60' + avatarQuery() + '&token=' + encodeURIComponent(session.token));
   if (!res.ok) {
     document.getElementById('roomTitle').textContent = 'ルームが見つかりません';
     return;
   }
   const data = await res.json();
+  fillAvatars(data.room);
   if (!currentRoom) currentRoom = data.room;
   else {
     // 最新ページの範囲内で返ってこなかったメッセージ（削除されたもの）は画面からも消す
@@ -279,9 +291,10 @@ async function loadOlderMessages() {
   const oldHeight = list.scrollHeight; const oldTop = list.scrollTop;
   try {
     const oldest = currentRoom.messages[0].id;
-    const res = await fetch('/.netlify/functions/pocket?roomId=' + encodeURIComponent(roomId) + '&before=' + encodeURIComponent(oldest) + '&limit=60&token=' + encodeURIComponent(session.token));
+    const res = await fetch('/.netlify/functions/pocket?roomId=' + encodeURIComponent(roomId) + '&before=' + encodeURIComponent(oldest) + '&limit=60' + avatarQuery() + '&token=' + encodeURIComponent(session.token));
     if (!res.ok) return;
     const data = await res.json();
+    fillAvatars(data.room);
     const byId = new Map([...currentRoom.messages, ...data.room.messages].map((message) => [message.id, message]));
     currentRoom = { ...currentRoom, ...data.room, messages:Array.from(byId.values()).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt)) };
     hasMoreMessages = Boolean(data.room.hasMoreMessages); currentRoom.hasMoreMessages = hasMoreMessages;

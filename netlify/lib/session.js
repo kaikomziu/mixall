@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 function stablePeerId(email) { return 'mixall-' + crypto.createHash('sha256').update(String(email)).digest('hex').slice(0, 24); }
 function stableUchId(email, createdAt) { return 'u' + crypto.createHmac('sha256', process.env.UCH_ID_SECRET || 'mixall-uch-id-v1').update(`${String(email)}|${String(createdAt || '')}`).digest('hex').slice(0, 10); }
-const { STORE_NAMES, getJSON, getJSONWithout, setJSON, deleteKey } = require('./store');
+const { STORE_NAMES, getJSON, getJSONWithout, setJSON, deleteKey, db } = require('./store');
 // アイコン画像はdata URLで数百KBあることがあり、毎リクエスト読むとSupabaseの転送量（Egress）を大きく消費する。
 // ログイン確認や名前だけ必要な場面では、DB側でこの項目を除いて読む。
 const HEAVY_ACCOUNT_FIELDS = ['avatarDataUrl'];
@@ -72,13 +72,52 @@ async function requireAdmin(token) {
   return info && info.isOperator ? info : null;
 }
 
+// アイコンの目印（md5）。端末が同じ目印のアイコンを持っていれば、本体を送らずに済ませる
+function avatarKeyOf(dataUrl) { return dataUrl ? crypto.createHash('md5').update(String(dataUrl), 'utf8').digest('hex') : null; }
+
+// アカウントを読み、アイコンは「端末が持っていない（knownに無い）ときだけ」本体を返す。
+// DB側で md5 を計算して比べるので、端末が持っているアイコンはDBからも転送しない。
+async function readAccountWithAvatarKey(email, known) {
+  const store = db();
+  if (typeof store.sql === 'function') {
+    // 空配列だと型が決まらないことがあるので、一致しないダミーを入れておく
+    const list = known.length ? known : ['-'];
+    try {
+      const rows = await store.sql`select value - 'avatarDataUrl' as value,
+          md5(value->>'avatarDataUrl') as akey,
+          case when md5(value->>'avatarDataUrl') = any(${list}::text[]) then null else value->>'avatarDataUrl' end as avatar
+        from public.mixall_kv where store = ${STORE_NAMES.ACCOUNTS} and key = ${email}`;
+      if (!rows.length || !rows[0].value) return { account:null, avatarKey:null, avatarCached:false };
+      const account = rows[0].value;
+      const avatarKey = rows[0].akey || null;
+      const avatarCached = Boolean(avatarKey && rows[0].avatar === null);
+      if (!avatarCached && rows[0].avatar) account.avatarDataUrl = rows[0].avatar;
+      return { account, avatarKey, avatarCached };
+    } catch (_) { /* メモリ版など SQL が使えないときは下の通常の読み方へ */ }
+  }
+  const account = await getJSON(STORE_NAMES.ACCOUNTS, email);
+  const avatarKey = avatarKeyOf(account && account.avatarDataUrl);
+  const avatarCached = Boolean(avatarKey && known.includes(avatarKey));
+  if (account && avatarCached) delete account.avatarDataUrl;
+  return { account, avatarKey, avatarCached };
+}
+
 // options.avatar === false のときはアイコン画像を読まない（名前・権限・オンライン状態だけ必要な場面用）
+// options.knownAvatars（端末が持っているアイコンの目印の配列）を渡すと、avatarKey を付け、
+// 端末が持っているアイコンは avatarUrl を null・avatarCached を true にして返す（端末側で補う）
 async function getAccountProfile(email, options = {}) {
   const normalized = String(email || '').trim().toLowerCase();
   if (!normalized) return { email: normalized, displayName: normalized, isAdmin: false, isOfficial: false };
-  const account = options.avatar === false
-    ? await getJSONWithout(STORE_NAMES.ACCOUNTS, normalized, HEAVY_ACCOUNT_FIELDS)
-    : await getJSON(STORE_NAMES.ACCOUNTS, normalized);
+  let avatarInfo = null;
+  let account;
+  if (Array.isArray(options.knownAvatars)) {
+    avatarInfo = await readAccountWithAvatarKey(normalized, options.knownAvatars);
+    account = avatarInfo.account;
+  } else {
+    account = options.avatar === false
+      ? await getJSONWithout(STORE_NAMES.ACCOUNTS, normalized, HEAVY_ACCOUNT_FIELDS)
+      : await getJSON(STORE_NAMES.ACCOUNTS, normalized);
+  }
   const presence = await getJSON(STORE_NAMES.PRESENCE, normalized);
   return {
     email: normalized,
@@ -95,7 +134,8 @@ async function getAccountProfile(email, options = {}) {
     createdAt: account ? account.createdAt : null,
     online: Boolean(presence && Number(presence.lastSeenAt) > Date.now() - 90 * 1000),
     lastSeenAt: presence ? presence.lastSeenAt : null,
-    peerId: stablePeerId(normalized)
+    peerId: stablePeerId(normalized),
+    ...(avatarInfo ? { avatarKey: avatarInfo.avatarKey, avatarCached: avatarInfo.avatarCached } : {})
   };
 }
 
