@@ -113,7 +113,7 @@ const DESCRIPTIONS = {
   'reset-password/index.html': 'MixAll+ のパスワード再設定ページです。登録した回復用メールアドレスから再設定できます。'
 };
 // 検索ワード（keywords）。全ページ共通の語に、サービスごとの語を足す
-const BASE_KEYWORDS = ['MixAll+', 'MixAll プラス', 'ミックスオールプラス', 'MixAll', 'ミックスオール'];
+const BASE_KEYWORDS = ['MixAll +（二世代）', 'MixAll 二世代', 'MixAll+', 'MixAll プラス', 'ミックスオールプラス', 'MixAll', 'ミックスオール', '二世代'];
 const SECTION_KEYWORDS = {
   '': ['掲示板', 'チャット', 'SNS', 'コミュニティ', '無料'],
   Uch: ['Uch', '掲示板', '匿名掲示板', 'スレッド'],
@@ -149,7 +149,7 @@ function seoTags(html, rel) {
     if (!/name="robots"/i.test(html)) add.push('<meta name="robots" content="noindex">');
   } else {
     if (!/name="robots"/i.test(html)) add.push(PRIVATE_PAGES.has(rel) ? '<meta name="robots" content="noindex, follow">' : '<meta name="robots" content="index, follow, max-image-preview:large">');
-    if (/property="og:title"/i.test(html) && !/property="og:site_name"/i.test(html)) add.push('<meta property="og:site_name" content="MixAll +">');
+    if (/property="og:title"/i.test(html) && !/property="og:site_name"/i.test(html)) add.push('<meta property="og:site_name" content="MixAll +（二世代）">');
     if (!/name="keywords"/i.test(html)) add.push(`<meta name="keywords" content="${attr(keywordsFor(rel))}">`);
     if (!QUERY_PAGES.has(rel) && !/rel="canonical"/i.test(html)) add.push(`<link rel="canonical" href="${attr(url)}">`);
     if (!/name="description"/i.test(html)) {
@@ -187,7 +187,7 @@ const pages = [];
   }
 })(OUT);
 
-const router = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll</title><meta name="robots" content="noindex">
+const router = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll +（二世代）</title><meta name="robots" content="noindex">
 <script>
 (function () {
   var BASE = ${JSON.stringify(BASE)}, API = ${JSON.stringify(API)}, PAGES = ${JSON.stringify(pages)};
@@ -217,7 +217,7 @@ writeFileSync(join(OUT, '404.html'), router);
 
 // 貸し出しサイト /site-view/<slug>: Supabaseの関数URLはHTMLを text/plain で返すため、ページ側で描画する
 mkdirSync(join(OUT, 'site-view'), { recursive: true });
-writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAllサイト</title><meta name="robots" content="noindex">
+writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll +（二世代） サイト</title><meta name="robots" content="noindex">
 <meta property="og:image" content="${SITE}/ogp/14-website-creation.jpg?v=20261013-1"></head><body style="margin:0;background:#0f1115;color:#eee;font-family:sans-serif">
 <p id="s" style="padding:24px">読み込み中...</p>
 <script>

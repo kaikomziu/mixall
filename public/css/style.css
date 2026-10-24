@@ -1186,3 +1186,7 @@ body:has(#messageList) main > .card.mx-composer { bottom: calc(84px + env(safe-a
 /* 既存ルール（:has(#msgBody) でID並みに強い）に負けないよう明示 */
 body:has(#messageList) main > .card.mx-composer { bottom: calc(84px + env(safe-area-inset-bottom)) !important; z-index: 24 !important; border-radius: 18px !important; }
 @media (max-width: 760px) { body:has(#messageList) main > .card.mx-composer { left: 8px !important; right: 8px !important; } }
+
+/* サイト名「MixAll +（二世代）」: ロゴの横に小さく「二世代」 */
+.brand-word::after { content: "二世代"; display: inline-block; margin-left: 6px; padding: 2px 7px; border-radius: 999px; font-size: .58em; font-weight: 800; letter-spacing: .04em; line-height: 1.4; vertical-align: .35em;
+  color: var(--text); background: var(--mx-grad-soft, rgba(139,107,255,.18)); border: 1px solid color-mix(in srgb, #8b6bff 45%, transparent); -webkit-text-fill-color: currentColor; }

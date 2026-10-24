@@ -1,5 +1,5 @@
 {
-  "name": "MixAll +",
+  "name": "MixAll +（二世代）",
   "short_name": "MixAll +",
   "lang": "ja",
   "start_url": "/",
@@ -7,7 +7,7 @@
   "display": "standalone",
   "background_color": "#0b0d1f",
   "theme_color": "#0b0d1f",
-  "description": "掲示板・チャット・SNSをひとつにまとめたMixAll+",
+  "description": "掲示板・チャット・SNSをひとつにまとめたMixAll +（二世代）",
   "icons": [
     {
       "src": "/icons/icon-192.png",
