@@ -12,6 +12,7 @@
 | データ | Supabase Postgres `public.kv`（EdgeOne版と同じ形式） |
 | 定期実行 | pg_cron → `public.mixall_cron_call2(関数名)`（やることが無いときは呼ばない） |
 | 設定値 | `kv` の store=`mixall-config` key=`env`（Edge Function のシークレットが優先）。AgentMail・cron の合言葉・VAPID 鍵など |
+| 古いデータ | 毎日 03:30（日本時間）に **kaikomziu/mixall-data** の GitHub Actions が、1日以上更新されていない行を暗号化して `data/` に移し、GitHub Pages で公開を確かめてから Supabase から消す（`server/archive-job.js`）。サイトは Supabase に無いキーを `MIXALL_DATA_URL` から読む。`MIXALL_ARCHIVE_SECRET` は変えないこと |
 
 ### EdgeOne版との違い（ビルドで吸収）
 - サイト内パス（`/Pocket/` など）に `/mixall` を付け、`/api/<名前>` を Edge Function のURLにする。実行時にも `js/mixall-base.js` が fetch・リンク・画面移動を補正する

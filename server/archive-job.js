@@ -64,20 +64,22 @@ const ACTIONS = {
     const store = p.store;
     const before = new Date(Date.now() - QUIET_DAYS * 86400000).toISOString();
     const after = p.after ? `&key=gt.${enc(p.after)}` : '';
-    const res = await rest(`kv?store=eq.${enc(store)}${after}&updated_at=lt.${enc(before)}&select=key,value,encoding,metadata&order=key.asc&limit=200`);
-    const rows = await res.json();
-    const page = []; let size = 0;
-    for (const r of rows) {
-      const len = String(r.value || '').length;
-      if (page.length && size + len > EXPORT_BYTES) break;
-      page.push(r); size += len;
+    // 大きい行（ファイル本体など）をまとめて読むと時間切れになるので、先にキーだけ取り、中身は数件ずつ読む
+    const keys = (await (await rest(`kv?store=eq.${enc(store)}${after}&updated_at=lt.${enc(before)}&select=key&order=key.asc&limit=200`)).json()).map((r) => r.key);
+    const page = []; let size = 0, read = 0;
+    while (read < keys.length && size < EXPORT_BYTES) {
+      const batch = keys.slice(read, read + 4);
+      const got = await Promise.all(batch.map(async (key) => (await (await rest(`kv?store=eq.${enc(store)}&key=eq.${enc(key)}&select=key,value,encoding,metadata`)).json())[0]));
+      for (const r of got) if (r) { page.push(r); size += String(r.value || '').length; }
+      read += batch.length;
     }
+    const rows = keys.slice(0, read);
     const files = await pmap(page, 16, async (r) => ({
       key: r.key,
       name: await archiveName(store, r.key),
       box: await archiveSeal({ key: r.key, value: r.value, encoding: r.encoding, metadata: r.metadata || null })
     }));
-    return { files, next: page.length ? page[page.length - 1].key : null, done: rows.length < 200 && page.length === rows.length };
+    return { files, next: rows.length ? rows[rows.length - 1] : null, done: keys.length < 200 && read === keys.length };
   },
 
   // 削除された（_deleted に記録がある）キー。Supabase にまた作られたキーは除く
