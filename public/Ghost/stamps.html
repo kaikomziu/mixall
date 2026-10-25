@@ -3,9 +3,27 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Pocketスタンプ管理 - MixAll +（二世代）</title>
+  <meta name="description" content="Pocketスタンプ管理 - MixAll。MixAllのサービスページです。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Pocketスタンプ管理 - MixAll">
+  <meta property="og:description" content="Pocketスタンプ管理 - MixAll。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Ghost/stamps">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="ぽけっと">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pocketスタンプ管理 - MixAll">
+  <meta name="twitter:description" content="Pocketスタンプ管理 - MixAll。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+<title>Pocketスタンプ管理 - MixAll</title>
 <link rel="stylesheet" href="/css/style.css" />
-<script src="/js/settings.js"></script><script>location.replace('/Pocket/stamps.html');</script>
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script><script>location.replace('/Pocket/stamps.html');</script>
 <style>
 .stamp-grid { display:flex; flex-direction:column; gap:12px; }
 .stamp-group { border:1px solid var(--border); border-radius:12px; padding:12px; background:var(--panel-2); }
@@ -15,27 +33,10 @@
 .stamp-item img { width:72px; height:72px; object-fit:contain; border-radius:8px; border:1px solid var(--border); background:var(--panel-2); }
 .stamp-item .name { font-size:0.75rem; margin-top:4px; word-break:break-all; }
 </style>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
 <script src="/js/mixall-nav.js" defer></script>
 <script src="/js/language-input.js"></script>
 
-  <meta name="description" content="Pocketスタンプ管理 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
-  <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Pocketスタンプ管理 - MixAll +（二世代）">
-  <meta property="og:description" content="Pocketスタンプ管理 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/stamps">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="Ghostのフィード">
-  <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Pocketスタンプ管理 - MixAll +（二世代）">
-  <meta name="twitter:description" content="Pocketスタンプ管理 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261020-plus">
 </head>
 <body>
 <header class="top">
@@ -100,7 +101,7 @@ function makeThumbnail(file) {
 }
 
 async function init() {
-  const res = await fetch('/.netlify/functions/stamps?token=' + encodeURIComponent(session.token));
+  const res = await fetch('/api/stamps?token=' + encodeURIComponent(session.token));
   if (res.status === 401) { window.location.href = '/?next=' + encodeURIComponent(location.pathname); return; }
   const data = await res.json();
 
@@ -113,7 +114,7 @@ async function init() {
 }
 
 async function loadStamps() {
-  const res = await fetch('/.netlify/functions/stamps?token=' + encodeURIComponent(session.token));
+  const res = await fetch('/api/stamps?token=' + encodeURIComponent(session.token));
   const data = await res.json();
   renderStamps(data.stamps);
 }
@@ -133,8 +134,8 @@ function renderStamps(stamps) {
   `).join('');
   grid.querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = async () => {
-      if (!(await MixAllDialog.confirm('このスタンプを削除しますか?'))) return;
-      await Netrify.api('/.netlify/functions/stamps', { action: 'deleteStamp', token: session.token, stampId: btn.dataset.del });
+      if (!confirm('このスタンプを削除しますか?')) return;
+      await Netrify.api('/api/stamps', { action: 'deleteStamp', token: session.token, stampId: btn.dataset.del });
       loadStamps();
     };
   });
@@ -158,7 +159,7 @@ document.getElementById('createSubmit').onclick = async () => {
       statusEl.textContent = `アップロード中... (${Math.round(done / total * 100)}%)`;
     });
 
-    await Netrify.api('/.netlify/functions/stamps', {
+    await Netrify.api('/api/stamps', {
       action: 'createStamp', token: session.token, name, fileId: manifest.fileId, thumbnailDataUrl
     });
 

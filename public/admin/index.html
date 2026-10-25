@@ -3,19 +3,36 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>運営ダッシュボード - MixAll +（二世代）</title>
+  <meta name="description" content="運営ダッシュボード - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="運営ダッシュボード - MixAll（ミックスオール）">
+  <meta property="og:description" content="運営ダッシュボード - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/admin/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="MixAll">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="運営ダッシュボード - MixAll（ミックスオール）">
+  <meta name="twitter:description" content="運営ダッシュボード - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+<title>運営ダッシュボード - MixAll（ミックスオール）</title>
 <style>html{visibility:hidden}</style>
 <link rel="stylesheet" href="/css/style.css" />
 <script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
 <script src="/js/auth.js"></script>
-<script src="/js/vendor/fflate.min.js"></script>
-<script src="/js/backup-zip.js?v=20261015-2"></script>
+<script src="/js/vendor/fflate.min.js"></script><script src="/js/progress-bar.js"></script><script src="/js/archive-export.js"></script>
 <script>
 (async()=>{
   try {
     const raw=localStorage.getItem('netrify_session');const session=raw?JSON.parse(raw):null;
     if(!session?.token){location.replace('/');return;}
-    await Netrify.api('/.netlify/functions/admin',{action:'preflight',token:session.token});
+    await Netrify.api('/api/admin',{action:'preflight',token:session.token});
     document.documentElement.style.visibility='visible';
   } catch (_) { location.replace('/'); }
 })();
@@ -36,27 +53,9 @@
 
 </style>
 <script src="/js/calls.js" defer></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
 <script src="/js/mixall-nav.js" defer></script>
 <script src="/js/language-input.js"></script>
-
-  <meta name="description" content="運営ダッシュボード - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
-  <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="運営ダッシュボード - MixAll +（二世代）">
-  <meta property="og:description" content="運営ダッシュボード - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/admin/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="MixAll +ログイン">
-  <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="運営ダッシュボード - MixAll +（二世代）">
-  <meta name="twitter:description" content="運営ダッシュボード - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -65,7 +64,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><a href="/" style="color:inherit;"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div>
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
   <nav class="services"><a href="/">トップ</a><a href="/Ghost">Ghost</a><a href="/Uch">Uch</a><a href="/admin/ghost-age.html">Ghost年齢監査</a><a href="/Pocket/stamps.html">スタンプ管理</a></nav>
 </header>
 <main>
@@ -76,19 +75,40 @@
     <div class="error" id="adminError"></div>
   </div>
 
-  <div class="card"><h3>Manus運営コンソール</h3><p class="audit-note">Manusから渡されたアプリ専用コマンドを貼り付けて実行できます。既存UIの操作も同じAPI経由で実行されます。OSのshellや任意のNetlify CLIは実行しません。</p><div class="manus-console"><div><span class="prompt">netrify-admin&gt;</span> <span id="consoleHint">help と入力すると利用可能なコマンドを表示します。</span></div><textarea id="adminCommand" placeholder="例: ghost tag add お知らせ | 重要なお知らせ | 1 | on"></textarea><div class="admin-actions"><button type="button" id="runAdminCommand">実行</button><button type="button" class="secondary" id="clearAdminConsole">画面をクリア</button></div><pre id="adminConsoleOutput">アプリ専用コンソールを起動しました。help と入力してください。</pre></div></div>
+  <div class="card"><h3>Manus運営コンソール</h3><p class="audit-note">Manusから渡されたアプリ専用コマンドを貼り付けて実行できます。既存UIの操作も同じAPI経由で実行されます。OSのshellや任意のCLIは実行しません。</p><div class="manus-console"><div><span class="prompt">netrify-admin&gt;</span> <span id="consoleHint">help と入力すると利用可能なコマンドを表示します。</span></div><textarea id="adminCommand" placeholder="例: ghost tag add お知らせ | 重要なお知らせ | 1 | on"></textarea><div class="admin-actions"><button type="button" id="runAdminCommand">実行</button><button type="button" class="secondary" id="clearAdminConsole">画面をクリア</button></div><pre id="adminConsoleOutput">アプリ専用コンソールを起動しました。help と入力してください。</pre></div></div>
 
   <div class="card"><h3>拡張機能管理</h3><p class="audit-note">Chrome拡張機能のように、運営が登録したJSONパッケージをサーバーから配布できます。パッケージはサンドボックス内で実行され、停止・削除もここから行えます。拡張機能ストアと拡張機能データストアはバックアップ対象です。</p><div class="row"><input id="extensionPackageFile" type="file" accept="application/json,.json"><button type="button" id="uploadExtension">拡張機能を登録</button><button type="button" class="secondary" id="downloadExtensionTemplate">テンプレート</button></div><p class="muted">JSON形式: {"id","name","version","description","author","icon","permissions","manifest","bundle"}</p><div id="extensionStatus" class="muted"></div><div id="extensionAdminList" class="admin-list" style="margin-top:10px"><p class="muted">読み込み中...</p></div></div>
-  <div class="card"><h3>データバックアップ</h3><p class="audit-note">運営専用のストア構造を保持したZIPバックアップです。索引作成・一貫スナップショット・ZIP生成はBackground Functionsで行い、完了後に作成済みZIPを分割ダウンロードします。全ストア、アカウントと申告生年月日、パスワードハッシュ・ソルト、投稿、コメント、スレッド、チャット、Mail、貸し出しサイト、添付チャンク、Ghostタグ、監査履歴、APIキー等を保存します。平文パスワードはシステムに保存されていないため出力されません。このファイル自体が秘密情報を含むため、運営のみが安全に保管してください。ダウンロード完了後にサイトを保護ロックします。復元もBackgroundで行い、復元完了後は運営が解除するまでロックします。</p><div class="admin-actions"><button type="button" id="exportBackup">Backgroundバックアップを開始</button><button type="button" class="secondary" id="unlockSite">サイトロックを解除</button><label class="secondary" style="display:inline-flex;align-items:center;padding:10px 16px;border:1px solid var(--accent);border-radius:8px;color:var(--accent);cursor:pointer;">バックアップを読み込む<input type="file" id="importBackup" multiple accept="application/zip,.zip,application/json,.json" hidden /></label></div><div id="backupStatus" class="muted" style="margin-top:10px;"></div><div id="backupJobs" class="admin-list" style="margin-top:10px"></div></div>
 
-  <div class="card"><h3>メール送信API設定</h3><p class="audit-note">回復メール、パスワード再設定、外部メール送信で使用します。APIキーと連携シークレットは管理ストアへ暗号化されず保存されるため、運営以外へ共有しないでください。既存のNetlify環境変数がある場合は、入力欄を空欄にして保存すると既存値を維持します。Mailgunの場合はドメインとホスト地域も入力してください。</p><div class="row" style="flex-wrap:wrap"><select id="emailProvider" style="flex:1;min-width:160px"><option value="agentmail">AgentMail</option><option value="sendgrid">SendGrid</option><option value="brevo">Brevo</option><option value="mailgun">Mailgun</option><option value="postmark">Postmark</option></select><input id="emailFrom" type="email" placeholder="認証済み送信元（例: no-reply@example.com）" style="flex:2;min-width:240px"></div><div class="row" style="margin-top:8px;flex-wrap:wrap"><input id="emailProviderApiKey" type="password" autocomplete="new-password" placeholder="プロバイダーAPIキー（変更時のみ）" style="flex:1;min-width:240px"><input id="emailSecret" type="password" autocomplete="new-password" placeholder="Netlify Email連携シークレット（変更時のみ）" style="flex:1;min-width:240px"></div><div class="row" id="mailgunFields" style="margin-top:8px;flex-wrap:wrap"><input id="mailgunDomain" placeholder="Mailgunドメイン" style="flex:2;min-width:220px"><select id="mailgunHostRegion" style="flex:1;min-width:140px"><option value="non-eu">non-eu</option><option value="eu">eu</option></select></div><div class="admin-actions"><button type="button" id="saveEmailSettings">メール送信設定を保存</button></div><div id="emailSettingsStatus" class="muted" style="margin-top:8px"></div></div>
+  <div class="card" id="googleCard"><h3>Google検索連携（MAWS）</h3><p class="audit-note">MAWSの検索にGoogleの結果を足します。Google Programmable Search Engine（「ウェブ全体を検索」にしたもの）の <b>検索エンジンID(cx)</b> と、Custom Search APIの <b>APIキー</b> を入力してください。無料枠は1日100回までなので、MixAll側で1日95回に制限しています。未設定のときは「Googleで開く」リンクだけが出ます。</p><div class="row"><input id="googleKey" type="password" autocomplete="off" placeholder="APIキー" style="flex:1"><input id="googleCx" placeholder="検索エンジンID(cx)" style="flex:1"><button type="button" id="saveGoogle">保存</button></div><div class="muted" id="googleStatus"></div></div>
+  <div class="card"><h3>x.gd APIキー設定</h3><p class="audit-note">短縮URL（x.gd）の発行で最優先に使うAPIキーです。x.gdのAPIキーは24時間使われないと自動で無効になるため、切れたらここで入れ直してください（ツールの短縮URL欄から入力しても運営ログイン中なら同じ値が保存されます）。入力したキーが使えない場合は、内蔵キーへ自動で切り替わります。空欄で保存すると保存済みキーを削除します。</p><div class="row" style="flex-wrap:wrap"><input id="xgdApiKey" type="password" autocomplete="off" placeholder="x.gd APIキー（32桁）" style="flex:1;min-width:240px"><button type="button" id="saveXgdKey">保存</button></div><div id="xgdKeyStatus" class="muted" style="margin-top:8px"></div></div>
   <div class="card"><h3>Gemini APIキー管理</h3><p class="audit-note">複数キーを登録できます。上から順に使用し、失敗したキーは次のキーへ自動で切り替えます。キーの値は一覧に表示しません。</p><div class="row"><input id="geminiKeyLabel" placeholder="表示名（例: メイン）" style="flex:1"><input id="geminiKeyValue" type="password" placeholder="AIza... のAPIキー" style="flex:2"><button type="button" id="addGeminiKey">追加</button></div><div id="geminiKeyStatus" class="muted" style="margin-top:8px"></div><div id="geminiKeyList" class="admin-list" style="margin-top:10px"><p class="muted">読み込み中...</p></div></div>
-  <div class="card"><h3>Geminiの固定プロンプト・権限</h3><p class="audit-note">固定プロンプトには「@u123... は運営」など、応答時に常に参照させたい説明を記入できます。参照対象は閲覧可能なUchスレッドと公開Ghost投稿のみです。Mail・Pocket個人チャット・アカウント情報や非公開スレッドはGeminiに渡しません。現在開いているUchスレッドの会話履歴は回答に必要な範囲で常に使います。</p><textarea id="geminiFixedPrompt" rows="6" maxlength="6000" placeholder="例: Uch ID @u1234567890 はMixAll +の運営です。権限に関する説明が必要な場合はこの情報を参照してください。"></textarea><div class="row" style="margin-top:8px;flex-wrap:wrap"><label class="muted"><input type="checkbox" id="geminiAllowUserReply" checked style="width:auto"> ユーザーがGeminiの投稿へ返信して会話を続ける</label><label class="muted"><input type="checkbox" id="geminiAllowReply" checked style="width:auto"> Geminiがメンション・返信に回答する</label></div><div class="row" style="margin-top:8px;flex-wrap:wrap"><label class="muted"><input type="checkbox" id="geminiReadUch" checked style="width:auto"> 他の閲覧可能なUchスレッドを検索</label><label class="muted"><input type="checkbox" id="geminiReadGhost" checked style="width:auto"> 公開Ghost投稿・コメントを検索</label><button type="button" id="saveGeminiSettings">Gemini設定を保存</button></div><div id="geminiSettingsStatus" class="muted" style="margin-top:8px"></div></div>
-  <div class="card"><h3>公式アカウント・自動応答プログラム</h3><p class="audit-note">運営・副運営専用。公式アカウントはPocket・Ghost・Uch・Mailの各チャンネルに接続できます。トリガー成立後、conditionsで送信者・本文・履歴・ルーム/スレッド・添付・返信・曜日/UTC時間帯・Ghost投稿状態まで絞り込めます。任意のJavaScriptは実行せず、宣言型ルールで登録します。</p><div class="row"><input id="officialId" type="hidden"><input id="officialName" placeholder="ID（例: support）" style="flex:1"><input id="officialDisplayName" placeholder="表示名（例: MixAll +サポート）" style="flex:1"><input id="officialIcon" placeholder="アイコン" value="公式" style="max-width:110px"></div><div class="row" style="margin-top:8px"><label class="muted"><input type="checkbox" data-official-channel="pocket" checked style="width:auto"> Pocket</label><label class="muted"><input type="checkbox" data-official-channel="ghost" style="width:auto"> Ghost</label><label class="muted"><input type="checkbox" data-official-channel="uch" style="width:auto"> Uch</label><label class="muted"><input type="checkbox" data-official-channel="mail" style="width:auto"> Mail</label></div><textarea id="officialRules" rows="9" placeholder='ルール(JSON配列) 例:\n[{"channel":"pocket","trigger":"mention","action":"canned","conditions":{"fromEmails":["user@example.com"],"historyIncludes":["困った"],"historyMessageCountMin":3,"hasAttachment":false},"text":"お問い合わせありがとうございます。"},{"channel":"ghost","trigger":"every","action":"ai","conditions":{"ghostStatus":{"isVideo":true,"hasMedia":true},"timeRangeUtc":{"start":"09:00","end":"18:00"}},"instruction":"公式サポートとして回答してください。"}]'></textarea><div class="admin-actions"><button type="button" id="saveOfficial">公式アカウントを保存</button><button type="button" class="secondary" id="resetOfficial">新規入力</button></div><div id="officialStatus" class="muted" style="margin-top:8px"></div><div id="officialList" class="admin-list" style="margin-top:10px"><p class="muted">読み込み中...</p></div></div>
+  <div class="card" id="usageCard"><h3>Supabaseの容量(主運営のみ)</h3>
+    <div id="usageMeter" class="muted">読み込み中…</div>
+    <div class="error" id="usageErr"></div>
+    <details id="usageSetup" style="display:none"><summary>初回設定(SQLを1回実行)</summary><p class="audit-note">SupabaseのSQL Editorで、下のSQLを貼って実行してください。そのあと「更新」を押します。</p><textarea id="usageSql" readonly style="min-height:150px;font-family:monospace;font-size:.8rem"></textarea><button type="button" class="secondary" id="usageCopy">SQLをコピー</button></details>
+    <button type="button" class="secondary" id="usageReload">更新</button>
+    <p class="audit-note">最大容量は既定で500MB(無料プラン)。プランが違う場合は、環境変数 SUPABASE_DB_LIMIT_MB(MB単位)を設定してください。</p>
+  </div>
+  <div class="card" id="archiveCard"><h3>データ書き出し(Supabase → データ置き場 mixall-data)</h3>
+    <p class="audit-note">Supabaseの容量を空けるための機能です(主運営のみ)。書き出したデータは別サイト <code>https://mixall-data.edgeone.dev/</code>(データ置き場)に置き、本体サイトはそこを読みに行きます。①「一覧を読み込む」 → ②Supabaseに溜まった追加・変更分を書き出したいストアにチェックして「ZIPで書き出す」 → ③できた <code>mixall-data.zip</code> を <b>mixall-data にそのまま再アップロード(置き換え)</b> → ④「確認してSupabaseから削除」。ZIPには「データ置き場に今ある内容 + Supabaseの追加・変更・削除」がすべて入っているので、毎回新しい保存先を作る必要はありません(チェックしていないストアも、今ある内容はそのまま引き継ぎます)。本体サイト側のZIPに <code>data</code> フォルダは不要です。書き出し後に編集・削除した分は、次回の書き出しまでSupabaseに残り、そのまま優先して使われます。</p>
+    <div class="row"><button type="button" class="secondary" id="archiveLoad">一覧を読み込む</button><button type="button" id="archiveCompress">Supabaseのデータを圧縮して容量を減らす</button><button type="button" id="archiveExportAll">全部まとめてZIPで書き出す</button><button type="button" id="archiveExport" class="secondary">選んだストアだけ書き出す</button><button type="button" class="ghost" id="archivePurgeAll">全部確認してSupabaseから削除</button><button type="button" class="ghost" id="archivePurge">選んだストアだけ確認して削除</button></div>
+    <div id="archiveTable" style="margin:8px 0;"></div><div id="archiveLog" class="muted"></div>
+  </div>
+  <div class="card"><h3>Geminiの固定プロンプト・権限</h3><p class="audit-note">固定プロンプトには「@u123... は運営」など、応答時に常に参照させたい説明を記入できます。参照対象は閲覧可能なUchスレッドと公開Ghost投稿のみです。Mail・Pocket個人チャット・アカウント情報や非公開スレッドはGeminiに渡しません。現在開いているUchスレッドの会話履歴は回答に必要な範囲で常に使います。</p><textarea id="geminiFixedPrompt" rows="6" maxlength="6000" placeholder="例: Uch ID @u1234567890 はMixAllの運営です。権限に関する説明が必要な場合はこの情報を参照してください。"></textarea><div class="row" style="margin-top:8px;flex-wrap:wrap"><label class="muted"><input type="checkbox" id="geminiAllowUserReply" checked style="width:auto"> ユーザーがGeminiの投稿へ返信して会話を続ける</label><label class="muted"><input type="checkbox" id="geminiAllowReply" checked style="width:auto"> Geminiがメンション・返信に回答する</label></div><div class="row" style="margin-top:8px;flex-wrap:wrap"><label class="muted"><input type="checkbox" id="geminiReadUch" checked style="width:auto"> 他の閲覧可能なUchスレッドを検索</label><label class="muted"><input type="checkbox" id="geminiReadGhost" checked style="width:auto"> 公開Ghost投稿・コメントを検索</label><button type="button" id="saveGeminiSettings">Gemini設定を保存</button></div><div id="geminiSettingsStatus" class="muted" style="margin-top:8px"></div></div>
+  <div class="card"><h3>公式アカウント・自動応答プログラム</h3><p class="audit-note">運営・副運営専用。公式アカウントはPocket・Ghost・Uch・Mailの各チャンネルに接続できます。トリガー成立後、conditionsで送信者・本文・履歴・ルーム/スレッド・添付・返信・曜日/UTC時間帯・Ghost投稿状態まで絞り込めます。任意のJavaScriptは実行せず、宣言型ルールで登録します。</p><div class="row"><input id="officialId" type="hidden"><input id="officialName" placeholder="ID（例: support）" style="flex:1"><input id="officialDisplayName" placeholder="表示名（例: MixAllサポート）" style="flex:1"><input id="officialIcon" placeholder="アイコン" value="公式" style="max-width:110px"></div><div class="row" style="margin-top:8px"><label class="muted"><input type="checkbox" data-official-channel="pocket" checked style="width:auto"> Pocket</label><label class="muted"><input type="checkbox" data-official-channel="ghost" style="width:auto"> Ghost</label><label class="muted"><input type="checkbox" data-official-channel="uch" style="width:auto"> Uch</label><label class="muted"><input type="checkbox" data-official-channel="mail" style="width:auto"> Mail</label></div><textarea id="officialRules" rows="9" placeholder='ルール(JSON配列) 例:\n[{"channel":"pocket","trigger":"mention","action":"canned","conditions":{"fromEmails":["user@example.com"],"historyIncludes":["困った"],"historyMessageCountMin":3,"hasAttachment":false},"text":"お問い合わせありがとうございます。"},{"channel":"ghost","trigger":"every","action":"ai","conditions":{"ghostStatus":{"isVideo":true,"hasMedia":true},"timeRangeUtc":{"start":"09:00","end":"18:00"}},"instruction":"公式サポートとして回答してください。"}]'></textarea><div class="admin-actions"><button type="button" id="saveOfficial">公式アカウントを保存</button><button type="button" class="secondary" id="resetOfficial">新規入力</button></div><div id="officialStatus" class="muted" style="margin-top:8px"></div><div id="officialList" class="admin-list" style="margin-top:10px"><p class="muted">読み込み中...</p></div></div>
 
+  <div class="card" id="warnCard"><h3>警告・お知らせの送信</h3><p class="audit-note">運営・副運営専用。送った相手には、次にMixAllを開いたとき全画面で表示され、「内容を確認しました」を押すまで閉じられません。通知一覧にも残ります。</p>
+    <div class="row"><select id="warnTpl" style="flex:1"></select><select id="warnSev"><option value="warning">警告</option><option value="danger">重大</option><option value="info">お知らせ</option></select></div>
+    <input id="warnTargets" placeholder="対象アカウント（カンマ区切り）または「全員」と入力" />
+    <input id="warnTitle" maxlength="100" placeholder="タイトル" />
+    <textarea id="warnBody" maxlength="2000" placeholder="本文（{理由} などはテンプレ選択後に書き換えてください）" style="min-height:120px"></textarea>
+    <label><input type="checkbox" id="warnAck" checked> 確認ボタンを押すまで閉じられない</label>
+    <div class="error" id="warnErr"></div><div id="warnOk" class="muted"></div><button id="warnSend">送信</button></div>
   <div class="card"><h3>操作履歴</h3><div class="row"><input id="auditSearch" type="search" placeholder="操作・対象・担当者・詳細を検索" style="flex:1"><select id="auditActionFilter"><option value="">すべての操作</option></select></div><div id="audits" class="admin-list"><p class="muted">読み込み中...</p></div></div><div class="card"><h3>通報対応</h3><div id="reports" class="admin-list"><p class="muted">読み込み中...</p></div></div>
   <div class="card" id="adminEmailChangeCard" hidden><h3>運営ログインメール変更</h3><p class="audit-note">主運営のみ利用できます。変更すると、保存済みデータ内の所有者・投稿者・参加者などの旧アドレスを新アドレスへ移行し、旧アドレスはログイン別名として保持します。既存の運営ログイン端末はすべて失効するため、完了後は新アドレスで再ログインしてください。</p><input id="adminEmailNew" type="text" placeholder="新しい運営用メールアドレス（例: new-admin@bix.3erver）" autocomplete="off"><input id="adminEmailPassword" type="password" placeholder="現在の運営パスワード" autocomplete="current-password"><label class="row muted"><input id="adminEmailConfirm" type="checkbox" style="width:auto"> 全データ移行・旧アドレス別名保持・全端末失効を理解しました</label><div id="adminEmailStatus" class="muted"></div><button type="button" id="changeAdminEmailButton" class="danger">運営メールを変更して全端末を失効</button></div>
   <div class="card"><h3>アカウント・運営権限・公認バッジ・パスワード再設定</h3><p class="audit-note">「運営」は主運営と副運営は同等の運営権限を持ち、全データのバックアップ・復元、運営・副運営の任命・解除を行えます。</p><div id="accounts" class="admin-list"><p class="muted">読み込み中...</p></div></div>
+  <div class="card"><h3>フィードバック</h3><p class="audit-note">ユーザーから届いた★評価と理由です。Supabaseを軽くするため、ボタンを押すと全件を<b>txtファイルのzip</b>としてダウンロードし、保存を確認してからサーバー上の分を自動削除します。</p><p id="fbStats" class="muted">読み込み中...</p><div class="row"><button type="button" id="fbExport">zipで書き出して削除</button></div><p id="fbMsg" class="muted" role="status"></p></div>
+  <div class="card"><h3>削除済みアカウント（ゴミ箱）</h3><p class="audit-note">「復元可能」で削除したアカウントです。復元または完全削除できます。</p><div id="trashAccounts" class="admin-list"><p class="muted">読み込み中...</p></div></div>
   <div class="card" id="birthDateAdminCard"><h3>申告された生年月日（運営限定）</h3><p class="audit-note">登録時に本人が申告した生年月日を閲覧できます。本人確認の補助情報ですが、自己申告情報だけで本人確認が完了するものではありません。一覧を開く操作は運営操作履歴に記録されます。</p><div class="admin-actions"><button type="button" id="loadBirthDates">生年月日一覧を表示</button><button type="button" class="secondary" id="prevBirthDates" disabled>前へ</button><button type="button" class="secondary" id="nextBirthDates" disabled>次へ</button><span id="birthDatePageStatus" class="muted"></span></div><div id="birthDateRows" class="admin-list" style="margin-top:10px"><p class="muted">必要なときに一覧を読み込んでください。</p></div></div>
   <div class="card"><h3>全アカウントのアクティブ端末</h3><div id="sessions" class="admin-list"><p class="muted">読み込み中...</p></div></div>
   <div class="card"><h3>Ghostモデレーション</h3><div id="ghostPosts" class="admin-list"><p class="muted">読み込み中...</p></div></div>
@@ -100,10 +120,10 @@
 </main>
 <script>
 let session = Netrify.requireLogin();
-  async function loadExtensionAdmin() { try { const d=await extensionCall({action:'listAdmin'}); const el=document.getElementById('extensionAdminList'); el.innerHTML=(d.extensions||[]).map(x=>`<div class="admin-item"><strong>${escapeHtml(x.icon||'🧩')} ${escapeHtml(x.name)}</strong> <span class="muted">v${escapeHtml(x.version)} · ${x.enabled===false?'停止中':'有効'}</span><div class="meta">${escapeHtml(x.description||'')}<br>ID: ${escapeHtml(x.id)} · 更新: ${date(x.updatedAt)}</div><div class="admin-actions"><button type="button" class="ghost" data-ext-toggle="${escapeHtml(x.id)}">${x.enabled===false?'有効化':'停止'}</button><button type="button" class="danger" data-ext-delete="${escapeHtml(x.id)}">削除</button></div></div>`).join('')||'<p class="muted">登録された拡張機能はありません。</p>'; el.querySelectorAll('[data-ext-toggle]').forEach(b=>b.onclick=async()=>{const x=(d.extensions||[]).find(i=>i.id===b.dataset.extToggle);await extensionCall({action:'toggle',id:x.id,enabled:x.enabled===false});await loadExtensionAdmin();}); el.querySelectorAll('[data-ext-delete]').forEach(b=>b.onclick=async()=>{if(!(await MixAllDialog.confirm('この拡張機能を削除しますか？')))return;await extensionCall({action:'delete',id:b.dataset.extDelete});await loadExtensionAdmin();}); } catch(e) { document.getElementById('extensionAdminList').innerHTML=`<p class="error">${escapeHtml(e.message)}</p>`; } }
-  async function extensionCall(body) { const r=await fetch('/.netlify/functions/extensions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,token:session.token})}); const d=await r.json(); if(!r.ok)throw new Error(d.error||'拡張機能APIエラー'); return d; }
+  async function loadExtensionAdmin() { try { const d=await extensionCall({action:'listAdmin'}); const el=document.getElementById('extensionAdminList'); el.innerHTML=(d.extensions||[]).map(x=>`<div class="admin-item"><strong>${escapeHtml(x.icon||'🧩')} ${escapeHtml(x.name)}</strong> <span class="muted">v${escapeHtml(x.version)} · ${x.enabled===false?'停止中':'有効'}</span><div class="meta">${escapeHtml(x.description||'')}<br>ID: ${escapeHtml(x.id)} · 更新: ${date(x.updatedAt)}</div><div class="admin-actions"><button type="button" class="ghost" data-ext-toggle="${escapeHtml(x.id)}">${x.enabled===false?'有効化':'停止'}</button><button type="button" class="danger" data-ext-delete="${escapeHtml(x.id)}">削除</button></div></div>`).join('')||'<p class="muted">登録された拡張機能はありません。</p>'; el.querySelectorAll('[data-ext-toggle]').forEach(b=>b.onclick=async()=>{const x=(d.extensions||[]).find(i=>i.id===b.dataset.extToggle);await extensionCall({action:'toggle',id:x.id,enabled:x.enabled===false});await loadExtensionAdmin();}); el.querySelectorAll('[data-ext-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('この拡張機能を削除しますか？'))return;await extensionCall({action:'delete',id:b.dataset.extDelete});await loadExtensionAdmin();}); } catch(e) { document.getElementById('extensionAdminList').innerHTML=`<p class="error">${escapeHtml(e.message)}</p>`; } }
+  async function extensionCall(body) { const r=await fetch('/api/extensions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,token:session.token})}); const d=await r.json(); if(!r.ok)throw new Error(d.error||'拡張機能APIエラー'); return d; }
   document.getElementById('uploadExtension').onclick=async()=>{const status=document.getElementById('extensionStatus'), file=document.getElementById('extensionPackageFile').files[0];if(!file){status.textContent='JSONパッケージを選択してください。';return;}try{const pkg=JSON.parse(await file.text());const result=await extensionCall({action:'create',...pkg});status.textContent=`${result.extension.name} を登録しました。`;await loadExtensionAdmin();}catch(e){status.textContent='登録失敗: '+e.message;}};
-  document.getElementById('downloadExtensionTemplate').onclick=()=>{const sample={id:'bereal-moments',name:'BeReal風 Moments',version:'1.0.0',description:'毎日の写真と短い一言を自分の拡張機能データに保存するサンプル。',author:'MixAll +運営',icon:'📸',permissions:['extensionData'],manifest:{display:'standalone'},bundle:"document.body.innerHTML='<h2>📸 Moments</h2><p>今日の一枚と一言を保存できます。</p><input id=\"photo\" type=\"file\" accept=\"image/*\" capture=\"environment\"><textarea id=\"text\" placeholder=\"今の一言\"></textarea><button id=\"save\">今日を保存</button><div id=\"status\"></div>; (async()=>{const data=(await MixAllExtension.api('dataGet')).data||{};document.getElementById('text').value=data.text||'';document.getElementById('save').onclick=async()=>{const file=document.getElementById('photo').files[0];let image=data.image||'';if(file)image=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(file)});await MixAllExtension.api('dataSet',{data:{image,text:document.getElementById('text').value,savedAt:new Date().toISOString()}});document.getElementById('status').textContent='保存しました';}})()"};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(sample,null,2)],{type:'application/json'}));a.download='mixall-extension-template-bereal.json';a.click();};
+  document.getElementById('downloadExtensionTemplate').onclick=()=>{const sample={id:'bereal-moments',name:'BeReal風 Moments',version:'1.0.0',description:'毎日の写真と短い一言を自分の拡張機能データに保存するサンプル。',author:'MixAll運営',icon:'📸',permissions:['extensionData'],manifest:{display:'standalone'},bundle:"document.body.innerHTML='<h2>📸 Moments</h2><p>今日の一枚と一言を保存できます。</p><input id=\"photo\" type=\"file\" accept=\"image/*\" capture=\"environment\"><textarea id=\"text\" placeholder=\"今の一言\"></textarea><button id=\"save\">今日を保存</button><div id=\"status\"></div>; (async()=>{const data=(await MixAllExtension.api('dataGet')).data||{};document.getElementById('text').value=data.text||'';document.getElementById('save').onclick=async()=>{const file=document.getElementById('photo').files[0];let image=data.image||'';if(file)image=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(file)});await MixAllExtension.api('dataSet',{data:{image,text:document.getElementById('text').value,savedAt:new Date().toISOString()}});document.getElementById('status').textContent='保存しました';}})()"};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(sample,null,2)],{type:'application/json'}));a.download='mixall-extension-template-bereal.json';a.click();};
 
   let latest = null;
   function syncCurrentRole(account) {
@@ -112,8 +132,6 @@ let session = Netrify.requireLogin();
     session.isDeputyAdmin = account.isDeputyAdmin === true;
     session.isOperator = session.isAdmin || session.isDeputyAdmin;
     const allowed = session.isOperator;
-    for (const id of ['exportBackup', 'importBackup', 'unlockSite']) document.getElementById(id).disabled = !allowed;
-    document.getElementById('backupStatus').textContent = allowed ? '' : 'バックアップ操作は運営アカウントのみ利用できます。';
     document.getElementById('birthDateAdminCard').hidden = !allowed;
   }
   const adminEmailCard=document.getElementById('adminEmailChangeCard');
@@ -123,21 +141,15 @@ let session = Netrify.requireLogin();
     status.textContent='';
     if(!newEmail||!password){status.textContent='新メールアドレスと現在のパスワードを入力してください';return;}
     if(!document.getElementById('adminEmailConfirm').checked){status.textContent='確認チェックを入れてください';return;}
-    if(!(await MixAllDialog.confirm('運営メールを変更し、保存済みデータを移行して既存の全端末を失効します。実行しますか？')))return;
+    if(!confirm('運営メールを変更し、保存済みデータを移行して既存の全端末を失効します。実行しますか？'))return;
     const button=document.getElementById('changeAdminEmailButton');button.disabled=true;status.textContent='全データを移行しています。完了まで画面を閉じないでください...';
-    try{const result=await Netrify.api('/.netlify/functions/auth',{action:'changeAdminEmail',token:session.token,newEmail,currentPassword:password});Netrify.clearSession();status.textContent=`変更完了。旧アドレスはログイン別名として保持されています。新アドレス ${result.email} で再ログインしてください。`;alert(`運営メールを変更しました。
+    try{const result=await Netrify.api('/api/auth',{action:'changeAdminEmail',token:session.token,newEmail,currentPassword:password});Netrify.clearSession();status.textContent=`変更完了。旧アドレスはログイン別名として保持されています。新アドレス ${result.email} で再ログインしてください。`;alert(`運営メールを変更しました。
 
 新アドレス: ${result.email}
 旧アドレスはログイン別名として利用できます。
 全ての既存端末を失効しました。`);window.location.href='/login/?next='+encodeURIComponent('/admin/');}
     catch(error){status.textContent='変更失敗: '+error.message;button.disabled=false;}
   };
-  if (!session.isOperator && !session.isAdmin && !session.isDeputyAdmin) {
-    document.getElementById('exportBackup').disabled = true;
-    document.getElementById('importBackup').disabled = true;
-    document.getElementById('unlockSite').disabled = true;
-    document.getElementById('backupStatus').textContent = 'バックアップ操作は運営アカウントのみ利用できます。';
-  }
   function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function date(value) { return value ? new Date(value).toLocaleString('ja-JP') : '—'; }
 function profileHtml(profile, fallback) {
@@ -146,14 +158,14 @@ function profileHtml(profile, fallback) {
   const roleBadge = p.isAdmin ? '<span class="operator-badge">運営</span>' : (p.isDeputyAdmin ? '<span class="deputy-operator-badge">副運営</span>' : (p.isOfficial ? '<span class="official-badge">公認</span>' : ''));
   return `<span class="identity ${roleClass}"><span class="presence-dot ${p.online ? 'online' : ''}"></span><span>${escapeHtml(p.displayName || fallback || p.email || '不明')}</span>${roleBadge}</span>`;
 }
-async function call(action, body = {}) { return Netrify.api('/.netlify/functions/admin', { action, token: session.token, ...body }); }
-  async function backupCall(action, body = {}) { let lastError; for (let attempt=1; attempt<=5; attempt+=1) { try { return await Netrify.api('/.netlify/functions/backup', { action, token: session.token, ...body }); } catch (error) { lastError=error; if (/復元セッションの認証に失敗|復元セッションが見つかりません/.test(error.message)) throw error; if (attempt<5) await new Promise(resolve=>setTimeout(resolve, 1000*attempt)); } } throw lastError; }
+async function call(action, body = {}) { return Netrify.api('/api/admin', { action, token: session.token, ...body }); }
+  async function backupCall(action, body = {}) { let lastError; for (let attempt=1; attempt<=5; attempt+=1) { try { return await Netrify.api('/api/backup', { action, token: session.token, ...body }); } catch (error) { lastError=error; if (/復元セッションの認証に失敗|復元セッションが見つかりません/.test(error.message)) throw error; if (attempt<5) await new Promise(resolve=>setTimeout(resolve, 1000*attempt)); } } throw lastError; }
   const commandInput = document.getElementById('adminCommand');
   const commandOutput = document.getElementById('adminConsoleOutput');
   const commandDanger = /(?:delete|削除|password reset|バックアップを出力|backup export|site lock)/i;
   async function runAdminCommand() {
     const raw = commandInput.value.trim(); if (!raw) return;
-    if (commandDanger.test(raw) && !(await MixAllDialog.confirm(`このコマンドは変更またはロックを伴う可能性があります。実行しますか？\\n\\n${raw}`))) return;
+    if (commandDanger.test(raw) && !confirm(`このコマンドは変更またはロックを伴う可能性があります。実行しますか？\\n\\n${raw}`)) return;
     commandOutput.textContent += `\\n\\nnetrify-admin> ${raw}\\n実行中...`;
     try {
       if (raw.toLowerCase() === 'backup export') {
@@ -167,148 +179,14 @@ async function call(action, body = {}) { return Netrify.api('/.netlify/functions
   document.getElementById('clearAdminConsole').onclick = () => { commandOutput.textContent = '画面をクリアしました。help と入力してください。'; commandInput.focus(); };
   commandInput.addEventListener('keydown', (event) => { if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) { event.preventDefault(); runAdminCommand(); } });
 
-  async function readBackupZip(file,status) {
-    if(!window.MixAllBackupZip)throw new Error('ZIP読込モジュールがありません。ページを再読み込みしてください');
-    return await window.MixAllBackupZip.inspectMany(Array.isArray(file)?file:[file],status);
-  }
-  function downloadBackupBlob(blob){const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`netrify-backup-${new Date().toISOString().replace(/[:.]/g,'-')}.zip`;link.click();setTimeout(()=>URL.revokeObjectURL(link.href),30000);}
 
-  async function waitForExportJob(exportId,status) {
-    while(true){
-      const result=await backupCall('exportStatus',{exportId});
-      const job=result.job||{};
-      if(job.status==='ready') return job;
-      if(job.status==='failed') throw new Error(job.lastError||'バックアップの準備に失敗しました');
-      const p=job.progress||{};
-      status.textContent=p.phase==='archive'?`ZIPをBackground生成中... ${p.store||''} · ${Number(p.archiveFiles||0).toLocaleString()}ファイル · ${Number(p.archiveBytes||0).toLocaleString()} bytes`:`バックアップをBackground処理中... ${p.store||p.phase||'準備'} (${Number(p.entries||0).toLocaleString()}/${Number(p.total||0).toLocaleString()}件)`;
-      await new Promise(resolve=>setTimeout(resolve,1500));
-    }
-  }
-  async function downloadReadyBackup(exportId,status) {
-    const archive=await backupCall('archiveManifest',{exportId});
-    const parts=Array.isArray(archive.parts)?archive.parts:[];
-    if(!parts.length) throw new Error('ZIPパート情報がありません');
-    for(let partIndex=0;partIndex<parts.length;partIndex++){
-      const info=parts[partIndex]; status.textContent=`ZIPパート ${partIndex+1}/${parts.length} をダウンロード中...`;
-      const chunks=[];let offset=0;
-      while(offset<Number(info.chunks)){
-        const result=await backupCall('archiveChunk',{exportId,part:partIndex,offset,limit:2});
-        if(Number(result.part)!==partIndex||Number(result.offset)!==offset||Number(result.nextOffset)<=offset||typeof result.data!=='string')throw new Error(`ZIPパート ${partIndex+1} の分割取得位置が進みません`);
-        const binary=atob(result.data),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);chunks.push(bytes);offset=Number(result.nextOffset);
-      }
-      const blob=new Blob(chunks,{type:'application/zip'});if(blob.size!==Number(info.bytes))throw new Error(`ZIPパート ${partIndex+1} のサイズが一致しません`);
-      const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`netrify-backup-${archive.createdAt.replace(/[:.]/g,'-')}-part-${String(partIndex+1).padStart(4,'0')}-of-${String(parts.length).padStart(4,'0')}.zip`;link.click();setTimeout(()=>URL.revokeObjectURL(link.href),30000);
-      await new Promise(resolve=>setTimeout(resolve,250));
-    }
-    await backupCall('lock',{exportId,createdAt:archive.createdAt});
-    status.textContent=`バックアップZIP ${parts.length}パートをダウンロードし、サイト保護ロックを有効にしました。パート全てを安全に保管してください。`;
-    await refreshBackupJobs();
-  }
-  const BACKUP_IMPORT_PAGE_BYTES=650000;
-  const BACKUP_IMPORT_PAGE_ITEMS=100;
-  const BACKUP_IMPORT_FRAGMENT_BYTES=1024*1024;
-  const BACKUP_IMPORT_DIRECT_BYTES=3500*1024;
-  const BACKUP_IMPORT_MAX_PAGE_BYTES=64*1024*1024;
-  function byteLength(text){return new TextEncoder().encode(String(text)).length;}
-  function splitBackupEntries(entries){
-    const pages=[];let page=[],bytes=2;
-    for(const entry of entries){const size=byteLength(JSON.stringify(entry));if(page.length&&(page.length>=BACKUP_IMPORT_PAGE_ITEMS||bytes+size>BACKUP_IMPORT_PAGE_BYTES)){pages.push(page);page=[];bytes=2;}page.push(entry);bytes+=size;}
-    if(page.length)pages.push(page);return pages;
-  }
-  function bytesToBase64(bytes){let binary='';const step=0x8000;for(let offset=0;offset<bytes.length;offset+=step)binary+=String.fromCharCode(...bytes.subarray(offset,Math.min(bytes.length,offset+step)));return btoa(binary);}
-  async function sha256Hex(bytes){if(!crypto?.subtle)throw new Error('このブラウザーでは大容量復元のチェックサム検証が利用できません');const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');}
-  async function importBackupInChunks(backup,status,pending=null,zipFile=null,fileFingerprint='') {
-    const storeInfo={};const jsonPages={};
-    for(const [name,value] of Object.entries(backup.stores||{})){
-      if(zipFile){storeInfo[name]={count:Number(value.count||0),pages:Number(value.pages||0)};}
-      else{if(!Array.isArray(value))throw new Error(`${name}のバックアップデータが配列ではありません`);jsonPages[name]=splitBackupEntries(value);storeInfo[name]={count:value.length,pages:jsonPages[name].length};}
-    }
-    let begin=pending;
-    if(begin?.importId&&begin?.importToken){
-      try{await backupCall('importReceivedPages',{importId:begin.importId,importToken:begin.importToken,store:Object.keys(storeInfo)[0]||'ACCOUNTS'});}
-      catch(error){if(/復元セッションの認証に失敗|復元セッションが見つかりません/.test(error.message)){localStorage.removeItem('mixall_backup_import');begin=null;}else throw error;}
-    }
-    if(!begin){begin=await backupCall('importBegin',{backup:{format:backup.format,version:backup.version,passwordData:backup.passwordData,security:backup.security,createdAt:backup.createdAt,stores:storeInfo}});}
-    localStorage.setItem('mixall_backup_import',JSON.stringify({importId:begin.importId,importToken:begin.importToken,createdAt:Date.now(),fileFingerprint}));
-    let sent=0;const total=Object.values(storeInfo).reduce((sum,item)=>sum+item.pages,0);
-    for(const [name,descriptor] of Object.entries(storeInfo)){
-      const receivedResult=descriptor.pages?await backupCall('importReceivedPages',{importId:begin.importId,importToken:begin.importToken,store:name}):{receivedPages:[]};
-      const received=new Set(receivedResult.receivedPages||[]);let pageNo=0;let count=0;let page=[],pageBytes=2;
-      const flushPage=async()=>{
-        if(!page.length)return;
-        const currentPage=pageNo;
-        if(!received.has(currentPage)){
-          const raw=new TextEncoder().encode(JSON.stringify(page));
-          if(raw.length>BACKUP_IMPORT_MAX_PAGE_BYTES)throw new Error(`${name}の${currentPage+1}ページが64MBを超えています`);
-          if(raw.length<=BACKUP_IMPORT_DIRECT_BYTES){
-            await backupCall('importChunk',{importId:begin.importId,importToken:begin.importToken,store:name,page:currentPage,entries:page});
-          }else{
-            const sha256=await sha256Hex(raw);const totalFragments=Math.ceil(raw.length/BACKUP_IMPORT_FRAGMENT_BYTES);
-            for(let fragmentIndex=0;fragmentIndex<totalFragments;fragmentIndex+=1){const part=raw.subarray(fragmentIndex*BACKUP_IMPORT_FRAGMENT_BYTES,Math.min(raw.length,(fragmentIndex+1)*BACKUP_IMPORT_FRAGMENT_BYTES));await backupCall('importChunkFragment',{importId:begin.importId,importToken:begin.importToken,store:name,page:currentPage,fragmentIndex,totalFragments,totalBytes:raw.length,sha256,data:bytesToBase64(part)});}
-          }
-        }
-        sent+=1;status.textContent=`復元データを送信・照合中... ${sent}/${total}ページ（受信済みページはスキップ）`;
-        pageNo+=1;page=[];pageBytes=2;
-      };
-      const addEntry=async(entry)=>{const size=byteLength(JSON.stringify(entry));if(size>BACKUP_IMPORT_MAX_PAGE_BYTES-65536)throw new Error(`${name}に64MBを超えるデータ項目があり復元できません`);if(page.length&&(page.length>=BACKUP_IMPORT_PAGE_ITEMS||pageBytes+size>BACKUP_IMPORT_PAGE_BYTES))await flushPage();page.push(entry);pageBytes+=size;count+=1;};
-      if(zipFile){
-        await window.MixAllBackupZip.forEachPart(zipFile,name,async(entries)=>{for(const entry of entries)await addEntry(entry);},status);
-      }else{
-        for(const entry of backup.stores[name]||[])await addEntry(entry);
-      }
-      await flushPage();
-      if(count!==descriptor.count||pageNo!==descriptor.pages)throw new Error(`${name}の読込件数・ページ数がバックアップ索引と一致しません (${count}/${descriptor.count}件, ${pageNo}/${descriptor.pages}ページ)`);
-    }
-    status.textContent='全ページを受信しました。Background Functionで復元を開始します...';
-    await backupCall('startImportCommit',{importId:begin.importId});
-    while(true){
-      const result=await backupCall('importStatus',{importId:begin.importId});
-      if(result.done===true||result.status==='done'){localStorage.removeItem('mixall_backup_import');return result;}
-      if(result.status==='failed')throw new Error(result.lastError||'復元ジョブに失敗しました');
-      const progress=result.progress||{};
-      if(progress.phase==='clear')status.textContent=`保存データを整理中... ${progress.store} (${progress.storeIndex}/${progress.storeTotal}ストア) ${progress.clearCount||0}件`;
-      else if(progress.phase==='write')status.textContent=`バックアップを反映中... ${progress.store} ${progress.storeRestored||0}/${progress.storeCount||0}件 (全体 ${progress.writtenEntries||0}/${progress.totalEntries||0}件)`;
-      else if(progress.phase==='cleanup')status.textContent=`復元一時データを片付け中... ${progress.cleanedCount||0}件`;
-      else status.textContent='Background Functionでバックアップを復元中...';
-      await new Promise(resolve=>setTimeout(resolve,1500));
-    }
-  }
-  function backupJobStatusLabel(job){
-    if(job.status==='ready')return 'バックアップ準備完了 — ダウンロードできます';
-    if(job.status==='done')return '復元完了';
-    if(job.status==='failed')return `失敗: ${job.lastError||'詳細を確認してください'}`;
-    if(job.status==='uploading')return `復元ファイル送信待ち (${job.progress?.receivedPages||0}/${job.progress?.totalPages||0}ページ)`;
-    const p=job.progress||{};
-    if(job.type==='export'&&p.phase==='archive')return `ZIP生成中 — ${p.store||''} · ${Number(p.archiveFiles||0).toLocaleString()}ファイル · ${Number(p.archiveBytes||0).toLocaleString()} bytes`;
-    if(job.type==='import'){
-      const written=`書き込み ${Number(p.writtenEntries||0).toLocaleString()}/${Number(p.totalEntries||0).toLocaleString()}件`;
-      if(p.phase==='clear')return `復元処理中 — 既存データを整理中（整理済み ${Number(p.clearCount||0).toLocaleString()}件） · ${written}`;
-      if(p.phase==='write')return `復元処理中 — ${p.store||''}を書き込み中（${Number(p.storeRestored||0).toLocaleString()}/${Number(p.storeCount||0).toLocaleString()}件） · ${written}`;
-      if(p.phase==='cleanup')return `復元処理中 — 一時データを片付け中（${Number(p.cleanedCount||0).toLocaleString()}件） · ${written}`;
-      return `バックアップ復元をBackground処理中 — ${p.phase||job.status} · ${written}`;
-    }
-    return `バックアップ作成をBackground処理中 — ${p.phase||job.status} ${Number(p.entries||0).toLocaleString()}/${Number(p.total||0).toLocaleString()}件`;
-  }
-  async function refreshBackupJobs(){
-    const box=document.getElementById('backupJobs');if(!box)return;
-    try{
-      const result=await backupCall('jobs');const jobs=result.jobs||[];
-      const pendingImport=(()=>{try{return JSON.parse(localStorage.getItem('mixall_backup_import')||'null');}catch{return null;}})();
-      if(pendingImport?.importId){try{const importState=await backupCall('importStatus',{importId:pendingImport.importId});if(importState.done||importState.status==='done'){localStorage.removeItem('mixall_backup_import');const status=document.getElementById('backupStatus');if(status)status.textContent='前回のBackground復元が完了しました。';}}catch(error){if(/404|見つかりません/.test(error.message)){localStorage.removeItem('mixall_backup_import');}}}
-      box.innerHTML=jobs.map((job)=>`<div class="admin-item"><strong>${job.type==='export'?'バックアップ書き出し':'バックアップ復元'}</strong><div class="meta">${escapeHtml(backupJobStatusLabel(job))} · ${date(job.updatedAt||job.createdAt)}</div>${job.type==='export'&&job.status==='ready'?`<div class="admin-actions"><button type="button" data-download-backup="${escapeHtml(job.id)}">準備済みバックアップをダウンロード</button></div>`:''}${job.type==='export'&&job.canResume?`<div class="admin-actions"><button type="button" data-resume-backup="${escapeHtml(job.id)}">停止したバックアップ処理を再開</button></div>`:''}${job.type==='import'&&job.status==='uploading'?'<div class="meta">送信が中断された場合は、同じバックアップファイルをもう一度選ぶと受信済みページを再送して再開できます。</div>':''}</div>`).join('');
-      box.querySelectorAll('[data-download-backup]').forEach((button)=>button.onclick=async()=>{button.disabled=true;const status=document.getElementById('backupStatus');try{await downloadReadyBackup(button.dataset.downloadBackup,status);}catch(error){status.textContent=`ダウンロード準備失敗: ${error.message}。ジョブは保持されるため、ページを再読み込みして再試行できます。`;button.disabled=false;}});
-      box.querySelectorAll('[data-resume-backup]').forEach((button)=>button.onclick=async()=>{button.disabled=true;const status=document.getElementById('backupStatus');try{await backupCall('resumeExport',{exportId:button.dataset.resumeBackup});await refreshBackupJobs();await waitForExportJob(button.dataset.resumeBackup,status);status.textContent='バックアップの準備が完了しました。ダウンロードできます。';await refreshBackupJobs();}catch(error){status.textContent=`再開失敗: ${error.message}`;button.disabled=false;}});
-      if(jobs.some((job)=>['queued','running','retrying','uploading'].includes(job.status)))setTimeout(refreshBackupJobs,4000);
-    }catch(error){box.innerHTML=`<p class="muted">Backgroundジョブの状況を取得できません: ${escapeHtml(error.message)}</p>`;}
-  }
-  window.addEventListener('pageshow',refreshBackupJobs);
-  setTimeout(refreshBackupJobs,0);
+  async function loadXgdSettings(){const status=document.getElementById('xgdKeyStatus');try{const data=await call('getXgdSettings');const x=data.settings||{};status.textContent=x.configured?`保存済み（${x.apiKey}）${x.updatedAt?' / 更新: '+new Date(x.updatedAt).toLocaleString():''}`:'未保存（内蔵キーを使用中）';}catch(e){status.textContent='読み込み失敗: '+e.message;}}
+  document.getElementById('saveXgdKey').onclick=async()=>{const status=document.getElementById('xgdKeyStatus');const apiKey=document.getElementById('xgdApiKey').value.trim();if(apiKey&&!/^[0-9a-f]{32}$/i.test(apiKey)){status.textContent='x.gd APIキーは32桁の英数字です';return;}try{const result=await call('saveXgdSettings',{apiKey});document.getElementById('xgdApiKey').value='';status.textContent=result.settings.configured?`保存しました（${result.settings.apiKey}）`:'保存済みキーを削除しました（内蔵キーを使用）';}catch(e){status.textContent='保存失敗: '+e.message;}};
+  loadXgdSettings();
+  (function(){const st=document.getElementById('googleStatus');async function load(){try{const d=await call('getGoogleSettings');const g=d.settings||{};st.textContent=g.configured?`設定済み（キー ${g.apiKey} / cx ${g.cx}）`:'未設定';document.getElementById('googleCx').value=g.cx||'';}catch(e){st.textContent=e.message;}}
+  document.getElementById('saveGoogle').onclick=async()=>{try{const d=await call('saveGoogleSettings',{apiKey:document.getElementById('googleKey').value.trim(),cx:document.getElementById('googleCx').value.trim()});document.getElementById('googleKey').value='';const g=d.settings||{};st.textContent=g.configured?`保存しました（キー ${g.apiKey} / cx ${g.cx}）`:'保存しました（未完了: キーとcxの両方が必要です）';}catch(e){st.textContent=e.message;}};load();})();
 
-  async function loadEmailSettings(){const status=document.getElementById('emailSettingsStatus');try{const data=await call('getEmailSettings');const x=data.settings||{};document.getElementById('emailProvider').value=x.provider||'agentmail';document.getElementById('emailFrom').value=x.from||'';document.getElementById('mailgunDomain').value=x.mailgunDomain||'';document.getElementById('mailgunHostRegion').value=x.mailgunHostRegion||'non-eu';status.textContent=x.configured?`設定済み（APIキー: ${x.providerApiKey}${x.provider==='agentmail'?` / 返信の取り込み: ${x.webhook?'有効':'未設定'}`:` / シークレット: ${x.secret}`}）`:'未設定';}catch(e){status.textContent='読み込み失敗: '+e.message;}}
-  document.getElementById('emailProvider').onchange=()=>{const p=document.getElementById('emailProvider').value;document.getElementById('mailgunFields').hidden=p!=='mailgun';document.getElementById('emailSecret').hidden=['brevo','agentmail'].includes(p);document.getElementById('emailFrom').placeholder=p==='agentmail'?'AgentMailの受信箱（例: agent-3097@agentmail.to）':'認証済み送信元（例: no-reply@example.com）';};
-  document.getElementById('saveEmailSettings').onclick=async()=>{const status=document.getElementById('emailSettingsStatus');const provider=document.getElementById('emailProvider').value;const from=document.getElementById('emailFrom').value.trim();const providerApiKey=document.getElementById('emailProviderApiKey').value.trim();const secret=document.getElementById('emailSecret').value.trim();if(!from){status.textContent='認証済み送信元メールアドレスを入力してください';return;}if(!(await MixAllDialog.confirm('メール送信設定を保存しますか？秘密情報は運営用ストアに保存されます。')))return;try{const result=await call('saveEmailSettings',{provider,from,providerApiKey,secret,mailgunDomain:document.getElementById('mailgunDomain').value.trim(),mailgunHostRegion:document.getElementById('mailgunHostRegion').value});document.getElementById('emailProviderApiKey').value='';document.getElementById('emailSecret').value='';status.textContent=`保存しました（APIキー: ${result.settings.providerApiKey}）${result.settings.webhookNote?' '+result.settings.webhookNote:''}`; }catch(e){status.textContent='保存失敗: '+e.message;}};
-  loadEmailSettings();document.getElementById('emailProvider').onchange();
-  async function loadGeminiKeys() { const el=document.getElementById('geminiKeyList'); try { const data=await call('geminiKeys'); el.innerHTML=(data.keys||[]).map((item,index)=>`<div class="admin-item" data-gemini-id="${escapeHtml(item.id)}"><div class="row" style="justify-content:space-between"><strong>${index+1}. ${escapeHtml(item.label)}</strong><span class="muted">${escapeHtml(item.masked)} · ${item.enabled?'有効':'停止中'}</span></div><div class="admin-actions"><button type="button" class="secondary" data-gemini-up="${escapeHtml(item.id)}" ${index===0?'disabled':''}>上へ</button><button type="button" class="secondary" data-gemini-down="${escapeHtml(item.id)}" ${index===(data.keys.length-1)?'disabled':''}>下へ</button><button type="button" class="secondary" data-gemini-toggle="${escapeHtml(item.id)}">${item.enabled?'停止':'有効化'}</button><button type="button" class="danger" data-gemini-delete="${escapeHtml(item.id)}">削除</button></div></div>`).join('')||'<p class="muted">APIキーが登録されていません。</p>'; el.querySelectorAll('[data-gemini-delete]').forEach(b=>b.onclick=async()=>{if((await MixAllDialog.confirm('このGemini APIキーを削除しますか？'))){await call('deleteGeminiKey',{id:b.dataset.geminiDelete});loadGeminiKeys();}}); el.querySelectorAll('[data-gemini-toggle]').forEach(b=>b.onclick=async()=>{const row=b.closest('[data-gemini-id]');const enabled=b.textContent==='有効化';await call('updateGeminiKey',{id:b.dataset.geminiToggle,enabled});loadGeminiKeys();}); const move=async(id,delta)=>{const ids=[...el.querySelectorAll('[data-gemini-id]')].map(x=>x.dataset.geminiId);const i=ids.indexOf(id),j=i+delta;if(i<0||j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];await call('reorderGeminiKeys',{order:ids});loadGeminiKeys();}; el.querySelectorAll('[data-gemini-up]').forEach(b=>b.onclick=()=>move(b.dataset.geminiUp,-1));el.querySelectorAll('[data-gemini-down]').forEach(b=>b.onclick=()=>move(b.dataset.geminiDown,1)); } catch(e){el.textContent='読み込み失敗: '+e.message;} }
+  async function loadGeminiKeys() { const el=document.getElementById('geminiKeyList'); try { const data=await call('geminiKeys'); el.innerHTML=(data.keys||[]).map((item,index)=>`<div class="admin-item" data-gemini-id="${escapeHtml(item.id)}"><div class="row" style="justify-content:space-between"><strong>${index+1}. ${escapeHtml(item.label)}</strong><span class="muted">${escapeHtml(item.masked)} · ${item.enabled?'有効':'停止中'}</span></div><div class="admin-actions"><button type="button" class="secondary" data-gemini-up="${escapeHtml(item.id)}" ${index===0?'disabled':''}>上へ</button><button type="button" class="secondary" data-gemini-down="${escapeHtml(item.id)}" ${index===(data.keys.length-1)?'disabled':''}>下へ</button><button type="button" class="secondary" data-gemini-toggle="${escapeHtml(item.id)}">${item.enabled?'停止':'有効化'}</button><button type="button" class="danger" data-gemini-delete="${escapeHtml(item.id)}">削除</button></div></div>`).join('')||'<p class="muted">APIキーが登録されていません。</p>'; el.querySelectorAll('[data-gemini-delete]').forEach(b=>b.onclick=async()=>{if(confirm('このGemini APIキーを削除しますか？')){await call('deleteGeminiKey',{id:b.dataset.geminiDelete});loadGeminiKeys();}}); el.querySelectorAll('[data-gemini-toggle]').forEach(b=>b.onclick=async()=>{const row=b.closest('[data-gemini-id]');const enabled=b.textContent==='有効化';await call('updateGeminiKey',{id:b.dataset.geminiToggle,enabled});loadGeminiKeys();}); const move=async(id,delta)=>{const ids=[...el.querySelectorAll('[data-gemini-id]')].map(x=>x.dataset.geminiId);const i=ids.indexOf(id),j=i+delta;if(i<0||j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];await call('reorderGeminiKeys',{order:ids});loadGeminiKeys();}; el.querySelectorAll('[data-gemini-up]').forEach(b=>b.onclick=()=>move(b.dataset.geminiUp,-1));el.querySelectorAll('[data-gemini-down]').forEach(b=>b.onclick=()=>move(b.dataset.geminiDown,1)); } catch(e){el.textContent='読み込み失敗: '+e.message;} }
   document.getElementById('addGeminiKey').onclick=async()=>{const label=document.getElementById('geminiKeyLabel').value.trim();const apiKey=document.getElementById('geminiKeyValue').value.trim();const st=document.getElementById('geminiKeyStatus');try{await call('addGeminiKey',{label,apiKey});document.getElementById('geminiKeyLabel').value='';document.getElementById('geminiKeyValue').value='';st.textContent='Gemini APIキーを追加しました。';loadGeminiKeys();}catch(e){st.textContent=e.message;}};
   loadGeminiKeys();
   async function loadGeminiSettings() { const status=document.getElementById('geminiSettingsStatus'); try { const data=await call('getGeminiSettings'); const s=data.settings||{}; document.getElementById('geminiFixedPrompt').value=s.fixedPrompt||''; document.getElementById('geminiAllowUserReply').checked=s.allowUserReply!==false; document.getElementById('geminiAllowReply').checked=s.allowGeminiReply!==false; document.getElementById('geminiReadUch').checked=s.readUch!==false; document.getElementById('geminiReadGhost').checked=s.readGhost!==false; } catch(e) { status.textContent='設定の読み込みに失敗しました: '+e.message; } }
@@ -316,53 +194,10 @@ async function call(action, body = {}) { return Netrify.api('/.netlify/functions
   loadGeminiSettings();
   let officialRows = [];
   function resetOfficialForm() { document.getElementById('officialId').value=''; document.getElementById('officialName').value=''; document.getElementById('officialDisplayName').value=''; document.getElementById('officialIcon').value='公式'; document.getElementById('officialRules').value='[{"channel":"pocket","trigger":"mention","action":"canned","text":"お問い合わせありがとうございます。"}]'; document.querySelectorAll('[data-official-channel]').forEach((el)=>el.checked=el.dataset.officialChannel==='pocket'); }
-  function renderOfficialRows() { const el=document.getElementById('officialList'); el.innerHTML=officialRows.map((item)=>`<div class="admin-item"><strong>${escapeHtml(item.displayName)} (@${escapeHtml(item.name)})</strong> <span class="muted">${item.enabled===false?'停止中':'有効'} · ${(item.channels||[]).join(', ')} · ${(item.rules||[]).length}ルール</span><div class="admin-actions"><button type="button" class="secondary" data-official-edit="${escapeHtml(item.id)}">編集</button><button type="button" class="danger" data-official-delete="${escapeHtml(item.id)}">削除</button></div></div>`).join('')||'<p class="muted">公式アカウントはありません。</p>'; el.querySelectorAll('[data-official-edit]').forEach((b)=>b.onclick=()=>{const x=officialRows.find((r)=>r.id===b.dataset.officialEdit);if(!x)return;document.getElementById('officialId').value=x.id;document.getElementById('officialName').value=x.name;document.getElementById('officialDisplayName').value=x.displayName;document.getElementById('officialIcon').value=x.icon||'公式';document.getElementById('officialRules').value=JSON.stringify(x.rules||[],null,2);document.querySelectorAll('[data-official-channel]').forEach((el)=>el.checked=(x.channels||[]).includes(el.dataset.officialChannel));window.scrollTo({top:document.getElementById('officialId').closest('.card').offsetTop-20,behavior:'smooth'});}); el.querySelectorAll('[data-official-delete]').forEach((b)=>b.onclick=async()=>{if((await MixAllDialog.confirm('この公式アカウントを削除しますか？'))){await call('deleteOfficialAccount',{id:b.dataset.officialDelete});await loadOfficialAccounts();}}); }
+  function renderOfficialRows() { const el=document.getElementById('officialList'); el.innerHTML=officialRows.map((item)=>`<div class="admin-item"><strong>${escapeHtml(item.displayName)} (@${escapeHtml(item.name)})</strong> <span class="muted">${item.enabled===false?'停止中':'有効'} · ${(item.channels||[]).join(', ')} · ${(item.rules||[]).length}ルール</span><div class="admin-actions"><button type="button" class="secondary" data-official-edit="${escapeHtml(item.id)}">編集</button><button type="button" class="danger" data-official-delete="${escapeHtml(item.id)}">削除</button></div></div>`).join('')||'<p class="muted">公式アカウントはありません。</p>'; el.querySelectorAll('[data-official-edit]').forEach((b)=>b.onclick=()=>{const x=officialRows.find((r)=>r.id===b.dataset.officialEdit);if(!x)return;document.getElementById('officialId').value=x.id;document.getElementById('officialName').value=x.name;document.getElementById('officialDisplayName').value=x.displayName;document.getElementById('officialIcon').value=x.icon||'公式';document.getElementById('officialRules').value=JSON.stringify(x.rules||[],null,2);document.querySelectorAll('[data-official-channel]').forEach((el)=>el.checked=(x.channels||[]).includes(el.dataset.officialChannel));window.scrollTo({top:document.getElementById('officialId').closest('.card').offsetTop-20,behavior:'smooth'});}); el.querySelectorAll('[data-official-delete]').forEach((b)=>b.onclick=async()=>{if(confirm('この公式アカウントを削除しますか？')){await call('deleteOfficialAccount',{id:b.dataset.officialDelete});await loadOfficialAccounts();}}); }
   async function loadOfficialAccounts() { try { const data=await call('officialAccounts'); officialRows=data.accounts||[]; renderOfficialRows(); } catch(e) { document.getElementById('officialList').textContent='読み込み失敗: '+e.message; } }
   document.getElementById('saveOfficial').onclick=async()=>{const status=document.getElementById('officialStatus');try{let rules;try{rules=JSON.parse(document.getElementById('officialRules').value||'[]');}catch{throw new Error('ルールJSONの形式が不正です');}if(!Array.isArray(rules))throw new Error('ルールはJSON配列で指定してください');const channels=[...document.querySelectorAll('[data-official-channel]:checked')].map((el)=>el.dataset.officialChannel);const body={id:document.getElementById('officialId').value||undefined,name:document.getElementById('officialName').value,displayName:document.getElementById('officialDisplayName').value,icon:document.getElementById('officialIcon').value,channels,rules};await call(body.id?'updateOfficialAccount':'createOfficialAccount',body);status.textContent='公式アカウントを保存しました。';await loadOfficialAccounts();resetOfficialForm();}catch(e){status.textContent='保存失敗: '+e.message;}};
   document.getElementById('resetOfficial').onclick=()=>{resetOfficialForm();document.getElementById('officialStatus').textContent='';}; resetOfficialForm(); loadOfficialAccounts();
-  document.getElementById('exportBackup').onclick = async () => {
-    const status=document.getElementById('backupStatus');const button=document.getElementById('exportBackup');button.disabled=true;
-    try{const started=await backupCall('startExport');status.textContent='バックアップをBackground Functionへ登録しました。ページを離れても処理は続きます。';await refreshBackupJobs();await waitForExportJob(started.exportId,status);status.textContent='バックアップの準備が完了しました。下の「準備済みバックアップをダウンロード」から取得してください。';await refreshBackupJobs();}
-    catch(error){status.textContent=`バックアップ開始失敗: ${error.message}`;}
-    finally{button.disabled=false;}
-  };
-  document.getElementById('unlockSite').onclick = async () => {
-    const status = document.getElementById('backupStatus');
-    if (!(await MixAllDialog.confirm('サイトの保護ロックを解除して、一般利用者からアクセスできる状態に戻しますか？'))) return;
-    try { await backupCall('unlock'); status.textContent = 'サイトロックを解除しました。'; } catch (error) { status.textContent = `解除失敗: ${error.message}`; }
-  };
-  document.getElementById('importBackup').onchange = async (event) => {
-    const files=Array.from(event.target.files||[]);if(!files.length)return;const status=document.getElementById('backupStatus');
-    const file=files[0]; const fileFingerprint=files.map(x=>`${x.name}|${x.size}|${x.lastModified}`).sort().join(';;');
-    try{
-      let pending=(()=>{try{return JSON.parse(localStorage.getItem('mixall_backup_import')||'null');}catch{return null;}})();
-      if(pending?.importId&&pending?.importToken){
-        if(pending.fileFingerprint&&pending.fileFingerprint!==fileFingerprint){
-          if(!(await MixAllDialog.confirm('選択したファイルは中断中の復元ファイルと異なります。別のバックアップとして新しく復元を開始しますか？')))return;
-          localStorage.removeItem('mixall_backup_import');pending=null;
-        }else{
-          const pendingStatus=await backupCall('importStatus',{importId:pending.importId});
-          if(pendingStatus.done||pendingStatus.status==='done'){localStorage.removeItem('mixall_backup_import');status.textContent='前回の復元はすでに完了しています。';await refreshBackupJobs();return;}
-          if(['queued','running','retrying'].includes(pendingStatus.status)){
-            if(Date.now()-Date.parse(pendingStatus.updatedAt||'')>10*60*1000)await backupCall('startImportCommit',{importId:pending.importId});
-            status.textContent='復元はBackground Functionで継続中です。選択したファイルの処理は不要です。';
-            while(true){const progress=await backupCall('importStatus',{importId:pending.importId});if(progress.done||progress.status==='done'){localStorage.removeItem('mixall_backup_import');status.textContent=`復元しました。${Object.values(progress.restored||{}).reduce((sum,count)=>sum+count,0)}件を反映しました。`;break;}if(progress.status==='failed')throw new Error(progress.lastError||'復元に失敗しました');await new Promise(resolve=>setTimeout(resolve,1500));}
-            await refreshBackupJobs();return;
-          }
-          if(!(await MixAllDialog.confirm('復元アップロードが中断されています。同じバックアップファイルを使って再開しますか？受信済みページは再送せず、未受信分だけを送ります。')))return;
-        }
-      }
-      const isZip=files.every(x=>x.name.toLowerCase().endsWith('.zip'));
-      const backup=isZip?await readBackupZip(files,status):JSON.parse(await file.text());
-      if(!pending&&!(await MixAllDialog.confirm('バックアップを復元すると、現在の保存データが置き換わります。実行しますか？')))return;
-      status.textContent='バックアップを復元中...';
-      const result=await importBackupInChunks(backup,status,pending?.importId?pending:null,isZip?files:null,fileFingerprint);
-      status.textContent=`復元しました。${Object.values(result.restored||{}).reduce((sum,count)=>sum+count,0)}件のデータを読み込みました。セキュリティのため再ログインが必要になる場合があります。`;
-      try{await refresh();}catch(refreshError){console.warn('backup restore completed, but dashboard refresh failed',refreshError);status.textContent='バックアップの復元は完了しました。管理画面の更新に失敗したため、必要ならページを再読み込みしてください。';}
-      await refreshBackupJobs();
-    }catch(error){status.textContent=`読み込み失敗: ${error.message}`;}
-    event.target.value='';
-  };
 
 
   function renderStats(stats) {
@@ -377,24 +212,50 @@ function renderReports(reports) {
 }
 function renderAccounts(accounts) {
   const el = document.getElementById('accounts');
-  el.innerHTML = accounts.map((a) => `<div class="admin-item"><div>${profileHtml(a, a.email)} <span class="muted">${escapeHtml(a.email)}</span></div><div class="meta">登録: ${date(a.createdAt)} · 最終確認: ${date(a.lastSeenAt)} · 権限: ${a.isAdmin ? '運営（主運営と同等）' : (a.isDeputyAdmin ? '副運営' : '一般')}</div><div class="admin-actions">${a.email !== session.email ? `<button type="button" class="ghost" data-official="${escapeHtml(a.email)}">${a.isOfficial ? '公認を解除' : '公認にする'}</button>` : ''}${session.isOperator && a.email !== session.email ? `<button type="button" class="ghost" data-deputy="${escapeHtml(a.email)}">${a.isDeputyAdmin ? '副運営を解除' : '副運営にする'}</button><button type="button" class="ghost" data-admin-role="${escapeHtml(a.email)}">${a.isAdmin ? '運営を解除' : '運営にする'}</button>` : ''}${a.email === session.email ? '<span class="muted">自分のアカウント</span>' : ''}<button type="button" class="ghost" data-reset="${escapeHtml(a.email)}">パスワード再設定</button>${!a.isAdmin ? `<button type="button" class="ghost" data-delete-account="${escapeHtml(a.email)}">アカウント強制削除</button>` : ''}</div></div>`).join('') || '<p class="muted">アカウントがありません。</p>';
+  el.innerHTML = accounts.map((a) => `<div class="admin-item"><div>${profileHtml(a, a.email)} <span class="muted">${escapeHtml(a.email)}</span></div><div class="meta">登録: ${date(a.createdAt)} · 最終確認: ${date(a.lastSeenAt)} · 権限: ${a.isAdmin ? '運営（主運営と同等）' : (a.isDeputyAdmin ? '副運営' : '一般')}</div><div class="admin-actions">${a.email !== session.email ? `<button type="button" class="ghost" data-official="${escapeHtml(a.email)}">${a.isOfficial ? '公認を解除' : '公認にする'}</button>` : ''}${session.isOperator && a.email !== session.email ? `<button type="button" class="ghost" data-deputy="${escapeHtml(a.email)}">${a.isDeputyAdmin ? '副運営を解除' : '副運営にする'}</button><button type="button" class="ghost" data-admin-role="${escapeHtml(a.email)}">${a.isAdmin ? '運営を解除' : '運営にする'}</button>` : ''}${a.email === session.email ? '<span class="muted">自分のアカウント</span>' : ''}<button type="button" class="ghost" data-edit-account="${escapeHtml(a.email)}">情報編集</button><button type="button" class="ghost" data-reset="${escapeHtml(a.email)}">パスワード再設定</button>${!a.isAdmin ? `<button type="button" class="ghost" data-delete-account="${escapeHtml(a.email)}">アカウント削除</button>` : ''}</div></div>`).join('') || '<p class="muted">アカウントがありません。</p>';
   el.querySelectorAll('[data-official]').forEach((b) => b.onclick = async () => { const a = accounts.find((item) => item.email === b.dataset.official); await call('setOfficial', { email:b.dataset.official, isOfficial:!a.isOfficial }); await refresh(); });
-  el.querySelectorAll('[data-deputy]').forEach((b) => b.onclick = async () => { const a = accounts.find((item) => item.email === b.dataset.deputy); if (!(await MixAllDialog.confirm(`${b.dataset.deputy} を${a.isDeputyAdmin ? '副運営から解除' : '副運営に任命'}しますか？`))) return; await call('setDeputyAdmin', { email:b.dataset.deputy, isDeputyAdmin:!a.isDeputyAdmin }); await refresh(); });
-  el.querySelectorAll('[data-admin-role]').forEach((b) => b.onclick = async () => { const a = accounts.find((item) => item.email === b.dataset.adminRole); if (!(await MixAllDialog.confirm(`${b.dataset.adminRole} を${a.isAdmin ? '運営から解除' : '運営に任命'}しますか？${!a.isAdmin ? '副運営の場合は運営へ昇格します。' : ''}`))) return; await call('setAdmin', { email:b.dataset.adminRole, isAdmin:!a.isAdmin }); await refresh(); });
-  el.querySelectorAll('[data-reset]').forEach((b) => b.onclick = async () => { if (!(await MixAllDialog.confirm(`${b.dataset.reset} のパスワードを再設定しますか？既存端末はすべてログアウトされます。`))) return; const result = await call('resetPassword', { email:b.dataset.reset }); alert(`一時パスワード: ${result.temporaryPassword}\n本人確認後、安全な経路で本人へ伝えてください。`); await refresh(); });
-  el.querySelectorAll('[data-delete-account]').forEach((b) => b.onclick = async () => { const reason=(await MixAllDialog.prompt('強制削除の理由を入力してください')); if (!reason) return; const confirmEmail=(await MixAllDialog.prompt(`確認のため ${b.dataset.deleteAccount} を入力してください`)); if (confirmEmail !== b.dataset.deleteAccount) { alert('確認文字列が一致しません。'); return; } if (!(await MixAllDialog.confirm('このアカウントと全ログイン端末を強制削除しますか？'))) return; await call('deleteAccount',{email:b.dataset.deleteAccount,reason,confirm:confirmEmail}); await refresh(); });
+  el.querySelectorAll('[data-deputy]').forEach((b) => b.onclick = async () => { const a = accounts.find((item) => item.email === b.dataset.deputy); if (!confirm(`${b.dataset.deputy} を${a.isDeputyAdmin ? '副運営から解除' : '副運営に任命'}しますか？`)) return; await call('setDeputyAdmin', { email:b.dataset.deputy, isDeputyAdmin:!a.isDeputyAdmin }); await refresh(); });
+  el.querySelectorAll('[data-admin-role]').forEach((b) => b.onclick = async () => { const a = accounts.find((item) => item.email === b.dataset.adminRole); if (!confirm(`${b.dataset.adminRole} を${a.isAdmin ? '運営から解除' : '運営に任命'}しますか？${!a.isAdmin ? '副運営の場合は運営へ昇格します。' : ''}`)) return; await call('setAdmin', { email:b.dataset.adminRole, isAdmin:!a.isAdmin }); await refresh(); });
+  el.querySelectorAll('[data-edit-account]').forEach((b) => b.onclick = async () => { const email=b.dataset.editAccount; const a = accounts.find((item) => item.email === email) || {}; const displayName=prompt('表示名（変更しない場合はそのまま）', a.displayName || ''); if (displayName === null) return; const birthDate=prompt('生年月日 YYYY-MM-DD（年齢はここから計算されます。変更しない場合は空欄）', a.birthDate || ''); if (birthDate === null) return; try { await call('updateAccount', { email, displayName, birthDate:birthDate.trim() }); alert('更新しました。'); await refresh(); } catch (e) { alert(e.message || '更新に失敗しました'); } });
+  el.querySelectorAll('[data-reset]').forEach((b) => b.onclick = async () => { const pw = prompt(`${b.dataset.reset} の新しいパスワード（8〜128文字）。設定すると既存端末はすべてログアウトされます。`); if (!pw) return; try { await call('resetPassword', { email:b.dataset.reset, customPassword:pw }); alert('パスワードを変更しました。本人確認後、安全な経路で本人へ伝えてください。'); await refresh(); } catch (e) { alert(e.message || '失敗しました'); } });
+  el.querySelectorAll('[data-delete-account]').forEach((b) => b.onclick = async () => { const email=b.dataset.deleteAccount; const reason=prompt('削除の理由を入力してください'); if (!reason) return; const confirmEmail=prompt(`確認のため ${email} を入力してください`); if (confirmEmail !== email) { alert('確認文字列が一致しません。'); return; } const permanent = confirm('【OK】完全削除（復元できません）\n【キャンセル】ゴミ箱へ移動（あとで復元できます）'); if (permanent && !confirm('本当に完全削除しますか？この操作は取り消せません。')) return; try { await call('deleteAccount',{email,reason,confirm:confirmEmail,mode:permanent?'permanent':'soft'}); await refresh(); await loadTrash(); } catch (e) { alert(e.message || '失敗しました'); } });
 }
-function renderSessions(sessions) { const el = document.getElementById('sessions'); el.innerHTML = sessions.map((s) => { const region = [s.regionCountry, s.regionName, s.city].filter(Boolean).join(' — ') || '地域情報なし'; const accuracy = s.regionAccuracy && s.regionAccuracy !== '不明' ? `（${escapeHtml(s.regionAccuracy)}）` : ''; return `<div class="admin-item"><strong>${escapeHtml(s.email)}</strong> <span class="muted">${s.isAdmin ? '運営' : ''}${s.logoutPending ? ' · ログアウト反映待ち' : ''}</span><div class="meta">${escapeHtml(s.deviceLabel)}\n最終利用: ${date(s.lastSeenAt)} · 発行: ${date(s.createdAt)}\n接続IP: ${escapeHtml(s.ip || '取得できませんでした')}\n推定地域: ${escapeHtml(region)} ${accuracy}\n${escapeHtml(s.userAgent || '')}</div>${!s.logoutPending && s.sessionId ? `<button type="button" class="ghost" data-admin-logout="${escapeHtml(s.sessionId)}">この端末をログアウト</button>` : ''}</div>`; }).join('') || '<p class="muted">有効なセッションはありません。</p>'; el.querySelectorAll('[data-admin-logout]').forEach((b) => b.onclick = async () => { if (!(await MixAllDialog.confirm('この端末をログアウトさせますか？オフライン端末は反映待ちになります。'))) return; await call('scheduleLogout',{sessionId:b.dataset.adminLogout}); await refresh(); }); }
+
+async function loadFeedbackStats() {
+  const el = document.getElementById('fbStats'); if (!el) return;
+  try { const r = await Netrify.api('/api/feedback', { action: 'stats', token: session.token }); el.textContent = r.count ? `${r.count}件 / 平均 ${r.average} ★（5:${r.distribution[4]} 4:${r.distribution[3]} 3:${r.distribution[2]} 2:${r.distribution[1]} 1:${r.distribution[0]}）` : 'フィードバックはまだありません。'; } catch (e) { el.textContent = '読み込めませんでした。'; }
+}
+document.getElementById('fbExport')?.addEventListener('click', async () => {
+  const msg = document.getElementById('fbMsg'), btn = document.getElementById('fbExport'); btn.disabled = true; msg.textContent = '書き出し中...';
+  try {
+    const r = await Netrify.api('/api/feedback', { action: 'export', token: session.token });
+    if (!r.count) { msg.textContent = '書き出すフィードバックがありません。'; return; }
+    const bin = atob(r.zipBase64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const blob = new Blob([u8], { type: 'application/zip' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `mixall-feedback-${new Date().toISOString().slice(0, 10)}.zip`; document.body.appendChild(a); a.click(); a.remove();
+    if (!confirm(`${r.count}件をzipに書き出しました。ダウンロードできたことを確認してから「OK」を押すと、サーバー上のフィードバックを削除します。`)) { msg.textContent = 'zipは保存しましたが、サーバー上の分は削除していません。'; return; }
+    const d = await Netrify.api('/api/feedback', { action: 'delete', token: session.token, keys: r.keys }); msg.textContent = `${d.deleted}件を削除しました。`; loadFeedbackStats();
+  } catch (e) { msg.textContent = e.message || '失敗しました'; } finally { btn.disabled = false; }
+});
+async function loadTrash() {
+  const box = document.getElementById('trashAccounts'); if (!box) return;
+  try {
+    const { rows } = await call('listDeletedAccounts');
+    box.innerHTML = rows.map((r) => `<div class="admin-item"><div>${escapeHtml(r.displayName)} <span class="muted">${escapeHtml(r.email)}</span></div><div class="meta">削除: ${date(r.deletedAt)} · ${escapeHtml(r.deletedBy || '')} · ${escapeHtml(r.reason || '')}</div><div class="admin-actions"><button type="button" class="ghost" data-restore="${escapeHtml(r.email)}">復元</button><button type="button" class="ghost" data-purge="${escapeHtml(r.email)}">完全削除</button></div></div>`).join('') || '<p class="muted">削除済みアカウントはありません。</p>';
+    box.querySelectorAll('[data-restore]').forEach((b) => b.onclick = async () => { try { await call('restoreAccount', { email:b.dataset.restore }); await refresh(); await loadTrash(); } catch (e) { alert(e.message || '失敗しました'); } });
+    box.querySelectorAll('[data-purge]').forEach((b) => b.onclick = async () => { if (!confirm(b.dataset.purge + ' をゴミ箱から完全に削除しますか？')) return; await call('purgeDeletedAccount', { email:b.dataset.purge }); await loadTrash(); });
+  } catch (e) { box.innerHTML = '<p class="muted">読み込めませんでした。</p>'; }
+}
+function renderSessions(sessions) { const el = document.getElementById('sessions'); el.innerHTML = sessions.map((s) => { const region = [s.regionCountry, s.regionName, s.city].filter(Boolean).join(' — ') || '地域情報なし'; const accuracy = s.regionAccuracy && s.regionAccuracy !== '不明' ? `（${escapeHtml(s.regionAccuracy)}）` : ''; return `<div class="admin-item"><strong>${escapeHtml(s.email)}</strong> <span class="muted">${s.isAdmin ? '運営' : ''}${s.logoutPending ? ' · ログアウト反映待ち' : ''}</span><div class="meta">${escapeHtml(s.deviceLabel)}\n最終利用: ${date(s.lastSeenAt)} · 発行: ${date(s.createdAt)}\n接続IP: ${escapeHtml(s.ip || '取得できませんでした')}\n推定地域: ${escapeHtml(region)} ${accuracy}\n${escapeHtml(s.userAgent || '')}</div>${!s.logoutPending && s.sessionId ? `<button type="button" class="ghost" data-admin-logout="${escapeHtml(s.sessionId)}">この端末をログアウト</button>` : ''}</div>`; }).join('') || '<p class="muted">有効なセッションはありません。</p>'; el.querySelectorAll('[data-admin-logout]').forEach((b) => b.onclick = async () => { if (!confirm('この端末をログアウトさせますか？オフライン端末は反映待ちになります。')) return; await call('scheduleLogout',{sessionId:b.dataset.adminLogout}); await refresh(); }); }
   function renderGhost(posts) {
   const el = document.getElementById('ghostPosts');
   el.innerHTML = posts.map((p) => `<div class="admin-item"><div>${profileHtml(p.authorProfile, p.authorEmail)} <span class="muted">${date(p.createdAt)}</span></div><div class="meta">${escapeHtml(p.text || '(メディア投稿)')}\nコメント: ${(p.comments || []).length} · いいね: ${(p.likes || []).length}</div><div class="admin-actions"><button type="button" class="ghost" data-delete-ghost="${escapeHtml(p.id)}">投稿を削除</button></div></div>`).join('') || '<p class="muted">投稿がありません。</p>';
-  el.querySelectorAll('[data-delete-ghost]').forEach((b) => b.onclick = async () => { if (!(await MixAllDialog.confirm('このGhost投稿を削除しますか？'))) return; await call('deleteGhostPost', { postId:b.dataset.deleteGhost }); await refresh(); });
+  el.querySelectorAll('[data-delete-ghost]').forEach((b) => b.onclick = async () => { if (!confirm('このGhost投稿を削除しますか？')) return; await call('deleteGhostPost', { postId:b.dataset.deleteGhost }); await refresh(); });
 }
   let editingGhostTag = null;
   async function loadGhostTags() {
     const el = document.getElementById('ghostTags');
     try {
-      const response = await fetch('/.netlify/functions/ghost?tags=1&token=' + encodeURIComponent(session.token));
+      const response = await fetch('/api/ghost?tags=1&token=' + encodeURIComponent(session.token));
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'タグ一覧を取得できません');
       const tags = Array.isArray(data.tags) ? data.tags : [];
@@ -410,10 +271,10 @@ function renderSessions(sessions) { const el = document.getElementById('sessions
         document.getElementById('saveGhostTag').textContent = 'タグを更新';
         document.getElementById('cancelGhostTagEdit').style.display = 'inline-block';
       });
-      el.querySelectorAll('[data-delete-ghost-tag]').forEach((button) => button.onclick = async () => { if (!(await MixAllDialog.confirm('このGhostタグを削除しますか？'))) return; await callGhost('deleteManagedTag', { tagId:button.dataset.deleteGhostTag }); resetGhostTagForm(); await loadGhostTags(); });
+      el.querySelectorAll('[data-delete-ghost-tag]').forEach((button) => button.onclick = async () => { if (!confirm('このGhostタグを削除しますか？')) return; await callGhost('deleteManagedTag', { tagId:button.dataset.deleteGhostTag }); resetGhostTagForm(); await loadGhostTags(); });
     } catch (error) { el.innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`; }
   }
-  function callGhost(action, body = {}) { return Netrify.api('/.netlify/functions/ghost', { action, token: session.token, ...body }); }
+  function callGhost(action, body = {}) { return Netrify.api('/api/ghost', { action, token: session.token, ...body }); }
   function resetGhostTagForm() { editingGhostTag = null; document.getElementById('ghostTagInput').value = ''; document.getElementById('ghostTagDescription').value = ''; document.getElementById('ghostTagOrder').value = '0'; document.getElementById('ghostTagEnabled').checked = true; document.getElementById('saveGhostTag').textContent = 'タグを追加'; document.getElementById('cancelGhostTagEdit').style.display = 'none'; document.getElementById('ghostTagError').textContent = ''; }
   document.getElementById('saveGhostTag').onclick = async () => { const error = document.getElementById('ghostTagError'); error.textContent = ''; try { await callGhost('saveManagedTag', { tag:document.getElementById('ghostTagInput').value, originalTag:editingGhostTag?.tag, description:document.getElementById('ghostTagDescription').value, order:Number(document.getElementById('ghostTagOrder').value) || 0, enabled:document.getElementById('ghostTagEnabled').checked }); resetGhostTagForm(); await loadGhostTags(); } catch (e) { error.textContent = e.message; } };
   document.getElementById('cancelGhostTagEdit').onclick = resetGhostTagForm;
@@ -471,7 +332,7 @@ async function downloadAuditAttachment(button){
 }
 
 function renderThreads(threads) { document.getElementById('threads').innerHTML = '<h4>Uch</h4>' + (threads.map((t) => `<div class="admin-item"><strong>${escapeHtml(t.title)}</strong> <span class="muted">${t.postCount}件 · ${date(t.createdAt)}</span><div class="meta">${escapeHtml(t.authorEmail || t.author || '')}</div></div>`).join('') || '<p class="muted">スレッドがありません。</p>'); }
-function renderSites(sites) { document.getElementById('sites').innerHTML = '<h4>貸し出しサイト</h4>' + (sites.map((s) => `<div class="admin-item"><a href="/site-view/${encodeURIComponent(s.slug)}" target="_blank">/site-view/${escapeHtml(s.slug)}</a> <span class="muted">${escapeHtml(s.title)} · ${escapeHtml(s.ownerEmail)}</span><div class="admin-actions"><button type="button" class="ghost" data-delete-site="${escapeHtml(s.slug)}">サイトを削除</button></div></div>`).join('') || '<p class="muted">サイトがありません。</p>'); document.querySelectorAll('[data-delete-site]').forEach((b) => b.onclick = async () => { if (!(await MixAllDialog.confirm('この公開サイトを削除しますか？'))) return; await call('deleteLendingSite', { slug:b.dataset.deleteSite }); await refresh(); }); }
+function renderSites(sites) { document.getElementById('sites').innerHTML = '<h4>貸し出しサイト</h4>' + (sites.map((s) => `<div class="admin-item"><a href="/site-view/${encodeURIComponent(s.slug)}" target="_blank">/site-view/${escapeHtml(s.slug)}</a> <span class="muted">${escapeHtml(s.title)} · ${escapeHtml(s.ownerEmail)}</span><div class="admin-actions"><button type="button" class="ghost" data-delete-site="${escapeHtml(s.slug)}">サイトを削除</button></div></div>`).join('') || '<p class="muted">サイトがありません。</p>'); document.querySelectorAll('[data-delete-site]').forEach((b) => b.onclick = async () => { if (!confirm('この公開サイトを削除しますか？')) return; await call('deleteLendingSite', { slug:b.dataset.deleteSite }); await refresh(); }); }
 
   let coinEarningSiteSelection = [];
   async function loadCoinEarningSites() { const data = await call('getCoinEarningSites'); coinEarningSiteSelection = data.selected || []; const el=document.getElementById('coinEarningSites'); el.innerHTML=(data.sites||[]).map((site)=>`<label class="row admin-item"><input type="checkbox" data-coin-site="${escapeHtml(site.slug)}" ${site.selected?'checked':''} style="width:auto;" /><span><strong>${escapeHtml(site.title)}</strong><br><span class="muted">/site-view/${escapeHtml(site.slug)} · ${escapeHtml(site.ownerEmail)}</span></span></label>`).join('') || '<p class="muted">Coin命令を含むサイトがありません。</p>'; }
@@ -495,11 +356,71 @@ function renderSites(sites) { document.getElementById('sites').innerHTML = '<h4>
   document.getElementById('loadBirthDates').onclick=()=>loadBirthDatePage(0);
   document.getElementById('prevBirthDates').onclick=()=>loadBirthDatePage(Math.max(0,birthDateCurrentOffset-100));
   document.getElementById('nextBirthDates').onclick=()=>{if(birthDateNextOffset!==null)loadBirthDatePage(birthDateNextOffset);};
-  async function refresh() { try { document.getElementById('adminError').textContent = ''; latest = await call('snapshot'); syncCurrentRole(latest.accounts.find((account) => account.email === session.email)); renderStats(latest.stats); renderReports(latest.reports); renderAccounts(latest.accounts); renderSessions(latest.sessions); renderGhost(latest.posts); renderRooms(latest.rooms); renderThreads(latest.threads); renderSites(latest.sites); renderAudits(latest.audits); await loadCoinEarningSites(); await loadGhostTags(); await loadProgramReviews(); } catch (e) { document.getElementById('adminError').textContent = e.message; } }
+  async function refresh() { try { document.getElementById('adminError').textContent = ''; latest = await call('snapshot'); syncCurrentRole(latest.accounts.find((account) => account.email === session.email)); renderStats(latest.stats); renderReports(latest.reports); renderAccounts(latest.accounts);loadTrash();loadFeedbackStats(); renderSessions(latest.sessions); renderGhost(latest.posts); renderRooms(latest.rooms); renderThreads(latest.threads); renderSites(latest.sites); renderAudits(latest.audits); await loadCoinEarningSites(); await loadGhostTags(); await loadProgramReviews(); } catch (e) { document.getElementById('adminError').textContent = e.message; } }
 document.getElementById('refreshBtn').onclick = refresh; document.getElementById('auditSearch')?.addEventListener('input',()=>renderAudits(latest?.audits||[])); document.getElementById('auditActionFilter')?.addEventListener('change',()=>renderAudits(latest?.audits||[]));
   loadExtensionAdmin();
 refresh();
 </script>
-<script src="/js/admin-plus.js" defer></script>
+<script src="/js/filter-search.js"></script><script src="/js/search-adapters.js"></script>
+<script>
+(function(){
+const T=[
+ ['','（テンプレートを選ぶ）','warning','',''],
+ ['unauth','アカウントの不正使用の疑い','danger','アカウントの不正使用の疑いについて','お客様のアカウントで、第三者による不正な利用が疑われる動きを確認しました。\n\n・念のため、すぐにパスワードを変更してください。\n・心当たりのないログイン端末は、アカウント設定からログアウトしてください。\n・回復用メールアドレスが本人確認済みか確認してください。\n\n心当たりがある場合は、この警告は無視していただいて構いません。'],
+ ['rule','利用規約違反(1回目の警告)','warning','利用規約に違反する行為について','あなたの投稿・行為が利用規約に違反している可能性があるため、警告します。\n\n該当: {内容を記入}\n\n今後同様の行為が続く場合、投稿の削除や利用制限を行うことがあります。'],
+ ['spam','スパム・連続投稿','warning','スパム・連続投稿について','短時間に大量の投稿・メッセージ送信が確認されました。他のユーザーの迷惑になるため、控えてください。繰り返される場合は利用を制限します。'],
+ ['harass','誹謗中傷・嫌がらせ','danger','他のユーザーへの誹謗中傷について','他のユーザーへの誹謗中傷・嫌がらせにあたる行為が確認されました。直ちにやめてください。改善されない場合は、アカウントの停止を行います。'],
+ ['impers','なりすまし','danger','なりすまし行為について','運営・公式・他のユーザーになりすます行為が確認されました。表示名・プロフィールを修正してください。'],
+ ['last','最終警告(停止予告)','danger','最終警告: アカウント停止の予告','これまでの警告にもかかわらず、規約違反が続いています。これが最終警告です。再度違反があった場合は、事前の連絡なくアカウントを停止します。'],
+ ['maint','メンテナンスのお知らせ','info','メンテナンスのお知らせ','{日時}にメンテナンスを行います。この間、一部の機能が使えなくなる場合があります。'],
+ ['age','年齢に関する確認のお願い','warning','年齢確認のお願い','登録情報(生年月日)について確認が必要です。年齢に合わない機能の利用が確認された場合、利用を制限することがあります。']
+];
+const $=(i)=>document.getElementById(i);
+$('warnTpl').innerHTML=T.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('');
+$('warnTpl').onchange=()=>{const t=T.find(x=>x[0]===$('warnTpl').value);if(!t||!t[0])return;$('warnSev').value=t[2];$('warnTitle').value=t[3];$('warnBody').value=t[4];};
+$('warnSend').onclick=async()=>{
+  $('warnErr').textContent='';$('warnOk').textContent='';
+  const raw=$('warnTargets').value.trim();const targets=(raw==='全員'||raw.toLowerCase()==='all')?'all':raw;
+  if(!targets){$('warnErr').textContent='対象を入力してください';return;}
+  if(!$('warnTitle').value.trim()||!$('warnBody').value.trim()){$('warnErr').textContent='タイトルと本文を入力してください';return;}
+  if(targets==='all'&&!confirm('全員に送信します。よろしいですか？'))return;
+  try{const s=Netrify.getSession();const r=await Netrify.api('/api/notifications',{action:'sendWarning',token:s.token,targets,title:$('warnTitle').value,body:$('warnBody').value,severity:$('warnSev').value,requireAck:$('warnAck').checked,templateId:$('warnTpl').value});
+    $('warnOk').textContent=r.sent+'人に送信しました'+(r.missing&&r.missing.length?'（存在しないアカウント: '+r.missing.join(', ')+'）':'');}
+  catch(e){$('warnErr').textContent=e.message;}
+};
+})();
+</script>
+<script>
+(function(){
+const $=(i)=>document.getElementById(i);
+const SQL=`create or replace function public.mixall_db_usage()
+returns json language sql security definer set search_path = public as $$
+  select json_build_object('db_bytes', pg_database_size(current_database()), 'kv_bytes', pg_total_relation_size('public.kv'), 'kv_rows', (select count(*) from public.kv));
+$$;
+revoke all on function public.mixall_db_usage() from public, anon, authenticated;
+grant execute on function public.mixall_db_usage() to service_role;`;
+$('usageSql').value=SQL;
+const fmt=(b)=>b>=1073741824?(b/1073741824).toFixed(2)+' GB':(b/1048576).toFixed(1)+' MB';
+async function load(){
+  $('usageErr').textContent='';
+  try{
+    const s=Netrify.getSession();const r=await Netrify.api('/api/archive',{action:'usage',token:s.token});
+    if(!r.ok){$('usageMeter').textContent='容量を取得できませんでした。';$('usageSetup').style.display='block';$('usageSetup').open=!!r.needSetup;$('usageErr').textContent=r.needSetup?'初回設定が必要です（下のSQLを実行）':(r.error||'');return;}
+    $('usageSetup').style.display='none';
+    window.__sub=r.sub;
+    const used=r.dbBytes,max=r.limitBytes,left=Math.max(0,max-used),pct=Math.min(100,used/max*100);
+    const col=pct>=90?'#c62828':pct>=70?'#f59e0b':'#2e7d32';
+    $('usageMeter').innerHTML=`<div style="font-size:1.1rem"><b>残り ${fmt(left)}</b> / 最大 ${fmt(max)}</div><div style="height:18px;border-radius:9px;background:rgba(127,127,127,.25);overflow:hidden;margin:6px 0" role="progressbar" aria-valuenow="${pct.toFixed(1)}" aria-valuemin="0" aria-valuemax="100"><div style="height:100%;width:${pct.toFixed(1)}%;background:${col}"></div></div><div>使用 ${fmt(used)}（${pct.toFixed(1)}%）　うちkvテーブル ${fmt(r.kvBytes)}・${r.kvRows.toLocaleString()}行</div>${pct>=80?'<div style="color:'+col+'">容量が少なくなっています。下の「データ書き出し」で空けてください。</div>':''}`;
+    if(r.sub){const b=r.sub.ok?r.sub.dbBytes:0,p2=Math.min(100,b/max*100);$('usageMeter').innerHTML+=r.sub.ok?`<div style="margin-top:10px"><b>第2Supabase</b> 使用 ${fmt(b)} / ${fmt(max)}（残り ${fmt(Math.max(0,max-b))}）<div style="height:12px;border-radius:6px;background:rgba(127,127,127,.25);overflow:hidden;margin-top:4px"><div style="height:100%;width:${p2}%;background:#1976d2"></div></div></div>`:`<div class="muted" style="margin-top:10px">第2Supabase: 取得できません(${r.sub.error}) schema2.sqlを実行したか確認してください</div>`;}
+    if(r.sub3){const b3=r.sub3.ok?r.sub3.dbBytes:0,p3=Math.min(100,b3/max*100);$('usageMeter').innerHTML+=r.sub3.ok?`<div style="margin-top:10px"><b>第3Supabase</b> 使用 ${fmt(b3)} / ${fmt(max)}（残り ${fmt(Math.max(0,max-b3))}）<div style="height:12px;border-radius:6px;background:rgba(127,127,127,.25);overflow:hidden;margin-top:4px"><div style="height:100%;width:${p3}%;background:#1976d2"></div></div></div>`:`<div class="muted" style="margin-top:10px">第3Supabase: 取得できません(${r.sub3.error}) schema2.sqlを実行したか確認してください</div>`;}
+    if(r.sub4){const b4=r.sub4.ok?r.sub4.dbBytes:0,p4=Math.min(100,b4/max*100);$('usageMeter').innerHTML+=r.sub4.ok?`<div style="margin-top:10px"><b>第4Supabase</b> 使用 ${fmt(b4)} / ${fmt(max)}（残り ${fmt(Math.max(0,max-b4))}）<div style="height:12px;border-radius:6px;background:rgba(127,127,127,.25);overflow:hidden;margin-top:4px"><div style="height:100%;width:${p4}%;background:#1976d2"></div></div></div>`:`<div class="muted" style="margin-top:10px">第4Supabase: 取得できません(${r.sub4.error}) schema2.sqlを実行したか確認してください</div>`;}
+    if(r.sub5){const b5=r.sub5.ok?r.sub5.dbBytes:0,p5=Math.min(100,b5/max*100);$('usageMeter').innerHTML+=r.sub5.ok?`<div style="margin-top:10px"><b>第5Supabase</b> 使用 ${fmt(b5)} / ${fmt(max)}（残り ${fmt(Math.max(0,max-b5))}）<div style="height:12px;border-radius:6px;background:rgba(127,127,127,.25);overflow:hidden;margin-top:4px"><div style="height:100%;width:${p5}%;background:#1976d2"></div></div></div>`:`<div class="muted" style="margin-top:10px">第5Supabase: 取得できません(${r.sub5.error}) schema2.sqlを実行したか確認してください</div>`;}
+  }catch(e){$('usageMeter').textContent='';$('usageErr').textContent=e.message;}
+}
+$('usageReload').onclick=load;
+$('usageCopy').onclick=async()=>{try{await navigator.clipboard.writeText(SQL);$('usageCopy').textContent='コピーしました';}catch(_){$('usageSql').select();}};
+load();
+})();
+</script>
 </body>
 </html>

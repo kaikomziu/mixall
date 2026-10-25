@@ -1,10 +1,12 @@
 // scripts/build-pages.mjs
-// public/ を GitHub Pages 用に build/ へ書き出す。
+// public/（EdgeOne版の画面）を GitHub Pages 用に build/ へ書き出す。
 // - サイトは https://<user>.github.io/<repo>/ 配下になるため、"/Ghost" などのサイト内パスにベースを付ける
-// - "/.netlify/functions/<name>" を Supabase Edge Function（mixall-api）のURLへ置き換える
-// - Netlifyの書き換えルール（_redirects / netlify.toml）の代わりに 404.html でURLを振り分ける
+// - "/api/<name>" を Supabase Edge Function（mixall-api）のURLへ置き換える
+// - EdgeOne の書き換えルール（edgeone.json）の代わりに 404.html でURLを振り分ける
+// - サイト名を「MixAll +（二世代）」にそろえ、検索向けのタグを補う
+// - overlay/ にある GitHub 版だけのファイル（js/mixall-base.js など）を上に重ねる
 //   node scripts/build-pages.mjs [--base /mixall] [--api https://...] [--site https://...]
-import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, extname } from 'node:path';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((pairs, value, index, all) => {
@@ -15,105 +17,119 @@ const BASE = String(args.base ?? process.env.MIXALL_BASE ?? '/mixall').replace(/
 const API = String(args.api || process.env.MIXALL_API_BASE || 'https://kifnzvktwbomxthzvvgy.supabase.co/functions/v1/mixall-api').replace(/\/$/, '');
 const SITE = String(args.site || process.env.MIXALL_SITE_URL || `https://kaikomziu.github.io${BASE}`).replace(/\/$/, '');
 const OUT = args.out || 'build';
-// Googleドライブ連携（任意機能）のOAuthクライアントID。公開して問題ない値（秘密ではない）。
-const GOOGLE_CLIENT_ID = String(args['google-client-id'] || process.env.MIXALL_GOOGLE_CLIENT_ID || '');
+const NAME = 'MixAll +（二世代）';
+const BUILD_ID = Date.now().toString(36);
 
 // 出力先の中身だけ消す（フォルダ自体は開いているシェルやエディタが掴んでいることがあるため残す）
 mkdirSync(OUT, { recursive: true });
 for (const name of readdirSync(OUT)) rmSync(join(OUT, name), { recursive: true, force: true });
 cpSync('public', OUT, { recursive: true });
-for (const name of ['_redirects', 'manus-routes.json']) rmSync(join(OUT, name), { force: true });
+// EdgeOne は大文字小文字を区別しないが、GitHub Pages は区別する。リンクは /Ghost/ なのでフォルダ名を合わせる
+// （Windows でも大文字小文字だけの改名が効くよう、いったん別名を経由する）
+if (readdirSync(OUT).includes('ghost')) { renameSync(join(OUT, 'ghost'), join(OUT, 'ghost.tmp')); renameSync(join(OUT, 'ghost.tmp'), join(OUT, 'Ghost')); }
+cpSync('overlay', OUT, { recursive: true });
+for (const name of ['manus-routes.json']) rmSync(join(OUT, name), { force: true });
 
 // サイト直下にある名前（これらで始まる "/..." はサイト内パスとみなす）
-const ROOTS = readdirSync('public').filter((name) => !name.startsWith('_')).concat(['ghost', 'r', 'site-view'])
+const ROOTS = readdirSync(OUT).concat(['ghost', 'r', 'site-view'])
   .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
   .sort((a, b) => b.length - a.length);
 const ROOT_RE = new RegExp(`(["'\`(])\\/((?:${ROOTS.join('|')})(?=[\\/?#"'\`)]|$))`, 'g');
-// パス比較をしている行は、比較相手の文字列を書き換えない（比較側を MixAllBase.path() にする）
-const COMPARE_LINE = /MixAllBase\.path\(\)|normalizedPath|mailPath|\bpath ===|\bpath\.startsWith|===\s*['"]\/|!==\s*['"]\//;
+// 比較の相手（=== '/admin' や startsWith('/Ghost/') など）のパスは、ベースを除いた MixAllBase.path() と比べるので書き換えない
+const COMPARE_BEFORE = /(===|!==|==|!=|startsWith\(|endsWith\(|includes\(|indexOf\(|case|\.test\()\s*$/;
+// 端末に保存して単独で開くページ（オフライン用）は書き換えない
+const STANDALONE = new Set(['downloads/mixall-emergency.html']);
 
-// 読み込み画面（セッションで最初に開いたときだけ）。CSSより先に描画されるよう<head>の先頭に直接埋め込む。
-// 画面の部品を作らず html の疑似要素だけで出すので、ページのHTMLやスクリプトには影響しない。
-function splash() {
-  const css = `html.mx-splash{overflow:hidden}
-html.mx-splash::before{content:"";position:fixed;inset:0;z-index:2147483646;
-background:url(${BASE}/images/logo-loader.svg) center calc(50% - 26px)/132px 132px no-repeat,
-radial-gradient(60% 45% at 50% 42%,rgba(123,92,255,.30),transparent 70%),
-radial-gradient(50% 40% at 20% 100%,rgba(79,220,255,.14),transparent 70%),
-radial-gradient(50% 40% at 85% 0%,rgba(255,92,154,.14),transparent 70%),#07081a;
-transition:opacity .45s ease,transform .45s ease}
-html.mx-splash::after{content:"MixAll+";position:fixed;z-index:2147483647;left:50%;top:calc(50% + 66px);transform:translateX(-50%);
-font:800 28px/1 "Segoe UI Variable Display","SF Pro Display","Hiragino Sans",system-ui,sans-serif;letter-spacing:-.01em;
-background:linear-gradient(100deg,#fff 0%,#fff 32%,#4fdcff 45%,#8b6bff 62%,#ff5c9a 80%);background-size:220% 100%;
--webkit-background-clip:text;background-clip:text;color:transparent;animation:mx-shine 1.6s ease-in-out infinite;
-transition:opacity .35s ease}
-html.mx-splash-out::before{opacity:0;transform:scale(1.04)}
-html.mx-splash-out::after{opacity:0}
-@keyframes mx-shine{0%{background-position:100% 0}100%{background-position:0 0}}
-@media (prefers-reduced-motion:reduce){html.mx-splash::after{animation:none}}`.replace(/\n/g, '');
-  const js = `(function(){var d=document.documentElement;try{if(sessionStorage.getItem('mixall.splash'))return;sessionStorage.setItem('mixall.splash','1')}catch(e){return}
-d.classList.add('mx-splash');var t0=Date.now(),done=false;
-function hide(){if(done)return;done=true;setTimeout(function(){d.classList.add('mx-splash-out');setTimeout(function(){d.classList.remove('mx-splash','mx-splash-out')},460)},Math.max(0,900-(Date.now()-t0)))}
-document.addEventListener('DOMContentLoaded',function(){setTimeout(hide,150)});window.addEventListener('load',hide);setTimeout(hide,2500)})();`.replace(/\n/g, '');
-  return `<style id="mx-splash-css">${css}</style><script>${js}</script>`;
+// ['/login', '/register'].includes(path) のような比較用の配列も書き換えない
+const COMPARE_ARRAY = /\[(?:\s*(["'])[^"'\n]*\1\s*,?)+\s*\]\s*\.(?:includes|indexOf|some)\(/g;
+
+function rewriteRoots(text) {
+  const kept = [];
+  const masked = text.replace(COMPARE_ARRAY, (m) => { kept.push(m); return `\u0000${kept.length - 1}\u0000`; });
+  return masked.replace(ROOT_RE, (match, quote, rest, offset) => {
+    if (COMPARE_BEFORE.test(masked.slice(Math.max(0, offset - 16), offset))) return match;
+    return `${quote}${BASE}/${rest}`;
+  }).replace(/\u0000(\d+)\u0000/g, (m, i) => kept[Number(i)]);
 }
 
 function rewriteJs(text) {
-  let out = text;
-  // 現在パスの比較はベースを除いたパスで行う
-  out = out
-    .replace(/window\.location\.pathname\.toLowerCase\(\) !== '\/age\.html'/g, "MixAllBase.path().toLowerCase() !== '/age.html'")
-    .replace(/const path = window\.location\.pathname\.toLowerCase\(\);/g, 'const path = MixAllBase.path().toLowerCase();')
-    .replace(/const path = window\.location\.pathname\.replace\(/g, 'const path = MixAllBase.path().replace(')
-    .replace(/location\.pathname === '\/admin' \|\| location\.pathname\.startsWith\('\/admin\/'\)/g, "MixAllBase.path() === '/admin' || MixAllBase.path().startsWith('/admin/')")
-    .replace(/window\.location\.pathname\.toLowerCase\(\)\.startsWith\('\/register'\)/g, "MixAllBase.path().toLowerCase().startsWith('/register')")
-    .replace(/const mailPath = window\.location\.pathname\./g, 'const mailPath = MixAllBase.path().');
+  // 現在パスはベースを除いたパス（EdgeOne版の location.pathname 相当）で扱う。代入（画面移動）は除く
+  let out = text.replace(/(?:window\.)?location\.pathname(?!\s*=(?!=))/g, '(window.MixAllBase?MixAllBase.path():location.pathname)');
   // 保存データ・入力由来のURLへ移動する箇所はベースを補う
   out = out
     .replace(/location\.href = next\b/g, 'location.href = MixAllBase.fix(next)')
     .replace(/location\.replace\(next\)/g, 'location.replace(MixAllBase.fix(next))')
-    .replace(/location\.replace\(target\)/g, 'location.replace(MixAllBase.fix(target))')
-    .replace(/location\.href=url;/g, 'location.href=MixAllBase.fix(url);');
+    .replace(/location\.replace\(target\)/g, 'location.replace(MixAllBase.fix(target))');
   // トップ（"/"）への移動
   out = out
     .replace(/location\.replace\((['"])\/\1\)/g, `location.replace('${BASE}/')`)
-    .replace(/location\.href = (['"])\/\1/g, `location.href = '${BASE}/'`)
+    .replace(/location\.href ?= ?(['"])\/\1/g, `location.href = '${BASE}/'`)
     .replace(/(['"])\/\?next=/g, `$1${BASE}/?next=`)
-    .replace(/params\.get\('next'\) \|\| '\/'/g, `params.get('next') || '${BASE}/'`)
-    .replace(/\? candidate : '\/';/g, `? candidate : '${BASE}/';`)
-    .replace(/link\('\/', /g, `link('${BASE}/', `);
-  out = out.split('\n').map((line) => (COMPARE_LINE.test(line) ? line : line.replace(ROOT_RE, `$1${BASE}/$2`))).join('\n');
+    .replace(/params\.get\('next'\) \|\| '\/'/g, `params.get('next') || '${BASE}/'`);
+  return rewriteRoots(out);
+}
+
+function rewriteCommon(text) {
+  return text
+    .replace(/(["'`])\/api\//g, `$1${API}/`)
+    .split('https://mixalls.edgeone.dev').join(SITE)
+    .split('mixalls.edgeone.dev').join(SITE.replace(/^https:\/\//, ''));
+}
+
+// タイトル・SNS向けの名前を「MixAll +（二世代）」にする
+function rename(html) {
+  const fixName = (value) => {
+    let v = value.replace(/MixAll（ミックスオール）/g, NAME).replace(/MixAll運営/g, `${NAME} 運営`);
+    if (v.includes(NAME)) return v;
+    if (/(^|[\s|｜\-–—])MixAll$/.test(v)) return v.replace(/MixAll$/, NAME);
+    if (!/MixAll/.test(v)) return `${v} - ${NAME}`;
+    return v;
+  };
+  return html
+    .replace(/<title>([^<]*)<\/title>/i, (m, t) => `<title>${fixName(t.trim())}</title>`)
+    .replace(/(<meta\s+(?:property|name)="(?:og:title|twitter:title)"\s+content=")([^"]*)(")/gi, (m, a, t, b) => a + fixName(t) + b)
+    .replace(/(<meta\s+(?:property|name)="(?:og:site_name|application-name|apple-mobile-web-app-title)"\s+content=")([^"]*)(")/gi, `$1${NAME}$3`)
+    .replace(/"@type": "(WebSite|Organization)", "name": "MixAll", "alternateName": \[/g, `"@type": "$1", "name": "${NAME}", "alternateName": ["MixAll", "MixAll+", "MixAll 二世代", "ミックスオールプラス", `);
+}
+
+function rewrite(text, ext, rel) {
+  let out = rewriteCommon(text);
+  if (ext === '.html') {
+    if (STANDALONE.has(rel)) return out;
+    out = out.replace(/(href|src|action|poster|content)="\/"/g, `$1="${BASE}/"`);
+    out = rewriteJs(out);
+    out = rename(out);
+    const head = `<script>window.MIXALL_BASE=${JSON.stringify(BASE)};window.MIXALL_API_BASE=${JSON.stringify(API)};window.MIXALL_SITE_URL=${JSON.stringify(SITE)};</script>`
+      + `<script src="${BASE}/js/mixall-base.js"></script><script src="${BASE}/js/vault-restore.js" defer></script><link rel="stylesheet" href="${BASE}/css/mixall-gh.css">`;
+    out = /<head[^>]*>/i.test(out) ? out.replace(/<head[^>]*>/i, (m) => m + head) : head + out;
+    // サービスワーカーが古いJS/CSSを先に返すため、公開のたびにURLを変えて最新を読ませる
+    out = out.replace(new RegExp(`((?:src|href)="${BASE}/(?:js|css)/[^"?#]+\\.(?:js|css))(?=")`, 'g'), `$1?v=${BUILD_ID}`);
+    return out;
+  }
+  if (rel === 'sw.js') return rewriteSw(out);
+  if (ext === '.js') return rewriteJs(out);
+  if (ext === '.css') return out.replace(/url\((['"]?)\/(?!\/)/g, `url($1${BASE}/`);
+  if (ext === '.webmanifest') {
+    const manifest = JSON.parse(rewriteRoots(out).replace(/"(start_url|scope)":\s*"\/"/g, `"$1": "${BASE}/"`));
+    manifest.name = NAME;
+    if (!/MixAll/.test(manifest.short_name || '')) manifest.short_name = 'MixAll+';
+    return JSON.stringify(manifest, null, 2);
+  }
+  if (ext === '.json') return rewriteRoots(out);
   return out;
 }
 
-function rewrite(text, ext) {
-  let out = text.split('/.netlify/functions/').join(`${API}/`).split("'/api/").join(`'${API}/`);
-  out = out.split('https://mix-alls.netlify.app').join(SITE);
-  if (ext === '.html') {
-    out = out.replace(/(href|src|action|poster|content)="\/"/g, `$1="${BASE}/"`);
-    // <script> の中身も含めて JS と同じ規則で書き換える
-    out = rewriteJs(out);
-    const head = `<script>window.MIXALL_BASE=${JSON.stringify(BASE)};window.MIXALL_API_BASE=${JSON.stringify(API)};window.MIXALL_SITE_URL=${JSON.stringify(SITE)};window.MIXALL_GOOGLE_CLIENT_ID=${JSON.stringify(GOOGLE_CLIENT_ID)};</script>`
-      + `<script src="${BASE}/js/mixall-base.js"></script><script src="${BASE}/js/chat-vault.js"></script><script src="${BASE}/js/mixall-ux.js"></script><script src="${BASE}/js/mixall-plus.js"></script><script src="${BASE}/js/google-drive-sync.js" defer></script>`;
-    out = /<head[^>]*>/i.test(out) ? out.replace(/<head[^>]*>/i, (m) => m + splash() + head) : splash() + head + out;
-    return out;
-  }
-  if (ext === '.js') return rewriteJs(out);
-  if (ext === '.css') return out.replace(/url\((['"]?)\/(?!\/)/g, `url($1${BASE}/`);
-  if (ext === '.json' || ext === '.webmanifest') return out.replace(ROOT_RE, `$1${BASE}/$2`).replace(/"(start_url|scope)":\s*"\/"/g, `"$1": "${BASE}/"`);
+// サービスワーカー: 保存するファイル・通知のURLにベースを付ける（MixAllBase は使えない）
+function rewriteSw(text) {
+  let out = rewriteRoots(text);
+  out = out.replace("const url = new URL((event.notification.data && event.notification.data.url) || '/Notifications/', self.location.origin).href;",
+    `const __raw = String((event.notification.data && event.notification.data.url) || '/Notifications/');\n  const url = new URL(__raw.startsWith('/') && !__raw.startsWith('${BASE}/') ? '${BASE}' + __raw : __raw, self.location.origin).href;`);
+  out = out.replace(/caches\.match\('\/emergency\.html'\)/g, `caches.match('${BASE}/emergency.html')`);
   return out;
 }
 
 // 検索・SNS向けのタグを補う（ページに既にあるものは触らない）
-const DESCRIPTIONS = {
-  'emergency.html': 'MixAll+ の緊急連絡ページ。通信が不安定なときでも、端末どうしで連絡を取り合えます。',
-  'emergency-peer.html': 'MixAll+ の緊急連絡（端末どうしの直接接続）ページです。',
-  'downloads/mixall-emergency.html': 'オフラインでも開ける MixAll+ 緊急連絡ページのダウンロード版です。',
-  'Extensions/index.html': 'MixAll+ の拡張機能。自分好みの機能を追加して、MixAll+ をもっと便利に使えます。',
-  'reset-password/index.html': 'MixAll+ のパスワード再設定ページです。登録した回復用メールアドレスから再設定できます。'
-};
-// 検索ワード（keywords）。全ページ共通の語に、サービスごとの語を足す
-const BASE_KEYWORDS = ['MixAll +（二世代）', 'MixAll 二世代', 'MixAll+', 'MixAll プラス', 'ミックスオールプラス', 'MixAll', 'ミックスオール', '二世代'];
+const BASE_KEYWORDS = [NAME, 'MixAll 二世代', 'MixAll+', 'MixAll プラス', 'ミックスオールプラス', 'MixAll', 'ミックスオール', '二世代'];
 const SECTION_KEYWORDS = {
   '': ['掲示板', 'チャット', 'SNS', 'コミュニティ', '無料'],
   Uch: ['Uch', '掲示板', '匿名掲示板', 'スレッド'],
@@ -121,63 +137,72 @@ const SECTION_KEYWORDS = {
   Ghost: ['Ghost', 'SNS', 'タイムライン', '投稿', 'ショート動画'],
   Mail: ['Mail', 'メール', 'Webメール'],
   Create: ['Creator Studio', '画像作成', '作品'],
-  Custom: ['Custom', '3Dワールド', 'Three.js'],
-  Tools: ['ツール', '便利ツール', '画像変換', 'ポモドーロタイマー'],
+  Custom: ['Custom', '3Dワールド', 'HTMLゲーム'],
+  Tools: ['ツール', '便利ツール', '画像変換'],
   Calendar: ['共有カレンダー', '予定表'],
-  Coin: ['Coin', 'ショップ'],
+  Coin: ['Mcコイン', 'みつばち', '仕事掲示板'],
   Language: ['特殊言語', '辞書'],
   Extensions: ['拡張機能'],
-  lending: ['貸し出しサーバー']
+  lending: ['貸し出しサーバー'],
+  Fomasu: ['ふぉます', 'マッチング'],
+  Kodomiru: ['コドミル', '見守り', 'ペアレンタルコントロール'],
+  school: ['学校モード', 'クラスルーム', 'クイズ'],
+  Wiki: ['Wiki', 'みんなのWiki'],
+  MAWS: ['MAWS', 'Web検索'],
+  Store: ['アプリストア']
 };
 function keywordsFor(rel) {
   const top = rel.includes('/') ? rel.split('/')[0] : '';
   return [...new Set([...BASE_KEYWORDS, ...(SECTION_KEYWORDS[top] || SECTION_KEYWORDS[''])])].join(',');
 }
-const NOINDEX = new Set(['404.html', 'site-view/index.html']);
+const NOINDEX = new Set(['404.html', 'site-view/index.html', 'downloads/mixall-emergency.html']);
 // ログインしないと中身が見られない・個人用のページは検索に出さない
-const PRIVATE_PAGES = new Set(['account/index.html', 'admin/index.html', 'admin/ghost-age.html', 'age.html', 'reset-password/index.html', 'Webhook/index.html',
-  'Mail/index.html', 'Mail/thread.html', 'Pocket/index.html', 'Pocket/room.html', 'Pocket/thread.html', 'Pocket/stamps.html',
-  'Ghost/compose.html', 'Ghost/notifications.html', 'Ghost/bookmarks.html', 'Ghost/chat.html', 'Ghost/stamps.html', 'Coin/index.html', 'lending/index.html', 'Custom/builder.html']);
+const PRIVATE_PAGES = new Set(['account/index.html', 'admin/index.html', 'admin/ghost-age.html', 'age.html', 'reset-password/index.html', 'Webhook/index.html', 'unlock/index.html',
+  'Mail/index.html', 'Mail/thread.html', 'Pocket/index.html', 'Pocket/room.html', 'Pocket/thread.html', 'Pocket/stamps.html', 'Notifications/index.html', 'Uch/approvals.html',
+  'Ghost/compose.html', 'Ghost/notifications.html', 'Ghost/bookmarks.html', 'Ghost/chat.html', 'Ghost/stamps.html', 'Coin/index.html', 'lending/index.html', 'Custom/builder.html',
+  'school/classroom/index.html', 'Kodomiru/index.html', 'Fomasu/index.html']);
 // ?id= などで中身が変わるページは、正規URLを1つに決められないので canonical を付けない
-const QUERY_PAGES = new Set(['Ghost/post.html', 'Ghost/profile.html', 'Ghost/watch.html', 'Ghost/chat.html', 'Ghost/live.html', 'Pocket/room.html', 'Pocket/thread.html', 'Uch/thread.html', 'Mail/thread.html', 'Custom/room.html', 'Custom/builder.html']);
+const QUERY_PAGES = new Set(['Ghost/post.html', 'Ghost/profile.html', 'Ghost/watch.html', 'Ghost/chat.html', 'Ghost/live.html', 'Ghost/sound.html', 'Pocket/room.html', 'Pocket/thread.html', 'Uch/thread.html', 'Mail/thread.html', 'Custom/room.html', 'Custom/builder.html', 'Custom/play.html']);
 function attr(value) { return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
 function seoTags(html, rel) {
   if (!/<head[^>]*>/i.test(html)) return html;
   const add = [];
   const url = `${SITE}/${rel.replace(/(^|\/)index\.html$/, '$1')}`;
+  // 友人のドメイン用の確認タグ・正規URLは外す（こちらのURLで付け直す）
+  html = html.replace(/<meta name="google-site-verification"[^>]*>/gi, '').replace(/<link rel="canonical"[^>]*>/gi, '');
   if (NOINDEX.has(rel)) {
     if (!/name="robots"/i.test(html)) add.push('<meta name="robots" content="noindex">');
   } else {
     if (!/name="robots"/i.test(html)) add.push(PRIVATE_PAGES.has(rel) ? '<meta name="robots" content="noindex, follow">' : '<meta name="robots" content="index, follow, max-image-preview:large">');
-    if (/property="og:title"/i.test(html) && !/property="og:site_name"/i.test(html)) add.push('<meta property="og:site_name" content="MixAll +（二世代）">');
+    if (/property="og:title"/i.test(html) && !/property="og:site_name"/i.test(html)) add.push(`<meta property="og:site_name" content="${NAME}">`);
     if (!/name="keywords"/i.test(html)) add.push(`<meta name="keywords" content="${attr(keywordsFor(rel))}">`);
-    if (!QUERY_PAGES.has(rel) && !/rel="canonical"/i.test(html)) add.push(`<link rel="canonical" href="${attr(url)}">`);
+    else html = html.replace(/(<meta name="keywords" content=")([^"]*)/i, (m, a, k) => a + attr([...new Set([...BASE_KEYWORDS, ...k.split(/[,、]/).map((s) => s.trim()).filter(Boolean)])].join(',')));
+    if (!QUERY_PAGES.has(rel)) add.push(`<link rel="canonical" href="${attr(url)}">`);
     if (!/name="description"/i.test(html)) {
       const og = /property="og:description"\s+content="([^"]*)"/i.exec(html);
-      const desc = DESCRIPTIONS[rel] || (og && og[1]);
-      if (desc) add.push(`<meta name="description" content="${og && !DESCRIPTIONS[rel] ? desc : attr(desc)}">`);
+      if (og) add.push(`<meta name="description" content="${og[1]}">`);
     }
   }
   return add.length ? html.replace(/<\/head>/i, `${add.join('')}</head>`) : html;
 }
 
-const TEXT = new Set(['.html', '.js', '.css', '.json', '.webmanifest']);
-const SKIP_JS = new Set(['js/vendor/fflate.min.js', 'js/mixall-base.js', 'js/chat-vault.js', 'js/google-drive-sync.js', 'js/mixall-ux.js', 'js/mixall-plus.js', 'js/ghost-stories.js', 'js/account-plus.js', 'js/admin-plus.js', 'js/coin-plus.js', 'js/coin-shop.js', 'js/ghost-plus.js', 'js/pocket-plus.js']);
+const TEXT = new Set(['.html', '.js', '.css', '.json', '.webmanifest', '.txt', '.xml']);
+const SKIP = new Set(['js/mixall-base.js', 'js/vault-restore.js']);
 function walk(dir) {
   for (const name of readdirSync(dir)) {
     const full = join(dir, name);
     if (statSync(full).isDirectory()) { walk(full); continue; }
     const ext = extname(name).toLowerCase();
     const rel = relative(OUT, full).replace(/\\/g, '/');
-    if (!TEXT.has(ext) || SKIP_JS.has(rel)) continue;
-    let text = rewrite(readFileSync(full, 'utf8'), ext);
+    if (!TEXT.has(ext) || SKIP.has(rel) || rel.startsWith('js/vendor/')) continue;
+    let text = rewrite(readFileSync(full, 'utf8'), ext, rel);
     if (ext === '.html') text = seoTags(text, rel);
     writeFileSync(full, text);
   }
 }
 walk(OUT);
 
-// 旧Netlifyの書き換えルールの代わり（存在しないURLは GitHub Pages が 404.html を返す）
+// EdgeOne の書き換えルールの代わり（存在しないURLは GitHub Pages が 404.html を返す）
 const pages = [];
 (function list(dir) {
   for (const name of readdirSync(dir)) {
@@ -187,7 +212,7 @@ const pages = [];
   }
 })(OUT);
 
-const router = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll +（二世代）</title><meta name="robots" content="noindex">
+const router = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${NAME}</title><meta name="robots" content="noindex">
 <script>
 (function () {
   var BASE = ${JSON.stringify(BASE)}, API = ${JSON.stringify(API)}, PAGES = ${JSON.stringify(pages)};
@@ -201,11 +226,11 @@ const router = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta
   if ((m = lower.match(/^\\/mail\\/(inbox|sent|all|compose)$/))) return go('/Mail/', withQuery('view=' + m[1]));
   if ((m = clean.match(/^\\/ghost\\/@([^/]+)$/i))) return go('/Ghost/profile.html', withQuery('handle=' + m[1]));
   if ((m = clean.match(/^\\/ghost\\/post\\/([^/]+)$/i))) return go('/Ghost/post.html', withQuery('id=' + m[1]));
-  if ((m = clean.match(/^\\/r\\/([^/]+)$/))) { location.replace(API + '/tools?action=redirectGet&id=' + encodeURIComponent(decodeURIComponent(m[1]))); return; }
+  if ((m = clean.match(/^\\/r\\/([^/]+)$/))) { location.replace(API + '/r/' + encodeURIComponent(decodeURIComponent(m[1]))); return; }
   if ((m = clean.match(/^\\/site-view\\/([^/]+)$/i))) return go('/site-view/', withQuery('slug=' + m[1]));
   if (/^\\/tools(\\/|$)/i.test(clean)) return go('/Tools/', q);
   if (lower === '/create/text') return go('/Create/text.html', q);
-  // 大文字小文字だけ違うページ・ディレクトリ（例: /ghost/watch → /Ghost/watch.html）
+  // 大文字小文字だけ違うページ・ディレクトリ（例: /ghost/watch → /Ghost/watch.html、/fomasu → /Fomasu/）
   for (var i = 0; i < PAGES.length; i++) {
     var page = PAGES[i], lp = page.toLowerCase();
     if (lp === lower || lp === lower + '.html' || lp === lower + '/index.html') return go(page.replace(/index\\.html$/, ''), q);
@@ -217,8 +242,8 @@ writeFileSync(join(OUT, '404.html'), router);
 
 // 貸し出しサイト /site-view/<slug>: Supabaseの関数URLはHTMLを text/plain で返すため、ページ側で描画する
 mkdirSync(join(OUT, 'site-view'), { recursive: true });
-writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MixAll +（二世代） サイト</title><meta name="robots" content="noindex">
-<meta property="og:image" content="${SITE}/ogp/14-website-creation.jpg?v=20261013-1"></head><body style="margin:0;background:#0f1115;color:#eee;font-family:sans-serif">
+writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${NAME} サイト</title><meta name="robots" content="noindex">
+</head><body style="margin:0;background:#0f1115;color:#eee;font-family:sans-serif">
 <p id="s" style="padding:24px">読み込み中...</p>
 <script>
 (async function () {
@@ -231,10 +256,10 @@ writeFileSync(join(OUT, 'site-view', 'index.html'), `<!doctype html><html lang="
 })();
 </script></body></html>`);
 
-// 検索エンジン用サイトマップ（ログインなしで中身が見えるページだけ）。
-// ルートの robots.txt（kaikomziu.github.io）は別リポジトリなので、Search Console から送信する。
+// 検索エンジン用サイトマップ（ログインなしで中身が見えるページだけ）
 const today = new Date().toISOString().slice(0, 10);
-const publicPages = ['/', '/login/', '/register/', '/emergency.html', '/Uch/', '/Ghost/', '/Ghost/videos.html', '/Tools/', '/Create/', '/Custom/', '/Calendar/', '/Language/', '/Extensions/'];
+const publicPages = ['/', '/login/', '/register/', '/emergency.html', '/Uch/', '/Ghost/', '/Ghost/videos.html', '/Tools/', '/Create/', '/Custom/', '/Calendar/', '/Language/',
+  '/Extensions/', '/Wiki/', '/MAWS/', '/Store/', '/school/', '/app/', '/company/', '/terms/', '/privacy/'];
 writeFileSync(join(OUT, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${publicPages.map((p) => `  <url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod>${p === '/' ? '<priority>1.0</priority>' : ''}</url>`).join('\n')}

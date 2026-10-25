@@ -1,0 +1,26 @@
+# MixAll（ミックスオール）
+
+> MixAllは、無料で使える日本語のコミュニティサービスです。掲示板、チャット、SNS、学校モード、仕事掲示板、Wiki、ツール、3Dワールドをひとつにまとめています。
+
+公開されているサービスの一覧です。ログインが必要なページや管理用のページは対象外です。
+
+## サービス
+- [Uch掲示板](https://mixalls.edgeone.dev/Uch/): スレッド形式の匿名掲示板
+- [ぽけっと](https://mixalls.edgeone.dev/Pocket/): グループチャット（通話・画像・スタンプ・投票・位置情報）
+- [Ghost](https://mixalls.edgeone.dev/Ghost/): 匿名SNS
+- [メール](https://mixalls.edgeone.dev/Mail/): 疑似メール
+- [ツールセンター](https://mixalls.edgeone.dev/Tools/): 便利ツール集
+- [みんなのWiki](https://mixalls.edgeone.dev/Wiki/): 誰でも編集できるWiki
+- [特殊言語辞書](https://mixalls.edgeone.dev/Language/): 特殊言語の辞書
+- [Custom](https://mixalls.edgeone.dev/Custom/): 3Dワールドの作成と公開
+- [学校モード](https://mixalls.edgeone.dev/school/): 学校・クラス向けの機能
+- [コドミル](https://mixalls.edgeone.dev/Kodomiru/): 親子の見守り・管理モード
+- [拡張機能](https://mixalls.edgeone.dev/Extensions/): 拡張機能
+
+## 規約
+- [利用規約](https://mixalls.edgeone.dev/terms/)
+- [プライバシーポリシー](https://mixalls.edgeone.dev/privacy/)
+- [運営会社](https://mixalls.edgeone.dev/company/)
+
+## Optional
+- [サイトマップ](https://mixalls.edgeone.dev/sitemap.xml)

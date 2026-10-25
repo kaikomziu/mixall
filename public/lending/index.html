@@ -3,35 +3,39 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>貸し出しサーバー - MixAll +（二世代）</title>
+  <meta name="keywords" content="MixAll, MiXaLl, MIXALL, mixall, Mix All, Mix-All, mix all, ミックスオール, ミクスオール, みっくすおーる, ﾐｯｸｽｵｰﾙ, ミックス・オール, mixalls, 貸し出しサーバー, サイト作成, ホームページ作成, 無料サイト, ホスティング, 公開, Webサイト">
+  <link rel="canonical" href="https://mixalls.edgeone.dev/lending/">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+
+  <meta name="description" content="MixAllで自分のミニサイトやゲームを作成して公開できます。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="サイト作成 - MixAll">
+  <meta property="og:description" content="MixAllで自分のミニサイトやゲームを作成して公開できます。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/lending/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/14-website-creation.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/14-website-creation.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="サイト制作">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="サイト作成 - MixAll">
+  <meta name="twitter:description" content="MixAllで自分のミニサイトやゲームを作成して公開できます。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/14-website-creation.jpg?v=20261019-2">
+<title>貸し出しサーバー - MixAll（ミックスオール）</title>
 <link rel="stylesheet" href="/css/style.css" />
 <script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
 <style>
 textarea#htmlEditor { min-height: 240px; font-family: monospace; font-size: 0.85rem; }
 </style>
 <script src="/js/site-lock.js" defer></script>
 <script src="/js/calls.js" defer></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
 <script src="/js/mixall-nav.js" defer></script>
 <script src="/js/language-input.js"></script>
-
-  <meta name="description" content="MixAll +（二世代）で自分のミニサイトやゲームを作成して公開できます。">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
-  <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="サイト作成 - MixAll +（二世代）">
-  <meta property="og:description" content="MixAll +（二世代）で自分のミニサイトやゲームを作成して公開できます。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/lending/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="MixAll +サイト作成">
-  <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="サイト作成 - MixAll +（二世代）">
-  <meta name="twitter:description" content="MixAll +（二世代）で自分のミニサイトやゲームを作成して公開できます。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261020-plus">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -40,7 +44,7 @@ textarea#htmlEditor { min-height: 240px; font-family: monospace; font-size: 0.85
 </head>
 <body>
 <header class="top">
-  <div class="brand"><a href="/" style="color:inherit;"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div>
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
   <nav class="services">
     <a href="/">トップへ</a>
   </nav>
@@ -72,7 +76,7 @@ textarea#htmlEditor { min-height: 240px; font-family: monospace; font-size: 0.85
   </div>
 
   <div class="card">
-    <h3>サイトデータ (Netlify Blobs)</h3>
+    <h3>サイトデータ (Supabase)</h3>
     <p class="muted">サイトごとに分離されたデータをJSONまたはテキストとして保存できます。1件512KB、サイト合計5MB、最大200件です。</p>
     <input type="text" id="dataSlug" placeholder="対象サイトの識別子 (例: my-page)" />
     <input type="text" id="dataKey" placeholder="データキー (例: settings)" />
@@ -80,7 +84,7 @@ textarea#htmlEditor { min-height: 240px; font-family: monospace; font-size: 0.85
     <textarea id="dataValue" placeholder='保存する値 (JSON例: {"theme":"dark"})'></textarea>
     <label class="row muted"><input type="checkbox" id="dataPublic" style="width:auto;" /> 公開データにする (サイト内のGETから読めます)</label>
     <div class="error" id="dataError"></div><button type="button" id="dataSave">データを保存</button>
-    <p class="muted">公開データの取得例: <code>/.netlify/functions/lending-data?slug=識別子&amp;key=キー&amp;public=1</code></p>
+    <p class="muted">公開データの取得例: <code>/api/lending-data?slug=識別子&amp;key=キー&amp;public=1</code></p>
     <div id="dataList" style="margin-top:12px;"><p class="muted">対象サイトを入力すると一覧が表示されます。</p></div>
   </div>
 </main>
@@ -99,24 +103,24 @@ async function loadDataList() {
   const el = document.getElementById('dataList');
   if (!slug) { el.innerHTML = '<p class="muted">対象サイトを入力すると一覧が表示されます。</p>'; return; }
   try {
-    const res = await fetch('/.netlify/functions/lending-data?slug=' + encodeURIComponent(slug) + '&token=' + encodeURIComponent(session.token));
+    const res = await fetch('/api/lending-data?slug=' + encodeURIComponent(slug) + '&token=' + encodeURIComponent(session.token));
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'データ一覧を取得できません');
     el.innerHTML = (data.data || []).map((item) => `<div class="bot-item"><span><strong>${escapeHtml(item.key)}</strong> <span class="muted">${escapeHtml(item.contentType)} · ${item.bytes} bytes · ${item.publicRead ? '公開' : '非公開'}</span></span><span class="row"><button type="button" class="ghost" data-data-load="${escapeHtml(item.key)}">取得</button><button type="button" class="ghost" data-data-delete="${escapeHtml(item.key)}">削除</button></span></div>`).join('') || '<p class="muted">保存されたデータはありません。</p>';
     el.querySelectorAll('[data-data-load]').forEach((button) => button.onclick = async () => {
-      const result = await Netrify.api('/.netlify/functions/lending-data', { action:'getData', token:session.token, slug, key:button.dataset.dataLoad });
+      const result = await Netrify.api('/api/lending-data', { action:'getData', token:session.token, slug, key:button.dataset.dataLoad });
       document.getElementById('dataKey').value = result.data.key;
       document.getElementById('dataContentType').value = result.data.contentType || 'application/json';
       document.getElementById('dataPublic').checked = result.data.publicRead === true;
       document.getElementById('dataValue').value = typeof result.data.value === 'string' ? result.data.value : JSON.stringify(result.data.value, null, 2);
     });
-    el.querySelectorAll('[data-data-delete]').forEach((button) => button.onclick = async () => { if (!(await MixAllDialog.confirm(`${button.dataset.dataDelete} を削除しますか？`))) return; await Netrify.api('/.netlify/functions/lending-data', { action:'deleteData', token:session.token, slug, key:button.dataset.dataDelete }); loadDataList(); });
+    el.querySelectorAll('[data-data-delete]').forEach((button) => button.onclick = async () => { if (!confirm(`${button.dataset.dataDelete} を削除しますか？`)) return; await Netrify.api('/api/lending-data', { action:'deleteData', token:session.token, slug, key:button.dataset.dataDelete }); loadDataList(); });
   } catch (e) { el.innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`; }
 }
 
 async function loadSites() {
   if (!session) return;
-  const res = await fetch('/.netlify/functions/lending?token=' + encodeURIComponent(session.token));
+  const res = await fetch('/api/lending?token=' + encodeURIComponent(session.token));
   const data = await res.json();
   const el = document.getElementById('siteList');
   if (!data.sites || data.sites.length === 0) {
@@ -136,7 +140,7 @@ async function loadSites() {
 
   el.querySelectorAll('[data-edit]').forEach(btn => {
     btn.onclick = async () => {
-      const data2 = await Netrify.api('/.netlify/functions/lending', { action: 'getSite', token: session.token, slug: btn.dataset.edit });
+      const data2 = await Netrify.api('/api/lending', { action: 'getSite', token: session.token, slug: btn.dataset.edit });
       document.getElementById('slugInput').value = data2.site.slug;
       document.getElementById('titleInput').value = data2.site.title;
       document.getElementById('htmlEditor').value = data2.site.html;
@@ -145,15 +149,15 @@ async function loadSites() {
   });
   el.querySelectorAll('[data-run-coin]').forEach(btn => {
     btn.onclick = async () => {
-      if (!(await MixAllDialog.confirm('このサイトに保存されたCoin命令を実行しますか？'))) return;
-      try { const result = await Netrify.api('/.netlify/functions/lending', { action:'runCoinProgram', token:session.token, slug:btn.dataset.runCoin }); alert((result.results || []).map((item) => item.ok ? `${item.target}: +${item.amount}` : `${item.target}: ${item.error}`).join('\\n')); }
+      if (!confirm('このサイトに保存されたCoin命令を実行しますか？')) return;
+      try { const result = await Netrify.api('/api/lending', { action:'runCoinProgram', token:session.token, slug:btn.dataset.runCoin }); alert((result.results || []).map((item) => item.ok ? `${item.target}: +${item.amount}` : `${item.target}: ${item.error}`).join('\\n')); }
       catch (e) { alert(e.message); }
     };
   });
   el.querySelectorAll('[data-del]').forEach(btn => {
     btn.onclick = async () => {
-      if (!(await MixAllDialog.confirm('/site-view/' + btn.dataset.del + ' を削除しますか?'))) return;
-      await Netrify.api('/.netlify/functions/lending', { action: 'deleteSite', token: session.token, slug: btn.dataset.del });
+      if (!confirm('/site-view/' + btn.dataset.del + ' を削除しますか?')) return;
+      await Netrify.api('/api/lending', { action: 'deleteSite', token: session.token, slug: btn.dataset.del });
       loadSites();
     };
   });
@@ -166,7 +170,7 @@ document.getElementById('dataSave').onclick = async () => {
   if (!slug || !key || !raw) { err.textContent = 'サイト識別子、キー、値を入力してください'; return; }
   let value = raw;
   if (document.getElementById('dataContentType').value === 'application/json') { try { value = JSON.parse(raw); } catch { err.textContent = 'JSONの形式が不正です'; return; } }
-  try { await Netrify.api('/.netlify/functions/lending-data', { action:'saveData', token:session.token, slug, key, value, contentType:document.getElementById('dataContentType').value, publicRead:document.getElementById('dataPublic').checked }); loadDataList(); } catch(e) { err.textContent = e.message; }
+  try { await Netrify.api('/api/lending-data', { action:'saveData', token:session.token, slug, key, value, contentType:document.getElementById('dataContentType').value, publicRead:document.getElementById('dataPublic').checked }); loadDataList(); } catch(e) { err.textContent = e.message; }
 };
 
   document.getElementById('saveSubmit').onclick = async () => {
@@ -178,7 +182,7 @@ document.getElementById('dataSave').onclick = async () => {
   if (!slug) { errEl.textContent = '識別子を入力してください'; return; }
 
   try {
-    const data = await Netrify.api('/.netlify/functions/lending', { action: 'saveSite', token: session.token, slug, title, html });
+    const data = await Netrify.api('/api/lending', { action: 'saveSite', token: session.token, slug, title, html });
     document.getElementById('previewLink').href = '/site-view/' + encodeURIComponent(data.site.slug);
     loadSites();
   } catch (e) {

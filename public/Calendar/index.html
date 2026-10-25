@@ -1,29 +1,34 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>共有カレンダー - MixAll +（二世代）</title><script>document.documentElement.dataset.theme=localStorage.getItem('netrify_theme')||'dark';document.documentElement.style.setProperty('--font-scale',localStorage.getItem('netrify_font_scale')||'1');</script><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/auth.js"></script><script src="/js/mixall-nav.js" defer></script>
-  <meta name="description" content="共有カレンダー - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="keywords" content="MixAll, MiXaLl, MIXALL, mixall, Mix All, Mix-All, mix all, ミックスオール, ミクスオール, みっくすおーる, ﾐｯｸｽｵｰﾙ, ミックス・オール, mixalls, カレンダー, 予定, スケジュール, Calendar">
+  <link rel="canonical" href="https://mixalls.edgeone.dev/Calendar/">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+
+  <meta name="description" content="共有カレンダー - MixAll。MixAllのサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="共有カレンダー - MixAll +（二世代）">
-  <meta property="og:description" content="共有カレンダー - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/Calendar/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/15-calendar.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/15-calendar.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="MixAll +共有カレンダー">
+  <meta property="og:title" content="共有カレンダー - MixAll">
+  <meta property="og:description" content="共有カレンダー - MixAll。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Calendar/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/15-calendar.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/15-calendar.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="カレンダー">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="共有カレンダー - MixAll +（二世代）">
-  <meta name="twitter:description" content="共有カレンダー - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/15-calendar.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="共有カレンダー - MixAll">
+  <meta name="twitter:description" content="共有カレンダー - MixAll。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/15-calendar.jpg?v=20261019-2"><title>共有カレンダー - MixAll</title><script>document.documentElement.dataset.theme=localStorage.getItem('netrify_theme')||'dark';document.documentElement.style.setProperty('--font-scale',localStorage.getItem('netrify_font_scale')||'1');</script><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script><script src="/js/auth.js"></script><script src="/js/mixall-nav.js" defer></script>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="/manifest.webmanifest">
-</head><body><header class="top"><div class="brand"><a href="/" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/">トップ</a><a href="/Pocket">Pocket</a><a href="/Uch">Uch</a></nav></header><main><div class="card"><h2>共有カレンダー</h2><p class="muted">ルームに紐づかない独立した予定表です。必要な数だけ作成できます。</p><div class="row"><input id="calendarTitle" placeholder="予定表名" style="flex:1"><button id="createCalendar">予定表を作成</button></div><div id="calendarError" class="error"></div></div><div class="card"><h3>予定表一覧</h3><div id="calendarList">読み込み中...</div></div><div class="card" id="calendarPanel" style="display:none"><h3 id="selectedTitle"></h3><div class="row"><input id="eventTitle" placeholder="予定タイトル" style="flex:1"><input id="eventStart" type="datetime-local"><input id="eventEnd" type="datetime-local"><button id="addEvent">予定を追加</button></div><input id="shareEmail" placeholder="共有するアカウント（例: user@bix.3erver）"><button id="shareCalendar" class="secondary">共有する</button><div id="eventList" style="margin-top:14px"></div></div></main><script>
-const s=Netrify.requireLogin();let selected=null;const esc=x=>String(x||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const api=(body)=>Netrify.api('/.netlify/functions/calendar',{token:s.token,...body});
-async function load(){const d=await api({action:'list'});document.getElementById('calendarList').innerHTML=d.calendars.map(c=>`<div class="bot-item"><span><strong>${esc(c.title)}</strong><small class="muted"> ${c.public?'公開':'非公開'}・${c.events.length}件</small></span><span><button class="secondary" data-open="${c.id}">開く</button>${c.ownerEmail===s.email?`<button class="ghost" data-delete="${c.id}">削除</button>`:''}</span></div>`).join('')||'<p class="muted">予定表がありません。</p>';document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openCalendar(d.calendars.find(c=>c.id===b.dataset.open)));document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async()=>{if((await MixAllDialog.confirm('この予定表を削除しますか？'))){await api({action:'delete',calendarId:b.dataset.delete});load();}})}
+</head><body><header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/">トップ</a><a href="/Pocket">Pocket</a><a href="/Uch">Uch</a></nav></header><main><div class="card"><h2>共有カレンダー</h2><p class="muted">ルームに紐づかない独立した予定表です。必要な数だけ作成できます。</p><div class="row"><input id="calendarTitle" placeholder="予定表名" style="flex:1"><button id="createCalendar">予定表を作成</button></div><div id="calendarError" class="error"></div></div><div class="card"><h3>予定表一覧</h3><div id="calendarList">読み込み中...</div></div><div class="card" id="calendarPanel" style="display:none"><h3 id="selectedTitle"></h3><div class="row"><input id="eventTitle" placeholder="予定タイトル" style="flex:1"><input id="eventStart" type="datetime-local"><input id="eventEnd" type="datetime-local"><button id="addEvent">予定を追加</button></div><input id="shareEmail" placeholder="共有するアカウント（例: user@bix.3erver）"><button id="shareCalendar" class="secondary">共有する</button><div id="eventList" style="margin-top:14px"></div></div></main><script>
+const s=Netrify.requireLogin();let selected=null;const esc=x=>String(x||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const api=(body)=>Netrify.api('/api/calendar',{token:s.token,...body});
+async function load(){const d=await api({action:'list'});document.getElementById('calendarList').innerHTML=d.calendars.map(c=>`<div class="bot-item"><span><strong>${esc(c.title)}</strong><small class="muted"> ${c.public?'公開':'非公開'}・${c.events.length}件</small></span><span><button class="secondary" data-open="${c.id}">開く</button>${c.ownerEmail===s.email?`<button class="ghost" data-delete="${c.id}">削除</button>`:''}</span></div>`).join('')||'<p class="muted">予定表がありません。</p>';document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openCalendar(d.calendars.find(c=>c.id===b.dataset.open)));document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async()=>{if(confirm('この予定表を削除しますか？')){await api({action:'delete',calendarId:b.dataset.delete});load();}})}
 function render(){document.getElementById('selectedTitle').textContent=selected.title;document.getElementById('eventList').innerHTML=(selected.events||[]).sort((a,b)=>a.start.localeCompare(b.start)).map(e=>`<div class="bot-item"><span><strong>${esc(e.title)}</strong><br><small>${esc(e.start)}${e.end?'〜'+esc(e.end):''}<br>${esc(e.description)}</small></span><button class="ghost" data-event-delete="${e.id}">削除</button></div>`).join('')||'<p class="muted">予定がありません。</p>';document.querySelectorAll('[data-event-delete]').forEach(b=>b.onclick=async()=>{selected=(await api({action:'deleteEvent',calendarId:selected.id,eventId:b.dataset.eventDelete})).calendar;render();});}
 function openCalendar(c){selected=c;document.getElementById('calendarPanel').style.display='block';render();}document.getElementById('createCalendar').onclick=async()=>{try{await api({action:'create',title:document.getElementById('calendarTitle').value});document.getElementById('calendarTitle').value='';load();}catch(e){document.getElementById('calendarError').textContent=e.message;}};document.getElementById('addEvent').onclick=async()=>{try{selected=(await api({action:'event',calendarId:selected.id,title:eventTitle.value,start:eventStart.value,end:eventEnd.value})).calendar;eventTitle.value='';render();}catch(e){alert(e.message);}};document.getElementById('shareCalendar').onclick=async()=>{try{selected=(await api({action:'share',calendarId:selected.id,email:shareEmail.value})).calendar;shareEmail.value='';alert('共有しました');}catch(e){alert(e.message);}};load();
 </script></body></html>

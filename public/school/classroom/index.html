@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex"><title>クラスルーム - 学校モード - MixAll</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/i18n.js"></script><script src="/js/mixall-nav.js" defer></script>
+<style>
+main{padding-bottom:120px}.cr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.cr-class{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--panel);cursor:pointer}.cr-class .top{padding:14px;background:linear-gradient(135deg,var(--accent),#2dd4bf);color:#fff}.cr-class .top b{font-size:1.05rem}.cr-class .body{padding:10px 14px;font-size:.85rem}
+.cr-tabs{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}.cr-tabs button{border-radius:999px;min-height:0;padding:6px 16px}.cr-tabs button.on{border-color:var(--accent);color:var(--accent)}
+.cr-post,.cr-assign{border:1px solid var(--border);border-radius:12px;padding:12px;margin:10px 0;background:var(--panel)}.cr-meta{font-size:.78rem;color:var(--text-dim)}.cr-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}
+.cr-cm{border-top:1px solid var(--border);margin-top:8px;padding-top:6px;font-size:.88rem}.cr-badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.74rem;border:1px solid var(--border);margin-right:6px}.cr-badge.late{color:#e5484d;border-color:#e5484d}.cr-badge.ok{color:#22a55a;border-color:#22a55a}
+.cr-code{font-size:1.6rem;font-weight:800;letter-spacing:.25em;border:2px dashed var(--accent);border-radius:12px;padding:6px 12px;display:inline-block;user-select:all}
+.cr-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}.cr-row>input,.cr-row>textarea{flex:1;min-width:120px}table.cr-t{width:100%;border-collapse:collapse;font-size:.9rem}table.cr-t td,table.cr-t th{padding:6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+</style></head><body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/school/">学校モード</a><a href="/school/classroom/" class="active">クラスルーム</a><a href="/">トップへ</a></nav></header>
+<main><div id="app"><div class="card"><p class="muted">読み込み中...</p></div></div></main>
+<script src="/js/auth.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id), app = $('app');
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const S = Netrify.requireLogin(); if (!S) return;
+  const fmt = (iso) => iso ? new Date(iso).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+  async function api(action, body) {
+    const r = await fetch('/api/classroom', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, token: S.token, ...(body || {}) }) });
+    const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || '通信に失敗しました'); return d;
+  }
+  const run = async (fn) => { try { await fn(); } catch (e) { alert(e.message); } };
+  let tab = 'stream', detail = null, openAssign = null;
+
+  // ---------- クラス一覧 ----------
+  async function home() {
+    let d; try { d = await api('myClasses'); } catch (e) { app.innerHTML = `<div class="card"><h2>クラスルーム</h2><p class="muted">${esc(e.message)}</p><p><a href="/school/">学校モードの登録へ</a></p></div>`; return; }
+    const teacher = d.role === 'teacher';
+    app.innerHTML = `<div class="card"><h2 style="margin-top:0">クラスルーム</h2><div class="cr-row">${teacher ? '<input id="cName" maxlength="60" placeholder="クラス名(例: 3年A組 数学)"><input id="cSec" maxlength="40" placeholder="科目・学期など" style="max-width:180px"><button id="cNew">＋ クラスを作成</button>' : ''}</div>
+      <div class="cr-row"><input id="jCode" maxlength="10" placeholder="${teacher ? '共同教員コード(8文字)で他の先生のクラスに参加' : 'クラスコード(6文字)で参加'}"><button id="jGo" class="secondary">参加する</button></div></div>
+      <div class="cr-grid">${d.classes.map((c) => `<div class="cr-class" data-id="${esc(c.id)}"><div class="top"><b>${esc(c.name)}</b><div style="font-size:.8rem">${esc(c.section)}</div></div><div class="body">${c.role === 'teacher' ? '先生' : '生徒'} · 担当: ${esc(c.owner)} · 生徒${c.students}人${c.code ? `<br>クラスコード: <b>${esc(c.code)}</b>` : ''}</div></div>`).join('') || '<p class="muted">参加しているクラスがありません。</p>'}</div>`;
+    app.querySelectorAll('.cr-class').forEach((el) => { el.onclick = () => { location.hash = '#c=' + el.dataset.id; }; });
+    if (teacher) $('cNew').onclick = () => run(async () => { const r = await api('createClass', { name: $('cName').value, section: $('cSec').value }); location.hash = '#c=' + r.id; });
+    $('jGo').onclick = () => run(async () => { const r = await api('joinClass', { code: $('jCode').value }); location.hash = '#c=' + r.id; });
+  }
+
+  // ---------- クラス画面 ----------
+  async function openClass(id) {
+    detail = await api('classDetail', { classId: id }); detail.id = id; renderClass();
+  }
+  const reload = () => openClass(detail.id);
+  function renderClass() {
+    const d = detail, c = d.class, teacher = d.role === 'teacher';
+    app.innerHTML = `<div class="card"><p style="margin:0"><a href="#" id="back">← クラス一覧</a></p><h2 style="margin:6px 0 0">${esc(c.name)}</h2><div class="cr-meta">${esc(c.section)} ${c.description ? ' · ' + esc(c.description) : ''}</div>
+      <div class="cr-tabs">${[['stream', 'ストリーム'], ['work', '課題'], ['people', 'メンバー']].map(([k, l]) => `<button type="button" class="secondary ${tab === k ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('')}</div><div id="pane"></div></div>`;
+    $('back').onclick = (e) => { e.preventDefault(); location.hash = ''; };
+    app.querySelectorAll('[data-tab]').forEach((b) => { b.onclick = () => { tab = b.dataset.tab; openAssign = null; renderClass(); }; });
+    ({ stream: paneStream, work: paneWork, people: panePeople })[tab](teacher);
+  }
+  function paneStream(teacher) {
+    const d = detail;
+    $('pane').innerHTML = (teacher ? '<div class="cr-post"><textarea id="pText" rows="3" maxlength="2000" placeholder="クラスにお知らせを投稿" style="width:100%;box-sizing:border-box"></textarea><div class="cr-row"><button id="pGo">投稿</button></div></div>' : '') +
+      (d.posts.map((p) => `<div class="cr-post"><div class="cr-meta"><b>${esc(p.authorName)}</b> · ${fmt(p.createdAt)} ${p.canDelete ? `<a href="#" data-del="${p.id}" style="float:right">削除</a>` : ''}</div><div class="cr-text">${esc(p.text)}</div>
+        ${(p.comments || []).map((c) => `<div class="cr-cm"><b>${esc(c.authorName)}</b> <span class="cr-meta">${fmt(c.createdAt)}</span> ${c.canDelete ? `<a href="#" data-delc="${p.id}:${c.id}">×</a>` : ''}<div class="cr-text">${esc(c.text)}</div></div>`).join('')}
+        <div class="cr-row"><input data-ci="${p.id}" maxlength="500" placeholder="クラスのコメントを追加"><button class="secondary" data-cg="${p.id}">送信</button></div></div>`).join('') || '<p class="muted">まだ投稿がありません。</p>');
+    if (teacher) $('pGo').onclick = () => run(async () => { await api('post', { classId: d.id, text: $('pText').value }); reload(); });
+    $('pane').querySelectorAll('[data-del]').forEach((a) => { a.onclick = (e) => { e.preventDefault(); if (confirm('この投稿を削除しますか？')) run(async () => { await api('deletePost', { classId: d.id, postId: a.dataset.del }); reload(); }); }; });
+    $('pane').querySelectorAll('[data-delc]').forEach((a) => { a.onclick = (e) => { e.preventDefault(); const [pid, cid] = a.dataset.delc.split(':'); run(async () => { await api('deletePost', { classId: d.id, postId: pid, commentId: cid }); reload(); }); }; });
+    $('pane').querySelectorAll('[data-cg]').forEach((b) => { b.onclick = () => run(async () => { await api('comment', { classId: d.id, postId: b.dataset.cg, text: $('pane').querySelector(`[data-ci="${b.dataset.cg}"]`).value }); reload(); }); });
+  }
+  function paneWork(teacher) {
+    const d = detail;
+    if (openAssign) return assignView(teacher, d.assignments.find((a) => a.id === openAssign));
+    $('pane').innerHTML = (teacher ? `<div class="cr-post"><b>課題を出す</b><div class="cr-row"><input id="aTitle" maxlength="100" placeholder="課題名"></div><textarea id="aIns" rows="3" maxlength="3000" placeholder="指示・説明" style="width:100%;box-sizing:border-box"></textarea><div class="cr-row"><label class="muted">期限 <input id="aDue" type="datetime-local" style="flex:none"></label><label class="muted">点数 <input id="aPts" type="number" min="1" max="1000" style="width:90px;flex:none"></label><button id="aGo">出す</button></div></div>` : '') +
+      (d.assignments.map((a) => `<div class="cr-assign" data-open="${a.id}" style="cursor:pointer"><b>${esc(a.title)}</b> ${a.points ? `<span class="cr-meta">${a.points}点</span>` : ''}<div class="cr-meta">${a.due ? '期限: ' + fmt(a.due) : '期限なし'}</div>
+        <div style="margin-top:4px">${teacher ? `<span class="cr-badge">提出 ${a.submitted}/${a.total}</span>` : (a.mine ? `<span class="cr-badge ok">提出済み</span>${a.mine.late ? '<span class="cr-badge late">遅れて提出</span>' : ''}${a.mine.gradedAt ? `<span class="cr-badge ok">採点済み ${a.mine.score ?? '-'}${a.points ? '/' + a.points : ''}</span>` : ''}` : `<span class="cr-badge ${a.due && Date.parse(a.due) < Date.now() ? 'late' : ''}">未提出</span>`)}</div></div>`).join('') || '<p class="muted">課題はまだありません。</p>');
+    if (teacher) $('aGo').onclick = () => run(async () => { await api('createAssignment', { classId: d.id, title: $('aTitle').value, instructions: $('aIns').value, due: $('aDue').value, points: $('aPts').value }); reload(); });
+    $('pane').querySelectorAll('[data-open]').forEach((el) => { el.onclick = () => { openAssign = el.dataset.open; renderClass(); }; });
+  }
+  async function assignView(teacher, a) {
+    const d = detail; if (!a) { openAssign = null; return paneWork(teacher); }
+    let html = `<p style="margin:0"><a href="#" id="aBack">← 課題一覧</a></p><div class="cr-post"><h3 style="margin:0">${esc(a.title)}</h3><div class="cr-meta">${a.due ? '期限: ' + fmt(a.due) : '期限なし'} ${a.points ? ' · ' + a.points + '点' : ''}</div><div class="cr-text">${esc(a.instructions)}</div>${teacher ? `<a href="#" id="aDel">この課題を削除</a>` : ''}</div>`;
+    if (!teacher) {
+      const m = a.mine;
+      html += `<div class="cr-post"><b>あなたの提出</b>${m && m.gradedAt ? `<div class="cr-badge ok">採点済み: ${m.score ?? '-'}${a.points ? '/' + a.points : ''}</div><div class="cr-text">${esc(m.feedback)}</div>` : ''}
+        <textarea id="sText" rows="4" maxlength="5000" placeholder="回答を入力" style="width:100%;box-sizing:border-box" ${m && m.gradedAt ? 'disabled' : ''}>${esc(m ? m.text : '')}</textarea>
+        <div class="cr-row"><input id="sLink" type="url" placeholder="資料のリンク(任意)" value="${esc(m ? m.link : '')}" ${m && m.gradedAt ? 'disabled' : ''}><button id="sGo" ${m && m.gradedAt ? 'disabled' : ''}>${m ? '提出し直す' : '提出する'}</button></div>${m ? `<div class="cr-meta">提出: ${fmt(m.submittedAt)}</div>` : ''}</div>`;
+    } else html += '<div class="cr-post" id="subs"><p class="muted">読み込み中...</p></div>';
+    $('pane').innerHTML = html;
+    $('aBack').onclick = (e) => { e.preventDefault(); openAssign = null; renderClass(); };
+    if (!teacher) $('sGo').onclick = () => run(async () => { const r = await api('submit', { classId: d.id, assignmentId: a.id, text: $('sText').value, link: $('sLink').value }); alert(r.late ? '提出しました(期限後)' : '提出しました'); reload(); });
+    else {
+      $('aDel').onclick = (e) => { e.preventDefault(); if (confirm('課題と提出物をすべて削除しますか？')) run(async () => { await api('deleteAssignment', { classId: d.id, assignmentId: a.id }); openAssign = null; reload(); }); };
+      run(async () => {
+        const r = await api('submissions', { classId: d.id, assignmentId: a.id });
+        $('subs').innerHTML = `<b>提出状況</b><table class="cr-t"><tr><th>生徒</th><th>提出</th><th>採点</th></tr>${r.rows.map((x, i) => `<tr><td>${esc(x.name)}</td><td>${x.submitted ? `<span class="cr-badge ${x.late ? 'late' : 'ok'}">${x.late ? '遅れて' : ''}提出 ${fmt(x.submittedAt)}</span><div class="cr-text">${esc(x.text)}</div>${x.link ? `<a href="${esc(x.link)}" target="_blank" rel="noopener noreferrer nofollow">${esc(x.link)}</a>` : ''}` : '<span class="cr-badge">未提出</span>'}</td>
+          <td>${x.submitted ? `<input data-sc="${i}" type="number" min="0" style="width:70px" value="${x.score ?? ''}"> ${a.points ? '/' + a.points : ''}<input data-fb="${i}" maxlength="500" placeholder="コメント" value="${esc(x.feedback || '')}"><button class="secondary" data-gr="${i}">${x.gradedAt ? '更新' : '採点'}</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">生徒がいません</td></tr>'}</table>`;
+        $('subs').querySelectorAll('[data-gr]').forEach((b) => { b.onclick = () => run(async () => { const i = b.dataset.gr; await api('grade', { classId: d.id, assignmentId: a.id, student: r.rows[i].email, score: $('subs').querySelector(`[data-sc="${i}"]`).value, feedback: $('subs').querySelector(`[data-fb="${i}"]`).value }); b.textContent = '保存しました'; }); });
+      });
+    }
+  }
+  function panePeople(teacher) {
+    const d = detail, c = d.class;
+    $('pane').innerHTML = `${teacher ? `<div class="cr-post"><div class="cr-meta">生徒に伝えるクラスコード</div><div class="cr-code">${esc(c.code)}</div> <button class="ghost small" data-rot="s">作り直す</button><div class="cr-meta" style="margin-top:8px">共同の先生に伝えるコード</div><div class="cr-code" style="font-size:1.2rem">${esc(c.tcode)}</div> <button class="ghost small" data-rot="t">作り直す</button></div>` : ''}
+      <div class="cr-post"><b>先生</b>${d.teachers.map((t) => `<div>${esc(t.name)}${t.owner ? ' <span class="cr-badge">オーナー</span>' : ''}</div>`).join('')}</div>
+      <div class="cr-post"><b>生徒 (${d.students.length})</b>${d.students.map((s) => `<div class="cr-row" style="justify-content:space-between"><span>${esc(s.name)}</span>${teacher ? `<a href="#" data-rm="${esc(s.email)}">削除</a>` : ''}</div>`).join('') || '<p class="muted">まだ生徒がいません</p>'}</div>
+      <div class="cr-row">${c.isOwner ? '<button class="ghost" id="delClass">クラスを削除</button>' : '<button class="ghost" id="leave">クラスから退出</button>'}</div>`;
+    $('pane').querySelectorAll('[data-rot]').forEach((b) => { b.onclick = () => { if (confirm('古いコードは使えなくなります。作り直しますか？')) run(async () => { await api('rotateCode', { classId: d.id, kind: b.dataset.rot }); reload(); }); }; });
+    $('pane').querySelectorAll('[data-rm]').forEach((a) => { a.onclick = (e) => { e.preventDefault(); if (confirm('この生徒をクラスから外しますか？')) run(async () => { await api('removeStudent', { classId: d.id, student: a.dataset.rm }); reload(); }); }; });
+    if ($('delClass')) $('delClass').onclick = () => { if (confirm('クラスの投稿・課題・提出物がすべて削除されます。本当に削除しますか？')) run(async () => { await api('deleteClass', { classId: d.id }); location.hash = ''; }); };
+    if ($('leave')) $('leave').onclick = () => { if (confirm('このクラスから退出しますか？')) run(async () => { await api('leaveClass', { classId: d.id }); location.hash = ''; }); };
+  }
+
+  function route() { const m = /^#c=([a-f0-9]{16})$/.exec(location.hash); if (m) run(() => openClass(m[1])); else home(); }
+  window.addEventListener('hashchange', () => { tab = 'stream'; openAssign = null; route(); });
+  setInterval(() => { if (!document.hidden && detail && /^#c=/.test(location.hash) && tab === 'stream' && !document.activeElement?.matches('input,textarea')) reload().catch(() => {}); }, 20000);
+  route();
+})();
+</script></body></html>

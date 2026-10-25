@@ -1,6 +1,6 @@
 (() => {
   if (location.pathname === '/admin' || location.pathname.startsWith('/admin/')) return;
-  fetch('/.netlify/functions/site-state', { cache: 'no-store' })
+  fetch('/api/site-state', { cache: 'no-store' })
     .then((response) => response.json())
     .then((state) => {
       if (!state.locked) return;

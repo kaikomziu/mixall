@@ -1,25 +1,16 @@
 // scripts/build-edge.mjs
-// mixall-api（Supabase Edge Function）を1ファイルにバンドルする。
-//   node scripts/build-edge.mjs  →  supabase/functions/mixall-api/index.js
-import { build } from 'esbuild';
-import { mkdirSync, statSync } from 'node:fs';
+// mixall-api（Supabase Edge Function）のフォルダを組み立てる。
+//   node scripts/build-edge.mjs  →  supabase/functions/mixall-api/{index.js, cloud/}
+// cloud/ は EdgeOne 版のサーバー（scripts/import-edgeone.mjs で取り込んだもの）をそのまま使う。
+import { cpSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 
-const outfile = 'supabase/functions/mixall-api/index.js';
-mkdirSync('supabase/functions/mixall-api', { recursive: true });
+const OUT = 'supabase/functions/mixall-api';
+mkdirSync(OUT, { recursive: true });
+for (const name of readdirSync(OUT)) rmSync(join(OUT, name), { recursive: true, force: true });
+cpSync('server/edge-router.js', join(OUT, 'index.js'));
+cpSync('cloud', join(OUT, 'cloud'), { recursive: true });
 
-await build({
-  entryPoints: ['server/deno-main.js'],
-  outfile,
-  bundle: true,
-  format: 'esm',
-  platform: 'node',
-  target: 'es2022',
-  minify: true,
-  legalComments: 'none',
-  external: ['npm:*', 'node:*', 'postgres', 'web-push'],
-  // Nodeの組み込みモジュールを require するコードのため、Denoで require を用意する
-  banner: { js: "import { createRequire as __mixallCreateRequire } from 'node:module'; const require = __mixallCreateRequire(import.meta.url);" },
-  logLevel: 'warning'
-});
-
-console.log(`${outfile}: ${(statSync(outfile).size / 1024).toFixed(1)} KiB`);
+let bytes = 0;
+(function size(dir) { for (const name of readdirSync(dir)) { const full = join(dir, name); const st = statSync(full); if (st.isDirectory()) size(full); else bytes += st.size; } })(OUT);
+console.log(`${OUT}: ${(bytes / 1024 / 1024).toFixed(2)} MiB`);

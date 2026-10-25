@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通知 - MixAll</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/i18n.js"></script><script src="/js/auth.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/mixall-nav.js" defer></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32"><link rel="manifest" href="/manifest.webmanifest">
+<style>
+.nrow{display:flex;gap:10px;padding:10px 8px;border-bottom:1px solid var(--border,#ddd);cursor:pointer;align-items:flex-start}
+.nrow:hover{background:rgba(127,127,127,.12)}
+.nrow .dot{width:10px;height:10px;border-radius:50%;background:#2563eb;margin-top:7px;flex:0 0 auto}
+.nrow.read .dot{background:transparent;border:1px solid var(--border,#aaa)}
+.nrow.read{opacity:.7}
+.nrow .svc{display:inline-block;font-size:.72rem;border-radius:6px;padding:1px 7px;background:var(--panel-2,#e5e7eb);margin-right:6px}
+.nrow .svc.admin{background:#e65100;color:#fff}
+.nrow small{color:var(--text-dim,#777)}
+.nrow .snip{color:var(--text-dim,#777);font-size:.88rem;overflow-wrap:anywhere;white-space:pre-wrap;max-height:3.6em;overflow:hidden}
+.ntabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.ntabs button.on{font-weight:700;outline:2px solid var(--accent,#2563eb)}
+</style></head>
+<body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div><nav class="services"><a href="/Notifications/" class="active">通知</a><a href="/">トップへ</a></nav></header>
+<main><div class="card" id="pushCard"><div class="row" style="justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><strong>🔔 バックグラウンド通知</strong><div class="muted" style="font-size:.85rem" id="pushState">確認中…</div></div><div class="row" style="gap:6px"><button type="button" id="pushOn">通知をオンにする</button><button type="button" class="secondary" id="pushTest" style="display:none">テスト通知</button><button type="button" class="secondary" id="pushOff" style="display:none">オフにする</button></div></div><div class="muted" style="font-size:.8rem;margin-top:6px">アプリやタブを閉じていても、ぽけっと・Uch・運営からのお知らせ・ふぉますのマッチなどを端末に表示します。端末ごとに設定します。</div><div class="error" id="pushErr"></div></div>
+<div class="card">
+  <div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">通知</h2><button class="secondary" id="readAll">すべて既読にする</button></div>
+  <div class="ntabs" id="tabs"></div>
+  <div id="list"><p class="muted">読み込み中…</p></div>
+  <div class="error" id="err"></div>
+</div></main>
+<script src="/js/auth.js"></script>
+<script>
+(function(){
+const s=Netrify.requireLogin(); if(!s) return;
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let items=[], filter='all', unreadOnly=false;
+const SVC={pocket:'ぽけっと',uch:'Uch',ghost:'Ghost',admin:'運営',mail:'Mail'};
+const gid=(n)=>n.id?'g:'+n.id+':'+n.createdAt:n.type+':'+(n.postId||'')+':'+(n.commentId||'')+':'+n.createdAt;
+function fromStored(n){
+  const svcKey=String(n.scope||'').split(':')[0].toLowerCase()||'admin';
+  const inThread=/:thread:/.test(String(n.scope||''));
+  let action='メッセージを送りました';
+  if(n.type==='warning')action='警告を送りました';
+  else if(n.isReply)action='あなたに返信しました';
+  else if(Array.isArray(n.mentionedEmails)&&n.mentionedEmails.includes(String(n.recipientEmail||'').toLowerCase()))action='あなたをメンションしました';
+  else if(n.type==='uchPost')action='投稿しました';
+  return {key:'s:'+n.id,svc:svcKey,place:n.title||SVC[svcKey]||'',placeNote:inThread?'（スレッド）':'',actor:n.actorName||'誰か',action,snippet:n.type==='warning'?n.body:n.body,url:n.url||'',at:n.createdAt,read:!!n.read&&!(n.requireAck&&!n.ack),stored:true,raw:n};
+}
+function fromGhost(n,readIds){
+  const t=String(n.text||'');const m=/^(.+?)さんが/.exec(t);const actor=m?m[1]:'誰か';
+  const rest=m?t.slice(m[0].length):t;
+  const place=((/(投稿|ショート|動画)(「[^」]*」)?/.exec(rest)||[])[0])||'Ghost';
+  const action=rest.replace(/^あなたの/,'').replace(place,'').replace(/^(を|に|の)/,'').replace(/（.*$/,'')||rest;
+  const url=n.postId?'/Ghost/post.html?id='+encodeURIComponent(n.postId):(n.type==='follow'?'/Ghost/':'/Ghost/notifications.html');
+  return {key:gid(n),svc:'ghost',place,placeNote:'',actor,action,snippet:n.snippet||'',url,at:n.createdAt,read:readIds.has(gid(n)),stored:false,raw:n};
+}
+async function load(){
+  try{
+    const [a,b]=await Promise.all([fetch('/api/notifications?token='+encodeURIComponent(s.token)),fetch('/api/ghost?notifications=1&token='+encodeURIComponent(s.token)).catch(()=>null)]);
+    const d=await a.json(); if(!a.ok)throw new Error(d.error||'取得できません');
+    const readIds=new Set(d.readIds||[]);
+    const g=b&&b.ok?((await b.json()).notifications||[]):[];
+    items=[...(d.notifications||[]).map(fromStored),...g.map(n=>fromGhost(n,readIds))].sort((x,y)=>new Date(y.at)-new Date(x.at));
+    render();
+  }catch(e){document.getElementById('err').textContent=e.message;}
+}
+function render(){
+  const svcs=['all',...Array.from(new Set(items.map(i=>i.svc)))];
+  document.getElementById('tabs').innerHTML=svcs.map(k=>`<button type="button" class="secondary ${filter===k&&!unreadOnly?'on':''}" data-f="${k}">${k==='all'?'すべて':esc(SVC[k]||k)}</button>`).join('')+`<button type="button" class="secondary ${unreadOnly?'on':''}" data-u="1">未読のみ (${items.filter(i=>!i.read).length})</button>`;
+  document.querySelectorAll('#tabs [data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;unreadOnly=false;render();});
+  document.querySelector('#tabs [data-u]').onclick=()=>{unreadOnly=!unreadOnly;render();};
+  const list=items.filter(i=>(filter==='all'||i.svc===filter)&&(!unreadOnly||!i.read));
+  document.getElementById('list').innerHTML=list.map(i=>`<div class="nrow ${i.read?'read':''}" data-k="${esc(i.key)}"><span class="dot"></span><div style="flex:1;min-width:0"><div><span class="svc ${i.svc==='admin'?'admin':''}">${esc(SVC[i.svc]||i.svc)}</span><b>${esc(i.place)}${esc(i.placeNote)}</b> で <b>${esc(i.actor)}</b> が ${esc(i.action)}</div>${i.snippet?`<div class="snip">${esc(i.snippet)}</div>`:''}<small>${new Date(i.at).toLocaleString('ja-JP')}${i.read?' ・既読':' ・未読'}</small></div></div>`).join('')||'<p class="muted">通知はありません。</p>';
+  document.querySelectorAll('.nrow').forEach(el=>el.onclick=()=>open(items.find(x=>x.key===el.dataset.k)));
+}
+async function post(body){return fetch('/api/notifications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,token:s.token})});}
+async function open(i){
+  if(!i)return;
+  if(!i.read){
+    if(i.stored&&i.raw.requireAck&&!i.raw.ack){await post({action:'ackWarning',id:i.raw.id});}
+    else if(i.stored){await post({action:'markRead',id:i.raw.id});}
+    else{await post({action:'markExternalRead',ids:[i.key]});}
+    i.read=true;render();
+  }
+  if(i.url)location.href=i.url;
+}
+document.getElementById('readAll').onclick=async()=>{await post({action:'markAllRead',ids:items.filter(i=>!i.stored&&!i.read).map(i=>i.key)});items.forEach(i=>{if(!(i.stored&&i.raw.requireAck&&!i.raw.ack))i.read=true;});render();};
+load();setInterval(load,30000);
+})();
+</script><script>
+(function(){
+const st=document.getElementById('pushState'),on=document.getElementById('pushOn'),off=document.getElementById('pushOff'),tst=document.getElementById('pushTest'),err=document.getElementById('pushErr');
+async function paint(){
+  err.textContent='';
+  if(!window.MixAllPush||!MixAllPush.supported()){st.textContent='この端末・ブラウザは未対応です(iPhoneは「ホーム画面に追加」したアプリで使えます)';on.style.display='none';return;}
+  const v=await MixAllPush.isOn();
+  st.textContent=v?'オン — アプリを閉じていても通知が届きます':(Notification.permission==='denied'?'ブロック中 — ブラウザ・端末の設定で通知を許可してください':'オフ');
+  on.style.display=v?'none':'';off.style.display=v?'':'none';tst.style.display=v?'':'none';
+}
+on.onclick=async()=>{try{await MixAllPush.subscribe();}catch(e){err.textContent=e.message;}paint();};
+off.onclick=async()=>{try{await MixAllPush.unsubscribe();}catch(e){err.textContent=e.message;}paint();};
+tst.onclick=async()=>{try{const r=await MixAllPush.test();err.textContent=r.sent?'':'送信できませんでした。いったんオフ→オンにしてください。';}catch(e){err.textContent=e.message;}};
+window.addEventListener('load',()=>setTimeout(paint,300));
+})();
+</script></body></html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>学校モード - MixAll（ミックスオール）</title>
+  <meta name="keywords" content="MixAll, MiXaLl, MIXALL, mixall, Mix All, Mix-All, mix all, ミックスオール, ミクスオール, みっくすおーる, ﾐｯｸｽｵｰﾙ, ミックス・オール, mixalls, 学校モード, 学校, 授業, クラス, 学校コード, クイズ, Kahoot, カフート, 生徒, 教員, 先生, 画面共有, 教育, MixAll, ミックスオール, 学校モード, オンライン授業, クラスルーム, 宿題 提出, 先生 生徒, 無料 学校">
+  <link rel="canonical" href="https://mixalls.edgeone.dev/school/">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<meta name="description" content="MixAllの学校モード。学校コードでクラスに参加し、先生がクイズを課題として出せます。">
+<meta property="og:title" content="学校モード - MixAll">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mixalls.edgeone.dev/school/">
+<meta property="og:image" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+main{padding-bottom:120px}
+.sc-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.8rem;font-weight:600;margin-left:6px}
+.sc-badge.ok{background:#dcfce7;color:#166534}.sc-badge.off{background:#e5e7eb;color:#374151}.sc-badge.live{background:#fee2e2;color:#991b1b}.sc-badge.info{background:#dbeafe;color:#1e40af}
+.sc-code{font-size:2.6rem;font-weight:800;letter-spacing:.35em;text-align:center;padding:14px 0 14px .35em;border:2px dashed var(--accent,#5865f2);border-radius:16px;user-select:all;margin:10px 0}
+.sc-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.sc-tile{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#0b1020;color:#fff}
+.sc-tile video{display:none;width:100%;aspect-ratio:16/9;background:#000;object-fit:contain;cursor:zoom-in}
+.sc-tile.live video{display:block}
+.sc-tile .sc-empty{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;color:#9aa3b2;font-size:.85rem}
+.sc-tile.live .sc-empty{display:none}
+.sc-tile .sc-name{display:flex;align-items:center;gap:6px;padding:6px 8px;font-size:.88rem;background:rgba(0,0,0,.45)}
+.sc-dot{width:9px;height:9px;border-radius:50%;background:#6b7280;flex:none}.sc-tile.online .sc-dot{background:#22c55e}.sc-tile.live .sc-dot{background:#ef4444}
+.sc-tile.big{position:fixed;inset:0;z-index:5000;border-radius:0;display:flex;flex-direction:column;background:#000}
+.sc-tile.big video{flex:1;min-height:0;aspect-ratio:auto;cursor:zoom-out}
+.sc-tile .sc-x{margin-left:auto;background:transparent;color:#fca5a5;border:0;padding:2px 6px;width:auto;min-height:0;font-size:.78rem}
+#scShareBar{position:fixed;left:0;right:0;top:0;z-index:4000;display:none;align-items:center;justify-content:center;gap:12px;padding:calc(6px + env(safe-area-inset-top)) 10px 6px;background:#dc2626;color:#fff;font-size:.9rem}
+#scShareBar button{width:auto;min-height:0;padding:4px 12px;background:#fff;color:#dc2626;border:0;border-radius:8px}
+.sc-modal{position:fixed;inset:0;z-index:4500;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:calc(12px + env(safe-area-inset-top)) 10px 24px}
+.sc-modal>.sc-box{width:100%;max-width:720px;background:var(--card,#fff);color:var(--text,#222);border-radius:16px;padding:16px;box-sizing:border-box}
+.sc-q{border:1px solid var(--border);border-radius:12px;padding:10px;margin:10px 0}
+.sc-q .sc-ch{display:flex;align-items:center;gap:8px;margin:6px 0}
+.sc-q .sc-ch input[type=text]{flex:1;margin:0}.sc-q .sc-ch input[type=radio]{width:auto;margin:0}
+.sc-bar{height:10px;border-radius:6px;background:var(--border);overflow:hidden}.sc-bar>i{display:block;height:100%;background:#22c55e}
+.sc-table{width:100%;border-collapse:collapse;font-size:.92rem}.sc-table th,.sc-table td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left}
+/* Kahoot風プレイ画面 */
+#scPlay{position:fixed;inset:0;z-index:6000;display:none;flex-direction:column;background:#46178f;color:#fff;font-family:inherit;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#scPlay .p-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.25);font-weight:700}
+#scPlay .p-main{flex:1;display:flex;flex-direction:column;min-height:0;padding:12px}
+#scPlay .p-q{background:#fff;color:#111;border-radius:12px;padding:18px 14px;text-align:center;font-size:1.35rem;font-weight:700;margin-bottom:10px;overflow-wrap:anywhere}
+#scPlay .p-timer{height:12px;background:rgba(255,255,255,.25);border-radius:8px;overflow:hidden;margin-bottom:10px}
+#scPlay .p-timer>i{display:block;height:100%;width:100%;background:#fff;transform-origin:left;transition:transform 1s linear}
+#scPlay .p-choices{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0}
+#scPlay .p-choices button{display:flex;align-items:center;gap:10px;justify-content:flex-start;border:0;border-radius:10px;color:#fff;font-size:1.05rem;font-weight:700;padding:12px;text-align:left;min-height:84px;box-shadow:0 5px 0 rgba(0,0,0,.25);overflow-wrap:anywhere}
+#scPlay .p-choices button .shape{font-size:1.6rem;flex:none}
+#scPlay .p-choices button:disabled{opacity:.35}
+#scPlay .p-choices button.right{opacity:1;outline:5px solid #fff}
+.c0{background:#e21b3c}.c1{background:#1368ce}.c2{background:#d89e00}.c3{background:#26890c}
+#scPlay .p-feedback{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+#scPlay .p-feedback.ok{background:#26890c}#scPlay .p-feedback.ng{background:#e21b3c}
+#scPlay .p-feedback h2{font-size:2rem;margin:0}
+#scPlay .p-btn{background:#fff;color:#46178f;border:0;border-radius:10px;padding:12px 28px;font-weight:800;width:auto;font-size:1.05rem}
+#scPlay .p-board{background:rgba(255,255,255,.12);border-radius:12px;padding:8px 14px;min-width:min(420px,90vw)}
+#scPlay .p-board div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.2)}
+#scPlay .p-board .me{color:#fde047;font-weight:800}
+@media (max-width:520px){#scPlay .p-choices{grid-template-columns:1fr}#scPlay .p-choices button{min-height:64px}}
+</style>
+</head>
+<body>
+<div id="scShareBar"><span>🔴 先生に画面を共有しています</span><button id="scShareStop" type="button">共有をやめる</button></div>
+<header class="top">
+  <div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div>
+  <nav class="services"><a href="/school/" class="active">学校モード</a><a href="/school/classroom/">クラスルーム</a><a href="/Uch">Uch</a><a href="/Pocket">ぽけっと</a><a href="/">トップへ</a></nav>
+</header>
+<main><div id="app"><div class="card"><p class="muted">読み込み中...</p></div></div></main>
+<div id="scPlay"></div>
+<script src="/js/auth.js"></script>
+<script src="/js/school-hub.js"></script>
+</body>
+</html>

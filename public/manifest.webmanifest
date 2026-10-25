@@ -1,13 +1,13 @@
 {
-  "name": "MixAll +（二世代）",
-  "short_name": "MixAll +",
+  "name": "MixAll",
+  "short_name": "MixAll",
   "lang": "ja",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0b0d1f",
-  "theme_color": "#0b0d1f",
-  "description": "掲示板・チャット・SNSをひとつにまとめたMixAll +（二世代）",
+  "background_color": "#07133f",
+  "theme_color": "#07133f",
+  "description": "接続がないときのローカル緊急メモとオフライン起動",
   "icons": [
     {
       "src": "/icons/icon-192.png",

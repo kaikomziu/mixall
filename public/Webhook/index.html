@@ -3,30 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Webhook | MixAll +（二世代）</title>
-<link rel="stylesheet" href="/css/style.css">
-<script src="/js/settings.js"></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
-<script src="/js/mixall-nav.js" defer></script>
-<script src="/js/language-input.js"></script>
+  <meta name="keywords" content="MixAll, MiXaLl, MIXALL, mixall, Mix All, Mix-All, mix all, ミックスオール, ミクスオール, みっくすおーる, ﾐｯｸｽｵｰﾙ, ミックス・オール, mixalls, Webhook, ウェブフック, Bot, ボット, 通知, 連携, 自動化">
+  <link rel="canonical" href="https://mixalls.edgeone.dev/Webhook/">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 
-  <meta name="description" content="Webhook | MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
+  <meta name="description" content="Webhook | MixAll。MixAllのサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Webhook | MixAll +（二世代）">
-  <meta property="og:description" content="Webhook | MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/Webhook/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="MixAll +サイト作成">
+  <meta property="og:title" content="Webhook | MixAll">
+  <meta property="og:description" content="Webhook | MixAll。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Webhook/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/19-webhook.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/19-webhook.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="Webhook">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Webhook | MixAll +（二世代）">
-  <meta name="twitter:description" content="Webhook | MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/14-website-creation.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="Webhook | MixAll">
+  <meta name="twitter:description" content="Webhook | MixAll。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/19-webhook.jpg?v=20261019-2">
+<title>Webhook | MixAll</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -35,7 +39,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></div>
+  <div class="brand">Mix<span>All</span></div>
   <nav class="services">
     <a href="/">アカウント</a><a href="/Uch">Uch</a><a href="/Pocket">ぽけっと</a><a href="/Ghost">Ghost</a><a href="/Mail">Mail</a>
   </nav>
@@ -80,7 +84,7 @@ const secretBox = document.getElementById('secretBox');
 const secretEl = document.getElementById('secret');
 function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function showError(error) { errorEl.textContent = error ? error.message || String(error) : ''; }
-async function api(action, extra = {}) { return Netrify.api('/.netlify/functions/webhooks', { action, token: session.token, ...extra }); }
+async function api(action, extra = {}) { return Netrify.api('/api/webhooks', { action, token: session.token, ...extra }); }
 function showSecret(value) { secretEl.textContent = value; secretBox.style.display = 'block'; window.scrollTo({ top: 0, behavior: 'smooth' }); }
 async function load() {
   try {
@@ -100,11 +104,11 @@ async function load() {
       try { await api('toggle', { id: button.dataset.toggle, enabled: button.dataset.enabled !== 'true' }); await load(); } catch (e) { showError(e); }
     });
     listEl.querySelectorAll('[data-rotate]').forEach((button) => button.onclick = async () => {
-      if (!(await MixAllDialog.confirm('秘密鍵を再発行しますか？旧秘密鍵は直ちに無効になります。'))) return;
+      if (!confirm('秘密鍵を再発行しますか？旧秘密鍵は直ちに無効になります。')) return;
       try { const data = await api('rotate', { id: button.dataset.rotate }); showSecret(data.secret); await load(); } catch (e) { showError(e); }
     });
     listEl.querySelectorAll('[data-delete]').forEach((button) => button.onclick = async () => {
-      if (!(await MixAllDialog.confirm('このWebhookを削除しますか？'))) return;
+      if (!confirm('このWebhookを削除しますか？')) return;
       try { await api('delete', { id: button.dataset.delete }); await load(); } catch (e) { showError(e); }
     });
   } catch (e) { showError(e); listEl.innerHTML = '<p class="error">読み込みに失敗しました。</p>'; }

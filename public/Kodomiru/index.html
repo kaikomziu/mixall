@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta name="description" content="コドミルは、お子さんの利用時間や安全を親子で管理できるMixAllの無料機能です。ペアレンタルコントロール・スクリーンタイム対応。" />
+<link rel="canonical" href="https://mixalls.edgeone.dev/Kodomiru/" />
+<meta property="og:type" content="website" /><meta property="og:site_name" content="MixAll" /><meta property="og:title" content="コドミル｜親子で安心の見守り・管理（MixAll）" /><meta property="og:description" content="コドミルは、お子さんの利用時間や安全を親子で管理できるMixAllの無料機能です。ペアレンタルコントロール・スクリーンタイム対応。" /><meta property="og:url" content="https://mixalls.edgeone.dev/Kodomiru/" /><meta property="og:image" content="https://mixalls.edgeone.dev/icons/icon-512.png" /><meta name="twitter:card" content="summary" />
+
+<meta name="keywords" content="MixAll, ミックスオール, コドミル, 親子 管理, ペアレンタルコントロール, スクリーンタイム, 子供 安全, 見守り"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>コドミル - MixAll</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/i18n.js"></script><script src="/js/auth.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/mixall-nav.js" defer></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32"><link rel="manifest" href="/manifest.webmanifest">
+<style>
+.kd-bar{height:12px;background:var(--panel-2);border-radius:8px;overflow:hidden;margin:6px 0}.kd-bar i{display:block;height:100%;background:var(--accent)}.kd-bar.over i{background:#e5484d}
+.kd-card{border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}.kd-card h3{margin:0 0 4px}
+.kd-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}.kd-code{font-size:1.6rem;font-weight:800;letter-spacing:.15em}
+.kd-chart{display:flex;align-items:flex-end;gap:6px;height:90px;margin:8px 0}.kd-chart div{flex:1;text-align:center;font-size:.68rem}.kd-chart b{display:block;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.kd-chk label{display:inline-block;margin:3px 10px 3px 0}.kd-lock{color:#e5484d;font-weight:700}
+</style></head>
+<body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div><nav class="services"><a href="/school/">学校モード</a><a href="/Kodomiru" class="active">コドミル</a><a href="/">トップへ</a></nav></header>
+<main>
+<div class="card"><h2 style="margin:0">👨‍👩‍👧 コドミル <small class="muted" style="font-size:.8rem">親子の見守りモード</small></h2><div class="muted">MixAllの中での利用時間(スクリーンタイム)・就寝時間・使えるサービスを、保護者が設定できます。</div><div class="muted" style="font-size:.8rem;margin-top:4px">保護者が見られるのは「どのサービスをどれだけ使ったか」だけです。メッセージや投稿の中身は見られません。見守り中は、子ども側の画面にもお知らせが出ます。</div></div>
+<div id="app"><div class="card"><p class="muted">読み込み中…</p></div></div>
+</main>
+<script src="/js/auth.js"></script>
+<script>
+(function(){
+const s=Netrify.requireLogin(); if(!s) return;
+const app=document.getElementById('app'), $=(i)=>document.getElementById(i);
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(action,body){const r=await fetch('/api/kodomiru',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,token:s.token,...body})});const d=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(d.error||'通信に失敗しました'),{data:d});return d;}
+const fmt=(sec)=>{sec=Math.round(sec||0);const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return h?`${h}時間${m}分`:`${m}分`;};
+let timer=null;
+async function boot(){
+  clearInterval(timer);
+  try{const me=await api('me');
+    if(me.role==='parent')return parentView();
+    if(me.role==='child')return childView();
+    app.innerHTML=`<div class="card"><h3 style="margin-top:0">はじめましょう</h3>${me.needBirth?'<p class="error">年齢で役割を分けるため、アカウントに生年月日の登録が必要です。</p>':''}<div class="kd-row"><button type="button" id="mkFam" ${me.canParent?'':'disabled'}>👩 保護者として始める(18歳以上)</button></div><div class="kd-row"><input id="joinCode" maxlength="8" placeholder="家族コード(8文字)" style="text-transform:uppercase" ${me.canChild?'':'disabled'}><button type="button" id="join" ${me.canChild?'':'disabled'}>🧒 子どもとして参加(18歳未満)</button></div><div class="error" id="err"></div></div>`;
+    $('mkFam').onclick=async()=>{try{await api('createFamily');boot();}catch(e){$('err').textContent=e.message;}};
+    $('join').onclick=async()=>{if(!confirm('保護者があなたの「利用時間・就寝時間・使えるサービス」を設定できるようになります。\n(メッセージや投稿の中身は見られません)\n参加しますか？'))return;try{await api('join',{code:$('joinCode').value});location.reload();}catch(e){$('err').textContent=e.message;}};
+  }catch(e){app.innerHTML=`<div class="card"><p class="error">${esc(e.message)}</p></div>`;}
+}
+// ---- 保護者 ----
+async function parentView(){
+  const d=await api('children');
+  app.innerHTML=`<div class="kd-card"><b>家族コード</b><div class="kd-code" id="fc">${esc(d.code)}</div><div class="muted" style="font-size:.85rem">お子さまのアカウントで「コドミル」を開き、このコードを入力すると見守りが始まります。</div><div class="kd-row"><button type="button" class="secondary" id="cc">コードをコピー</button><button type="button" class="secondary" id="nc">コードを作り直す</button></div></div>`+(d.children.length?d.children.map(card(d)).join(''):'<div class="kd-card muted">まだ子どもが参加していません。</div>');
+  $('cc').onclick=()=>navigator.clipboard.writeText(d.code).then(()=>$('cc').textContent='✓ コピーしました');
+  $('nc').onclick=async()=>{if(confirm('今のコードは使えなくなります。作り直しますか？')){await api('newCode');parentView();}};
+  d.children.forEach(bindChild(d));
+}
+const card=(d)=>(c)=>{
+  const r=c.rules,cap=r.dailyMin?(r.dailyMin+(r.extra.day&&r.extra.min?r.extra.min:0))*60:0,pct=cap?Math.min(100,Math.round(c.usedSec/cap*100)):0;
+  return `<div class="kd-card" id="k-${c.id}"><h3>${esc(c.name)} ${c.lock.locked?`<span class="kd-lock">🔒 ${({lockNow:'ロック中',quiet:'就寝時間',limit:'時間切れ'})[c.lock.reason]}</span>`:''}</h3>
+  <div>今日: <b>${fmt(c.usedSec)}</b>${r.dailyMin?` / ${fmt(cap)}`:' (制限なし)'}</div>${r.dailyMin?`<div class="kd-bar ${pct>=100?'over':''}"><i style="width:${pct}%"></i></div>`:''}
+  <div class="muted" style="font-size:.82rem">${Object.entries(c.by||{}).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${esc(d.services[k]||k)} ${fmt(v)}`).join(' ・ ')||'まだ使っていません'}</div>
+  ${c.leaveRequest?'<div class="error">⚠ 見守りの解除をお願いされています</div>':''}
+  <div class="kd-row"><button type="button" data-add="15" data-id="${c.id}">＋15分</button><button type="button" data-add="30" data-id="${c.id}">＋30分</button><button type="button" class="secondary" data-lock="${c.id}" data-on="${c.lock.reason==='lockNow'?0:1}">${c.lock.reason==='lockNow'?'🔓 ロック解除':'🔒 今すぐロック'}</button></div>
+  <div class="kd-row"><button type="button" class="secondary" data-rules="${c.id}">ルール設定</button><button type="button" class="secondary" data-rep="${c.id}">7日間のレポート</button><button type="button" class="secondary" data-unlink="${c.id}">見守りを解除</button></div><div id="p-${c.id}"></div></div>`;
+};
+const bindChild=(d)=>(c)=>{
+  const q=(sel)=>document.querySelectorAll(sel);
+  q(`[data-add][data-id="${c.id}"]`).forEach(b=>b.onclick=async()=>{await api('addTime',{child:c.id,min:Number(b.dataset.add)}).catch(e=>alert(e.message));parentView();});
+  q(`[data-lock="${c.id}"]`).forEach(b=>b.onclick=async()=>{await api('lockNow',{child:c.id,on:b.dataset.on==='1'}).catch(e=>alert(e.message));parentView();});
+  q(`[data-unlink="${c.id}"]`).forEach(b=>b.onclick=async()=>{if(confirm(c.name+' さんの見守りを解除しますか？')){await api('unlink',{child:c.id}).catch(e=>alert(e.message));parentView();}});
+  q(`[data-rep="${c.id}"]`).forEach(b=>b.onclick=async()=>{const r=await api('report',{child:c.id});const mx=Math.max(1,...r.days.map(x=>x.sec));$('p-'+c.id).innerHTML=`<div class="kd-chart">${r.days.map(x=>`<div><b style="height:${Math.round(x.sec/mx*70)}px"></b>${Math.round(x.sec/60)}分<br>${x.day.slice(4,6)}/${x.day.slice(6)}</div>`).join('')}</div>`;});
+  q(`[data-rules="${c.id}"]`).forEach(b=>b.onclick=()=>{const r=c.rules;$('p-'+c.id).innerHTML=`<div class="kd-card"><div class="kd-row">1日の利用時間<select id="dm-${c.id}">${[0,30,60,90,120,180,240,360].map(v=>`<option value="${v}" ${r.dailyMin===v?'selected':''}>${v?v+'分':'制限なし'}</option>`).join('')}</select></div><div class="kd-row"><label><input type="checkbox" id="qo-${c.id}" ${r.quiet.on?'checked':''}> 就寝時間は使えない</label><input type="time" id="qf-${c.id}" value="${r.quiet.from}"> 〜 <input type="time" id="qt-${c.id}" value="${r.quiet.to}"></div><div class="kd-chk">使えないサービス:<br>${Object.entries(d.services).map(([k,l])=>`<label><input type="checkbox" value="${k}" ${r.blocked.includes(k)?'checked':''}> ${esc(l)}</label>`).join('')}</div><button type="button" id="sv-${c.id}">保存</button> <span class="muted" id="sm-${c.id}"></span></div>`;
+    $('sv-'+c.id).onclick=async()=>{const blocked=Array.from($('p-'+c.id).querySelectorAll('.kd-chk input:checked')).map(x=>x.value);try{await api('saveRules',{child:c.id,rules:{dailyMin:Number($('dm-'+c.id).value),quiet:{on:$('qo-'+c.id).checked,from:$('qf-'+c.id).value,to:$('qt-'+c.id).value},blocked}});$('sm-'+c.id).textContent='保存しました';setTimeout(parentView,700);}catch(e){$('sm-'+c.id).textContent=e.message;}};});
+};
+// ---- 子ども ----
+async function childView(){
+  const render=async()=>{const d=await api('status');const r=d.rules,cap=r.dailyMin?(r.dailyMin+(r.extra.day&&r.extra.min?r.extra.min:0))*60:0;
+    app.innerHTML=`<div class="kd-card"><h3>🧒 見守りが有効です</h3><div>今日の利用: <b>${fmt(d.usedSec)}</b>${r.dailyMin?` / ${fmt(cap)}(のこり ${fmt(d.lock.remainSec)})`:' (制限なし)'}</div>${r.dailyMin?`<div class="kd-bar"><i style="width:${Math.min(100,Math.round(d.usedSec/cap*100))}%"></i></div>`:''}${d.lock.locked?`<p class="kd-lock">いまは使えません(${({lockNow:'保護者がロックしています',quiet:'就寝時間です',limit:'今日の利用時間に達しました'})[d.lock.reason]})</p>`:''}
+    <ul style="margin:8px 0;padding-left:1.2em;font-size:.9rem"><li>1日の上限: ${r.dailyMin?r.dailyMin+'分':'なし'}</li><li>就寝時間: ${r.quiet.on?r.quiet.from+' 〜 '+r.quiet.to:'なし'}</li><li>使えないサービス: ${r.blocked.length?r.blocked.map(k=>esc(d.services[k]||k)).join('、'):'なし'}</li></ul>
+    <div class="muted" style="font-size:.82rem">保護者が見られるのは、サービスごとの利用時間だけです。メッセージや投稿の中身は見られません。</div>
+    <div class="kd-row"><button type="button" id="ask" ${d.extendRequest?'disabled':''}>${d.extendRequest?'お願い済み':'⏰ 延長をお願いする'}</button><button type="button" class="secondary" id="leave" ${d.leaveRequest?'disabled':''}>${d.leaveRequest?'解除をお願い済み':'見守りの解除をお願いする'}</button></div><div class="muted" id="m"></div></div>`;
+    $('ask').onclick=async()=>{await api('requestExtend').catch(e=>alert(e.message));render();};$('leave').onclick=async()=>{await api('requestLeave').catch(e=>alert(e.message));render();};};
+  await render();timer=setInterval(render,30000);
+}
+boot();
+})();
+</script></body></html>

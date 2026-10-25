@@ -3,30 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>生年月日設定 - MixAll +（二世代）</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="/js/settings.js"></script>
-
-  <meta name="description" content="生年月日設定 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
+  <meta name="description" content="生年月日設定 - MixAll。MixAllのサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="生年月日設定 - MixAll +（二世代）">
-  <meta property="og:description" content="生年月日設定 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/age">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="MixAll +ログイン">
+  <meta property="og:title" content="生年月日設定 - MixAll">
+  <meta property="og:description" content="生年月日設定 - MixAll。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/age">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="MixAll">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="生年月日設定 - MixAll +（二世代）">
-  <meta name="twitter:description" content="生年月日設定 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="生年月日設定 - MixAll">
+  <meta name="twitter:description" content="生年月日設定 - MixAll。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+  <title>生年月日設定 - MixAll</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+
 </head>
 <body>
-  <header class="top"><div class="brand"><a href="/" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div></header>
+  <header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div></header>
   <main>
     <section id="ageCheckNotice" class="card" style="max-width:680px;margin:32px auto" aria-live="polite">
       <p id="ageCheckMessage">ログイン状態と生年月日データを確認しています…</p>
@@ -70,7 +71,7 @@
       checkError.textContent = '';
       checkMessage.textContent = 'ログイン状態と生年月日データを確認しています…';
       try {
-        const saved = await Netrify.api('/.netlify/functions/auth', { action:'getBirthDate', token:session.token });
+        const saved = await Netrify.api('/api/auth', { action:'getBirthDate', token:session.token });
         if (saved.birthDate) {
           // サーバーには登録済みでも、旧版のlocalStorageセッションには
           // hasBirthDateが無い/falseのまま残ることがある。ここで必ず同期し、
@@ -96,7 +97,7 @@
       if (!input.value) { error.textContent = '生年月日を入力してください。'; return; }
       button.disabled = true;
       try {
-        const result = await Netrify.api('/.netlify/functions/auth', { action:'setBirthDate', token:session.token, birthDate:input.value });
+        const result = await Netrify.api('/api/auth', { action:'setBirthDate', token:session.token, birthDate:input.value });
         Netrify.setSession({ ...session, age:result.age, hasBirthDate:true });
         location.replace(next);
       } catch (e) {

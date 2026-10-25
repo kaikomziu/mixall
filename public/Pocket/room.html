@@ -18,41 +18,54 @@
   #stampPurchaseModal { position:fixed; inset:0; z-index:1100; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.55); padding:20px; }
   #stampPurchaseModal .purchase-panel { width:min(420px, 100%); background:var(--card,#fff); color:var(--text,#111); border-radius:16px; padding:20px; box-shadow:0 10px 40px rgba(0,0,0,.3); }
   #stampPurchasePreview { display:block; width:140px; height:140px; object-fit:contain; margin:12px auto; border-radius:12px; }
-  .message-context-menu { position:fixed; z-index:2000; display:none; min-width:170px; background:var(--card,#fff); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 28px rgba(0,0,0,.22); }
+  .message-context-menu { position:fixed;max-height:calc(100dvh - 16px);max-width:calc(100vw - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch; z-index:2000; display:none; min-width:170px; background:var(--card,#fff); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 28px rgba(0,0,0,.22); }
   .message-context-menu button { display:block; width:100%; text-align:left; border:0; background:transparent; padding:10px 12px; border-radius:8px; }
   .message-context-menu button:hover,.message-context-menu button:focus { background:rgba(80,120,220,.12); }
   #stampPicker { border-color: transparent !important; background: transparent; }
   #stampPickerGrid button.secondary { border-color: transparent; background: transparent; }
 
+  .mention{color:#0b6fc4;font-weight:700;background:rgba(11,111,196,.12);border-radius:4px;padding:0 3px}
+  .mention-list{display:none;position:absolute;left:0;right:0;bottom:100%;margin-bottom:4px;max-height:210px;overflow-y:auto;background:var(--card,#fff);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:50;padding:4px}
+  .mention-item{display:flex!important;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;border-radius:8px;color:inherit}
+  .mention-item:hover,.mention-item:focus{background:rgba(80,120,220,.14)}
+  .mention-ph{display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+  .author-click{cursor:pointer}
+  .member-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+</style>
+<style>
+body:has(#messageList) main { padding-bottom: calc(var(--composer-h,108px) + 16px + env(safe-area-inset-bottom)) !important; }
+body:has(#messageList) main > .card:has(#msgBody) { max-height:60dvh; overflow-y:auto; }
+body:has(#messageList) #msgFilePreview { max-height:120px; overflow:auto; }
+body:has(#messageList) #msgFilePreview .attachment-preview-image { max-height:96px; max-width:min(160px,40vw); }
 </style>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>チャット - MixAll +（二世代）</title>
-<link rel="stylesheet" href="/css/style.css" />
-<script src="/js/settings.js"></script>
-<script src="/js/site-lock.js" defer></script>
-<script src="/js/calls.js" defer></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
-<script src="/js/mixall-nav.js" defer></script>
-<script src="/js/language-input.js"></script>
-
-  <meta name="description" content="チャット - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
+  <meta name="description" content="チャット - MixAll（ミックスオール）。MixAllのサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="チャット - MixAll +（二世代）">
-  <meta property="og:description" content="チャット - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/Pocket/room">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="ぽけっとのチャット">
+  <meta property="og:title" content="チャット - MixAll（ミックスオール）">
+  <meta property="og:description" content="チャット - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Pocket/room">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="ぽけっと">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="チャット - MixAll +（二世代）">
-  <meta name="twitter:description" content="チャット - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="チャット - MixAll（ミックスオール）">
+  <meta name="twitter:description" content="チャット - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+<title>チャット - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -61,34 +74,16 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><a href="/" style="color:inherit;"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div>
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
   <nav class="services">
-    <a href="/Pocket">ぽけっと一覧へ戻る</a><a href="/Coin">所持Coin</a>
+    <a href="/Pocket">ぽけっと一覧へ戻る</a><a href="/Coin">所持Mcコイン</a>
   </nav>
 </header>
 
 <main>
   <div class="card">
-    <div class="row" style="justify-content:space-between;align-items:center;"><h2 id="roomTitle">読み込み中...</h2><div class="row"><button type="button" class="secondary" id="searchChatButton">検索</button><button type="button" class="secondary" id="exportChatButton">TXT書き出し</button><button type="button" class="secondary" id="renameRoomButton" style="display:none;">ルーム名を編集</button></div></div>
+    <div class="row" style="justify-content:space-between;align-items:center;"><h2 id="roomTitle">読み込み中...</h2><div class="row"><button type="button" class="secondary" id="searchChatButton">検索</button><button type="button" class="secondary" id="threadListButton" onclick="showThreadList()">スレッド一覧</button><button type="button" class="secondary" id="exportChatButton">TXT書き出し</button><button type="button" class="secondary" id="renameRoomButton" style="display:none;">ルーム名を編集</button></div></div>
     <div id="messageList"></div>
-  </div>
-
-  <div class="card mx-composer" id="composerCard">
-    <div id="replyInfo" class="muted" style="display:none;margin-bottom:8px;"></div>
-    <div id="msgFilePreview" class="attachment-preview"></div>
-    <div id="stampPicker" style="display:none; max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:10px;">
-      <div id="stampPickerGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(60px,1fr)); gap:8px;"><p class="muted">読み込み中...</p></div>
-    </div>
-    <div class="mx-composer-tools">
-      <label class="mx-tool-btn" for="msgFile" title="ファイルを添付">📎<span>添付</span></label><input type="file" id="msgFile" accept="*/*" class="mx-visually-hidden" />
-      <button type="button" class="secondary mx-tool-btn" id="stampToggleBtn">😀 スタンプ</button><button type="button" class="secondary mx-tool-btn" id="pollButton">投票</button><button type="button" class="secondary mx-tool-btn" id="locationButton">位置情報</button><button type="button" class="secondary mx-tool-btn" id="recordButton">録音開始</button>
-    </div>
-    <div class="mx-composer-main">
-      <textarea id="msgBody" rows="1" placeholder="メッセージ（@アドレスでメンション）"></textarea>
-      <button id="msgSubmit" aria-label="送信">送信</button>
-    </div>
-    <div id="typingIndicator" class="typing-indicator" aria-live="polite"></div>
-    <div class="error" id="msgError"></div>
   </div>
 
   <div class="card" id="threadCard" style="display:none;">
@@ -100,12 +95,23 @@
     <button type="button" id="threadSubmit">スレッドへ送信</button>
   </div>
 
-  <details class="card mx-room-more" id="roomMore">
-    <summary>📞 通話・ノート・このルームの設定</summary>
-  <div class="card"><h3>メンバーへ通話</h3><p class="muted">音声・ビデオ・画面共有はWebRTCで接続し、接続情報は一時的なNetlify Blobへ保存して再接続を補助します。相手がオフラインの場合は未通話履歴に保存されます。</p><div id="callMembers"></div></div>
+  <details class="card" id="membersCard"><summary><b>👥 メンバー(参加中)</b> <span class="muted" id="membersCount"></span></summary><div id="membersBody" style="margin-top:10px;"></div></details>
 
+  <div class="card" id="roomCallCard"><h3>メンバーへ通話</h3><p class="muted">音声・ビデオ・画面共有はWebRTCで接続し、接続情報は一時的にサーバー(Supabase)へ保存して再接続を補助します。相手がオフラインの場合は未通話履歴に保存されます。</p><div id="callMembers"></div></div>
 
   <div class="card">
+    <div id="replyInfo" class="muted" style="display:none;margin-bottom:8px;"></div>
+    <div style="position:relative;"><div id="mentionList" class="mention-list" role="listbox"></div><textarea id="msgBody" placeholder="メッセージを入力（@で名前を入力するとメンションできます）"></textarea></div><div class="row" style="margin:8px 0;"><button type="button" class="secondary" id="attachButton" aria-label="ファイルを添付">📎 添付ファイル</button><button type="button" class="secondary" id="stampToggleBtn">😀 スタンプ</button><button type="button" class="secondary" id="pollButton">投票</button><button type="button" class="secondary" id="locationButton">位置情報</button><button type="button" class="secondary" id="recordButton">録音開始</button></div><div id="typingIndicator" class="typing-indicator" aria-live="polite"></div><p class="muted">メンション: <code>@</code> を入力すると、このルームのメンバーの名前が候補に出ます。</p>
+    <input type="file" id="msgFile" accept="*/*" hidden />
+    <div id="msgFilePreview" class="attachment-preview"></div>
+    <div id="stampPicker" style="display:none; max-height:220px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:8px; margin-bottom:10px;">
+      <div id="stampPickerGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(60px,1fr)); gap:8px;"><p class="muted">読み込み中...</p></div>
+    </div>
+    <div class="error" id="msgError"></div>
+    <button id="msgSubmit">送信</button>
+  </div>
+
+  <div class="card" id="roomMinefieldCard">
     <h3>自分用の地雷フィルター</h3>
     <p class="muted">受信メッセージだけを、あなたの画面上でAIに書き換えます。送信者本人には原文が表示され、サーバー上の原文は変更されません。初期状態はOFFです。</p>
     <label class="row muted"><input type="checkbox" id="minefieldEnabled" style="width:auto;"> 有効にする</label>
@@ -114,7 +120,7 @@
     <span id="minefieldStatus" class="muted"></span>
   </div>
 
-  <div class="card">
+  <div class="card" id="roomNicknameCard">
     <h3>このルームでの表示名</h3>
     <div class="row">
       <input type="text" id="nicknameInput" placeholder="このルームだけのニックネーム (空欄で解除)" style="flex:1;" />
@@ -122,9 +128,8 @@
     </div>
   </div>
 
-  <div class="card"><h3>ノート</h3><p class="muted">Xのように投稿する、ルーム専用の共有フィードです。</p><input id="pocketNoteSearch" placeholder="ノートを検索"><textarea id="pocketNoteBody" placeholder="投稿内容"></textarea><input type="file" id="pocketNoteFiles" accept="image/*,video/*,image/gif" multiple><button type="button" class="secondary" id="pocketNoteSave">投稿する</button><div id="pocketNotes" style="margin-top:12px"></div><hr style="border-color:var(--border);margin:16px 0"><h4>アルバム</h4><p class="muted">画像をまとめて送り、あとから同じアルバムへ追加できます。</p><div class="row"><input id="pocketAlbumTitle" placeholder="アルバム名" style="flex:1"><input type="file" id="pocketAlbumFiles" accept="image/*" multiple><button type="button" class="secondary" id="pocketAlbumCreate">アルバム送信</button></div><div id="pocketAlbums" style="margin-top:12px"></div></div>
-  </details>
-
+  <div class="card" id="roomNoteCard"><h3>ノート</h3><p class="muted">Xのように投稿する、ルーム専用の共有フィードです。</p><input id="pocketNoteSearch" placeholder="ノートを検索"><textarea id="pocketNoteBody" placeholder="投稿内容"></textarea><input type="file" id="pocketNoteFiles" accept="image/*,video/*,image/gif" multiple><button type="button" class="secondary" id="pocketNoteSave">投稿する</button><div id="pocketNotes" style="margin-top:12px"></div></div>
+  <div class="card" id="roomAlbumCard"><h3>アルバム</h3><p class="muted">画像をまとめて送り、あとから同じアルバムへ追加できます。</p><div class="row"><input id="pocketAlbumTitle" placeholder="アルバム名" style="flex:1"><input type="file" id="pocketAlbumFiles" accept="image/*" multiple><button type="button" class="secondary" id="pocketAlbumCreate">アルバム送信</button></div><div id="pocketAlbums" style="margin-top:12px"></div></div>
   <div class="card" id="manageCard" style="display:none;">
     <h3>メンバー・ロール管理</h3>
     <div id="roomNameEditor" style="display:none;margin-bottom:14px;"><div class="row"><input type="text" id="roomNameInput" placeholder="ルーム名" style="flex:1;" /><button type="button" class="secondary" id="roomNameSubmit">保存</button></div><div class="error" id="roomNameError"></div></div>
@@ -147,12 +152,12 @@
 
     <hr style="border-color: var(--border); margin: 14px 0;" />
     <div id="notificationSettings" class="card" style="margin-top:12px;"><p class="muted">通知設定を読み込み中...</p></div>
-<div id="botManager" style="display:none;"><h4>このルームのbot</h4><p class="muted">定型bot、Gemini、Netlify AI Gateway経由のMixBotを作成できます。AIにはメンバーに見える運営区分と本文の文字数・バイト数を渡します。</p><div id="botList"></div><div class="row"><input type="text" id="botName" placeholder="bot名" style="flex:1;" /><input type="text" id="botIcon" placeholder="アイコン" value="BOT" style="max-width:90px;" /><select id="botType"><option value="canned">定型返信</option><option value="ai">Gemini</option><option value="mixbot">MixBot（AI Gateway）</option></select><select id="botTrigger"><option value="mention">メンション時</option><option value="every">毎メッセージ</option></select></div><textarea id="botReply" placeholder="定型botの返信文（AI botでは空欄可）"></textarea><textarea id="botInstruction" placeholder="AIへの指示文（任意）"></textarea><button type="button" id="botSubmit" class="secondary">botを追加</button><button type="button" id="importUchBotButton" class="ghost">Uchのbotを追加</button><div id="botError" class="error"></div></div>
+<div id="botManager" style="display:none;"><h4>このルームのbot</h4><p class="muted">定型bot、Gemini、MixAll AI(EdgeOne内蔵)、AI API(OPENAI_BASE_URL)経由のMixBotを作成できます。AIにはメンバーに見える運営区分と本文の文字数・バイト数を渡します。</p><div id="botList"></div><div class="row"><input type="text" id="botName" placeholder="bot名" style="flex:1;" /><input type="text" id="botIcon" placeholder="アイコン" value="BOT" style="max-width:90px;" /><select id="botType"><option value="canned">定型返信</option><option value="ai">Gemini</option><option value="mixall">MixAll AI（EdgeOne内蔵・軽量）</option><option value="mixbot">MixBot（AI Gateway）</option></select><select id="botTrigger"><option value="mention">メンション時</option><option value="every">毎メッセージ</option></select></div><textarea id="botReply" placeholder="定型botの返信文（AI botでは空欄可）"></textarea><textarea id="botInstruction" placeholder="AIへの指示文（任意）"></textarea><button type="button" id="botSubmit" class="secondary">botを追加</button><button type="button" id="importUchBotButton" class="ghost">Uchのbotを追加</button><div id="botError" class="error"></div></div>
 
     <hr style="border-color: var(--border); margin: 14px 0;" />
     <h4 id="inviteHeader" style="display:none;">メンバーを招待</h4>
     <div class="row" id="inviteRow" style="display:none;">
-      <input type="text" id="inviteEmail" placeholder="招待するアドレス" style="flex:1;" />
+      <select id="inviteEmail" style="flex:1;"><option value="">友達から選択</option></select>
       <button id="inviteSubmit" class="secondary">招待</button>
     </div>
   </div>
@@ -166,8 +171,8 @@
 </div>
 <div id="stampPurchaseModal" role="dialog" aria-modal="true" aria-labelledby="stampPurchaseTitle"><div class="purchase-panel"><h3 id="stampPurchaseTitle">スタンプを購入</h3><img id="stampPurchasePreview" alt="スタンププレビュー" /><p id="stampPurchaseDescription" class="muted"></p><div class="row" style="justify-content:flex-end;gap:8px"><button type="button" class="secondary" id="stampPurchaseCancel">キャンセル</button><button type="button" id="stampPurchaseConfirm">購入して使う</button></div><div id="stampPurchaseError" class="error"></div></div></div>
 
-<script src="/js/auth.js"></script><script src="/js/ogp-cache.js"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="/js/files.js"></script>
+<script src="/js/auth.js"></script><script src="/js/ogp-cache.js"></script><script src="/js/pocket-location.js"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="/js/files.js"></script><script src="/js/chat-rt.js"></script><script src="/js/chat-extras.js" defer></script><script src="/js/filter-search.js"></script>
 <script src="/js/notifications.js"></script>
 <div id="messageContextMenu" class="message-context-menu" role="menu"></div>
 <button id="copySelectedMessageText" type="button" class="secondary" style="position:fixed;right:16px;bottom:92px;z-index:1999;display:none">選択部分をコピー</button>
@@ -181,6 +186,7 @@ function escapeHtml(s) {
 }
 
 let currentRoom = null;
+const rtSentRead = new Set(); // WebRTCで既読を送信済みのメッセージID
 let currentPerms = null;
 let activeThread = null;
 let messageHasRendered = false;
@@ -193,7 +199,7 @@ function closeStampPurchase() { document.getElementById('stampPurchaseModal').st
 function confirmStampPurchase(stamp, price) {
   return new Promise((resolve) => {
     const modal=document.getElementById('stampPurchaseModal'); const preview=document.getElementById('stampPurchasePreview'); const desc=document.getElementById('stampPurchaseDescription'); const confirmButton=document.getElementById('stampPurchaseConfirm');
-    preview.src=stamp.thumbnailDataUrl || ''; desc.textContent=`${stamp.packName || 'スタンプ'} の「${stamp.name}」を ${price} Coin で購入しますか？購入後すぐ送信待ちになります。`; modal.style.display='flex';
+    preview.src=stamp.thumbnailDataUrl || ''; desc.textContent=`${stamp.packName || 'スタンプ'} の「${stamp.name}」を ${price} Mcコイン で購入しますか？購入後すぐ送信待ちになります。`; modal.style.display='flex';
     const finish=(value)=>{ modal.style.display='none'; confirmButton.onclick=null; document.getElementById('stampPurchaseCancel').onclick=null; resolve(value); };
     confirmButton.onclick=()=>finish(true); document.getElementById('stampPurchaseCancel').onclick=()=>finish(false); modal.onclick=(event)=>{ if(event.target===modal) finish(false); };
   });
@@ -202,7 +208,7 @@ function confirmStampPurchase(stamp, price) {
 async function loadPocketStamps() {
   const grid = document.getElementById('stampPickerGrid');
   try {
-    const res = await fetch('/.netlify/functions/stamps?token=' + encodeURIComponent(session.token));
+    const res = await fetch('/api/stamps?token=' + encodeURIComponent(session.token));
     if (!res.ok) throw new Error('スタンプ一覧を取得できません');
     const data = await res.json();
     pocketStamps = Array.isArray(data.stamps) ? data.stamps : [];
@@ -210,7 +216,7 @@ async function loadPocketStamps() {
     const unlimited = Boolean(data.unlimited);
     const grouped = new Map();
     pocketStamps.forEach(stamp => { const id = stamp.packId || stamp.id; if (!grouped.has(id)) grouped.set(id, []); grouped.get(id).push(stamp); });
-    grid.innerHTML = pocketStamps.length ? `<div class="muted" style="margin-bottom:6px;">MixAll +コイン: ${unlimited ? '無限（運営・公認特典）' : `${Number(data.balance || 0)}コイン`}</div>` + [...grouped.values()].map(items => `<div style="border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px;"><strong>${escapeHtml(items[0].packIcon || '😀')} ${escapeHtml(items[0].packName || 'スタンプ')}</strong><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">${items.map((stamp) => {
+    grid.innerHTML = pocketStamps.length ? `<div class="muted" style="margin-bottom:6px;">Mcコイン: ${unlimited ? '無限（運営・公認特典）' : `${Number(data.balance || 0)}コイン`}</div>` + [...grouped.values()].map(items => `<div style="border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px;"><strong>${escapeHtml(items[0].packIcon || '😀')} ${escapeHtml(items[0].packName || 'スタンプ')}</strong><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">${items.map((stamp) => {
       const price = Number(stamp.priceCoins || 0);
       const needsPurchase = price > 0 && !owned.has(stamp.id) && !unlimited;
       return `<button type="button" class="secondary" data-pocket-stamp="${escapeHtml(stamp.id)}" title="${escapeHtml(stamp.name)}" style="padding:4px;"><img src="${escapeHtml(stamp.thumbnailDataUrl || '')}" alt="${escapeHtml(stamp.name)}" style="width:52px;height:52px;object-fit:contain;display:block;margin:auto;" /><small>${escapeHtml(stamp.name)}${needsPurchase ? `（${price}コイン）` : '（無料）'}</small></button>`;
@@ -222,7 +228,7 @@ async function loadPocketStamps() {
         const price = Number(stamp.priceCoins || 0);
         if (price > 0 && !owned.has(stamp.id) && !unlimited) {
           if (!await confirmStampPurchase(stamp, price)) return;
-          try { await Netrify.api('/.netlify/functions/stamps', { action:'purchaseStamp', token:session.token, stampId:stamp.id }); await loadPocketStamps(); owned.add(stamp.id); }
+          try { await Netrify.api('/api/stamps', { action:'purchaseStamp', token:session.token, stampId:stamp.id }); await loadPocketStamps(); owned.add(stamp.id); }
           catch (error) { alert(error.message); return; }
         }
         selectedStamp = stamp;
@@ -230,9 +236,9 @@ async function loadPocketStamps() {
         document.getElementById('msgFilePreview').innerHTML = `<img class="attachment-preview-image" id="selectedStampPreview" src="${escapeHtml(selectedStamp.thumbnailDataUrl || '')}" alt="${escapeHtml(selectedStamp.name)}" /><span class="attachment-link">${escapeHtml(selectedStamp.packIcon || '😀')} ${escapeHtml(selectedStamp.packName || 'スタンプ')} ↳ ${escapeHtml(selectedStamp.name)}（送信待ち）</span> <button type="button" class="ghost" id="giftStampButton">プレゼント</button>`;
         document.getElementById('selectedStampPreview').onclick = () => openImageViewer(selectedStamp.thumbnailDataUrl, selectedStamp.name);
         document.getElementById('giftStampButton').onclick = async () => {
-          const recipientEmail = (await MixAllDialog.prompt('プレゼント先のメールアドレスを入力してください'));
+          const recipientEmail = prompt('プレゼント先のメールアドレスを入力してください');
           if (!recipientEmail) return;
-          try { await Netrify.api('/.netlify/functions/stamps', { action:'giftStamp', token:session.token, stampId:selectedStamp.id, recipientEmail }); alert('スタンプをプレゼントしました。'); }
+          try { await Netrify.api('/api/stamps', { action:'giftStamp', token:session.token, stampId:selectedStamp.id, recipientEmail }); alert('スタンプをプレゼントしました。'); }
           catch (error) { alert(error.message); }
         };
       };
@@ -242,41 +248,44 @@ async function loadPocketStamps() {
   }
 }
 
+// スタンプ一覧を開いたとき、下バーに隠れないよう入力欄ごと少し上へ退かす
+function revealStampPicker() {
+  const picker = document.getElementById('stampPicker');
+  if (!picker || picker.style.display === 'none') return;
+  const nav = document.querySelector('.mixall-bottom-nav, .ghost-bottom-nav');
+  const navH = nav ? Math.ceil(nav.getBoundingClientRect().height) : 0;
+  document.body.style.paddingBottom = (navH + 24) + 'px';
+  const viewport = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const overflow = picker.getBoundingClientRect().bottom - (viewport - navH - 12);
+  if (overflow > 0) window.scrollBy({ top: overflow, behavior: 'smooth' });
+}
+function resetStampPickerSpace() { document.body.style.paddingBottom = ''; }
+(function watchStampPicker() {
+  const picker = document.getElementById('stampPicker');
+  if (!picker) return;
+  if (window.ResizeObserver) new ResizeObserver(() => revealStampPicker()).observe(picker);
+  new MutationObserver(() => { if (picker.style.display === 'none') resetStampPickerSpace(); }).observe(picker, { attributes: true, attributeFilter: ['style'] });
+})();
 document.getElementById('stampToggleBtn').onclick = () => {
   const picker = document.getElementById('stampPicker');
-  picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+  const opening = picker.style.display === 'none';
+  picker.style.display = opening ? 'block' : 'none';
+  if (opening) requestAnimationFrame(revealStampPicker); else resetStampPickerSpace();
 };
-
-// 受け取ったアイコンを覚えておき、次からは目印(avatarKey)だけ送ってサーバーに本体を省いてもらう（通信量の節約）
-const avatarCache = new Map();
-function avatarQuery() { return avatarCache.size ? '&avatars=' + Array.from(avatarCache.keys()).slice(-100).join(',') : ''; }
-function fillAvatars(room) {
-  for (const profile of Object.values(room?.profiles || {})) {
-    if (!profile || !profile.avatarKey) continue;
-    if (profile.avatarCached && avatarCache.has(profile.avatarKey)) profile.avatarUrl = avatarCache.get(profile.avatarKey);
-    else if (profile.avatarUrl) avatarCache.set(profile.avatarKey, profile.avatarUrl);
-  }
-}
 
 async function loadRoom() {
   if (!session) return;
   loadPocketStamps();
-  const res = await fetch('/.netlify/functions/pocket?roomId=' + encodeURIComponent(roomId) + '&limit=60' + avatarQuery() + '&token=' + encodeURIComponent(session.token));
+  const res = await fetch('/api/pocket?roomId=' + encodeURIComponent(roomId) + '&limit=60&token=' + encodeURIComponent(session.token));
   if (!res.ok) {
     document.getElementById('roomTitle').textContent = 'ルームが見つかりません';
     return;
   }
   const data = await res.json();
-  fillAvatars(data.room);
-  if (!currentRoom) currentRoom = data.room;
+  if (!currentRoom) { currentRoom = data.room; if (window.ChatRT) currentRoom.messages = ChatRT.decorate(currentRoom.messages || []); }
   else {
-    // 最新ページの範囲内で返ってこなかったメッセージ（削除されたもの）は画面からも消す
-    const fresh = data.room.messages;
-    const freshIds = new Set(fresh.map((message) => message.id));
-    const windowStart = data.room.hasMoreMessages && fresh.length ? new Date(fresh[0].createdAt) : null;
-    const kept = currentRoom.messages.filter((message) => freshIds.has(message.id) || (windowStart && new Date(message.createdAt) < windowStart));
-    const byId = new Map([...kept, ...fresh].map((message) => [message.id, message]));
-    currentRoom = { ...currentRoom, ...data.room, messages: Array.from(byId.values()).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt)) };
+    const byId = new Map([...currentRoom.messages, ...data.room.messages].map((message) => [message.id, message]));
+    currentRoom = { ...currentRoom, ...data.room, messages: (window.ChatRT ? ChatRT.decorate : (x) => x)(Array.from(byId.values()).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt))) };
   }
   hasMoreMessages = hasMoreMessages || Boolean(data.room.hasMoreMessages);
   currentRoom.hasMoreMessages = hasMoreMessages;
@@ -291,10 +300,9 @@ async function loadOlderMessages() {
   const oldHeight = list.scrollHeight; const oldTop = list.scrollTop;
   try {
     const oldest = currentRoom.messages[0].id;
-    const res = await fetch('/.netlify/functions/pocket?roomId=' + encodeURIComponent(roomId) + '&before=' + encodeURIComponent(oldest) + '&limit=60' + avatarQuery() + '&token=' + encodeURIComponent(session.token));
+    const res = await fetch('/api/pocket?roomId=' + encodeURIComponent(roomId) + '&before=' + encodeURIComponent(oldest) + '&limit=60&token=' + encodeURIComponent(session.token));
     if (!res.ok) return;
     const data = await res.json();
-    fillAvatars(data.room);
     const byId = new Map([...currentRoom.messages, ...data.room.messages].map((message) => [message.id, message]));
     currentRoom = { ...currentRoom, ...data.room, messages:Array.from(byId.values()).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt)) };
     hasMoreMessages = Boolean(data.room.hasMoreMessages); currentRoom.hasMoreMessages = hasMoreMessages;
@@ -323,7 +331,13 @@ function avatarHtml(profile, alt='') {
   return String(profile.avatarType||'').startsWith('video/') ? `<video class="pocket-avatar avatar-video" src="${escapeHtml(profile.avatarUrl)}" muted autoplay loop playsinline data-start="${Number(crop.start)||0}" data-end="${Number(crop.end)||0}" style="${style}" aria-label="${escapeHtml(alt)}"></video>` : `<img class="pocket-avatar" src="${escapeHtml(profile.avatarUrl)}" alt="${escapeHtml(alt)}" style="${style}">`;
 }
 
-function renderMessageText(text) {
+function renderMessageText(text, mentions) {
+  let html = renderMessageTextBase(text);
+  (mentions || []).forEach((item) => { const esc = escapeHtml(item.name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); html = html.replace(new RegExp('(^|[\\s>])(@' + esc + ')(?=$|[\\s<、。,.!?])', 'g'), '$1<span class="mention">$2</span>'); });
+  return html;
+}
+
+function renderMessageTextBase(text) {
   let html = NetrifyLanguage.renderText(text || '');
   return html.replace(/(https?:\/\/[^\s<]+)/gi, (raw) => {
     const url = raw.replace(/[.,!?、。]+$/g, '');
@@ -333,15 +347,15 @@ function renderMessageText(text) {
 }
 
 async function loadUrlPreviews(root) {
-  if (window.NetrifyOgp) return NetrifyOgp.hydrate(root, (url) => Netrify.api('/.netlify/functions/pocket', { action:'urlPreview', token:session.token, url }));
-  root.querySelectorAll('[data-preview-url]').forEach(async (card) => { try { const data = await Netrify.api('/.netlify/functions/pocket', { action:'urlPreview', token:session.token, url:card.dataset.previewUrl }); card.textContent = data.title || data.siteName || 'リンク'; } catch (_) {} });
+  if (window.NetrifyOgp) return NetrifyOgp.hydrate(root, (url) => Netrify.api('/api/pocket', { action:'urlPreview', token:session.token, url }));
+  root.querySelectorAll('[data-preview-url]').forEach(async (card) => { try { const data = await Netrify.api('/api/pocket', { action:'urlPreview', token:session.token, url:card.dataset.previewUrl }); card.textContent = data.title || data.siteName || 'リンク'; } catch (_) {} });
 }
 
 function readReceiptHtml(message) {
   const readers = (message.readBy || []).filter((email) => email !== message.authorEmail && currentRoom.memberEmails.includes(email));
   if (!readers.length) return '';
   const label = currentRoom.type === 'dm' ? '既読' : `既読 ${readers.length}`;
-  const names = readers.map((email) => displayNameOf(email)).join('\n');
+  const names = readers.map((email) => { const at = message.readAt && message.readAt[email]; const d = at ? new Date(at) : null; return `${displayNameOf(email)}　${d && !isNaN(d) ? d.toLocaleString('ja-JP') : '(時刻不明)'}`; }).join('\n');
   return `<button type="button" class="read-receipt" title="長押しまたはクリックで既読者を表示" data-readers="${escapeHtml(names)}">${label}</button>`;
 }
 
@@ -373,9 +387,12 @@ async function copyImageTextNow(url, button) {
     setTimeout(() => { if (button.isConnected) { button.textContent = original; button.disabled = false; } }, 1500);
   } catch (error) { button.disabled = false; button.textContent = original; alert(`文字コピーに失敗しました: ${error.message}`); }
 }
+const rtFileWait = new Map(); // fileId -> { promise, resolve }(相手がP2Pで送ってくるファイル)
 async function resolveAttachment(fileId, containerEl, directUrl = '') {
   if (directUrl) return directUrl;
   if (attachmentCache[fileId]) return attachmentCache[fileId];
+  const rw = rtFileWait.get(fileId);
+  if (rw) { if (containerEl) containerEl.textContent = '相手から直接受信中...'; await Promise.race([rw.promise, new Promise((r) => setTimeout(r, 20000))]); if (attachmentCache[fileId]) return attachmentCache[fileId]; }
   if (attachmentLoading.has(fileId)) return attachmentLoading.get(fileId);
   const request = NetrifyFiles.downloadFile(fileId, session.token, (done, total) => {
     if (containerEl) containerEl.textContent = `読み込み中... (${done}/${total})`;
@@ -388,16 +405,16 @@ function renderAttachment(a) {
   if (!a) return '';
   if (a.isNote) return `<div class="note-share-box" data-shared-note="${escapeHtml(a.noteId)}"><button type="button" class="secondary">📝 ノートへ移動</button></div>`;
   if (a.isVoiceMessage) return `<div class="voice-message attachment-slot" data-file-id="${escapeHtml(a.fileId || '')}" data-kind="audio" data-name="録音メッセージ" data-auto-load="true"><div class="attachment-inline-media muted">🎙 録音メッセージを読み込み中...</div></div>`;
-  if (a.isLocation) return `<div class="attachment-link"><a href="https://www.google.com/maps?q=${encodeURIComponent(a.lat)},${encodeURIComponent(a.lng)}" target="_blank" rel="noopener noreferrer">位置情報: ${escapeHtml(a.label || '地図を開く')}（${Number(a.lat).toFixed(5)}, ${Number(a.lng).toFixed(5)}）</a></div>`;
+  if (a.isLocation) return window.PocketLocation.renderHtml(a);
   if (a.isPoll) return `<div class="poll-card"><strong>投票: ${escapeHtml(a.question)}</strong>${(a.options || []).map((option) => `<button type="button" class="secondary poll-option" data-option-id="${escapeHtml(option.id)}">${escapeHtml(option.label)}（${(option.voters || []).length}）</button>`).join('')}</div>`;
   if (a.isStamp && a.thumbnailDataUrl) {
     return `<div class="attachment-slot" data-file-id="${escapeHtml(a.fileId || '')}" data-kind="image" data-name="${escapeHtml(a.name || 'スタンプ')}"><img src="${escapeHtml(a.thumbnailDataUrl)}" alt="${escapeHtml(a.name || 'スタンプ')}" style="display:block;max-width:180px;max-height:180px;width:auto;height:auto;object-fit:contain;border-radius:8px;" /></div>`;
   }
   const sizeLabel = a.sizeBytes ? ` (${(a.sizeBytes / 1024 / 1024).toFixed(1)}MB)` : '';
   const type=String(a.type||'').toLowerCase(), ext=String(a.name||'').split('.').pop().toLowerCase();
-  const kind=type.startsWith('image/')?'image':type.startsWith('audio/')||['mp3','wav','ogg','oga','m4a','aac','flac','opus'].includes(ext)?'audio':type.startsWith('video/')||['mp4','webm','mov','m4v','ogv'].includes(ext)?'video':type.includes('html')||['html','htm'].includes(ext)?'html':'file';
+  const kind=type.startsWith('image/')||['png','jpg','jpeg','jpe','gif','webp','avif','bmp','svg','heic','heif'].includes(ext)?'image':type.startsWith('audio/')||['mp3','wav','ogg','oga','m4a','aac','flac','opus'].includes(ext)?'audio':type.startsWith('video/')||['mp4','webm','mov','m4v','ogv'].includes(ext)?'video':type.includes('html')||['html','htm'].includes(ext)?'html':'file';
   const label=kind==='image'?'画像をプレビュー':kind==='audio'?'音声を再生':kind==='video'?'動画を再生':kind==='html'?'HTMLを実行':'ファイルをダウンロード';
-  const directUrl = String(a.shortUrl || a.mediaUrl || '');
+  const directUrl = /^[a-f0-9]{64}$/i.test(String(a.mediaHash || '')) ? '/api/media?hash=' + a.mediaHash : String(a.shortUrl || a.mediaUrl || '');
   const state=attachmentViewState.get(a.fileId || directUrl);
   if (state && (kind==='audio'||kind==='video') && state.url) return `<div class="attachment-slot" data-file-id="${escapeHtml(a.fileId || '')}" data-media-url="${escapeHtml(directUrl)}" data-kind="${kind}" data-name="${escapeHtml(a.name)}" data-expanded="true"><div class="attachment-inline-media"><strong>${kind==='audio'?'♫':'▶'} ${escapeHtml(a.name)}</strong><${kind} controls ${kind==='video'?'playsinline ':''}preload="metadata" src="${escapeHtml(state.url)}" style="display:block;width:min(100%,680px);margin-top:6px"></${kind}><div class="row"><a class="secondary" href="${escapeHtml(state.url)}" download="${escapeHtml(a.name)}">ダウンロード</a></div></div></div>`;
   if (kind==='audio'||kind==='video') return `<div class="attachment-slot" data-file-id="${escapeHtml(a.fileId || '')}" data-media-url="${escapeHtml(directUrl)}" data-kind="${kind}" data-name="${escapeHtml(a.name)}" data-auto-load="true"><div class="attachment-inline-media muted">${kind==='audio'?'♫ 音声':'▶ 動画'}を読み込み中...</div></div>`;
@@ -431,8 +448,8 @@ document.addEventListener('keydown', (event) => { if (event.key === 'Escape') cl
 
 async function editPocketMessage(messageId) {
   const message = currentRoom?.messages?.find((item) => item.id === messageId); if (!message) return;
-  const next = (await MixAllDialog.prompt('メッセージを編集', message.text || '')); if (next === null || !next.trim()) return;
-  try { await Netrify.api('/.netlify/functions/pocket', { action:'editMessage', token:session.token, roomId, messageId, text:next }); await loadRoom(); } catch (error) { alert('編集できませんでした: ' + error.message); }
+  const next = prompt('メッセージを編集', message.text || ''); if (next === null || !next.trim()) return;
+  try { await Netrify.api('/api/pocket', { action:'editMessage', token:session.token, roomId, messageId, text:next }); await loadRoom(); } catch (error) { alert('編集できませんでした: ' + error.message); }
 }
 function showPocketHistory(messageId) {
   const message = currentRoom?.messages?.find((item) => item.id === messageId); if (!message) return;
@@ -448,20 +465,20 @@ function setupMessageContextMenu() {
     const add = (label, fn) => { const b=document.createElement('button'); b.type='button'; b.textContent=label; b.onclick=()=>{ close(); fn(); }; menu.appendChild(b); };
     const text = post.querySelector('.text')?.textContent?.trim() || post.querySelector('.attachment-link')?.textContent?.trim() || '';
     add('コピー', async () => { try { await navigator.clipboard.writeText(text); } catch { alert('コピーできませんでした'); } });
-    if (post.dataset.transformed === 'true') add('元のメッセージを表示', async () => { try { const original = await Netrify.api('/.netlify/functions/pocket',{action:'getOriginalMessage',token:session.token,roomId,messageId:post.dataset.messageId}); alert(`原文（文字数 ${original.textChars}・${original.textBytes} bytes）\n\n${original.text}`); } catch (error) { alert(`原文を取得できませんでした: ${error.message}`); } });
+    add('翻訳', () => window.MixAllI18n && MixAllI18n.translateMessage(post));
+    if (post.dataset.transformed === 'true') add('元のメッセージを表示', async () => { try { const original = await Netrify.api('/api/pocket',{action:'getOriginalMessage',token:session.token,roomId,messageId:post.dataset.messageId}); alert(`原文（文字数 ${original.textChars}・${original.textBytes} bytes）\n\n${original.text}`); } catch (error) { alert(`原文を取得できませんでした: ${error.message}`); } });
     const selection = window.getSelection(); const selectedText = selection?.toString().trim() || '';
     if (selectedText && post.querySelector('.text')?.contains(selection.anchorNode)) add('選択部分だけコピー', async () => { try { await navigator.clipboard.writeText(selectedText); } catch { alert('選択部分をコピーできませんでした'); } });
     const reply = post.querySelector('[data-reply-message]'); if (reply) add('返信', () => reply.click());
-    // MixAll+: ピン留め・文字起こしなど（js/pocket-plus.js）
-    if (window.MixAllPocketPlus) window.MixAllPocketPlus.menuItems(post, add);
     const thread = post.querySelector('[data-thread-message]'); if (thread) add('スレッド', () => thread.click());
+    add('スレッド一覧', () => showThreadList());
     const threadLink = post.querySelector('a[href*="/Pocket/thread.html"]'); if (threadLink) add('スレッドを開く', () => { location.href=threadLink.href; });
-    add('リアクション', async () => { const value=(await MixAllDialog.prompt('リアクション (例: 👍 ❤️ 😂)')); if (value) alert(`${value} を選択しました`); });
+    add('リアクション', () => { const value=prompt('リアクション (例: 👍 ❤️ 😂)'); if (value) alert(`${value} を選択しました`); });
     const report = post.querySelector('[data-report-message]'); if (report) add('報告', () => report.click());
     const edit = post.querySelector('[data-edit-message]'); if (edit) add('編集', () => edit.click());
     const history = post.querySelector('[data-history-message]'); if (history) add('編集履歴', () => history.click());
     const del = post.querySelector('[data-delete-message]'); if (del) add('削除', () => del.click());
-    menu.style.left = `${Math.max(8, Math.min(x, innerWidth-190))}px`; menu.style.top = `${Math.max(8, Math.min(y, innerHeight-260))}px`; menu.style.display='block';
+    menu.style.display='block'; const __r=menu.getBoundingClientRect(); menu.style.left=`${Math.max(8,Math.min(x,innerWidth-__r.width-8))}px`; menu.style.top=`${Math.max(8,Math.min(y,innerHeight-__r.height-8))}px`;
   };
   document.addEventListener('pointerdown', (event) => { const post=event.target.closest?.('.post[data-message-id]'); if (!post) return; clearTimeout(timer); timer=setTimeout(()=>open(post,event.clientX,event.clientY),550); });
   document.addEventListener('pointerup', () => clearTimeout(timer)); document.addEventListener('pointercancel', () => clearTimeout(timer)); document.addEventListener('pointermove', () => clearTimeout(timer), {passive:true});
@@ -498,7 +515,7 @@ function bindAttachmentSlots(root) {
     if (slot.dataset.kind === 'image') {
       const preview = document.createElement('img'); preview.className = 'attachment-preview-image'; preview.alt = name; preview.loading = 'lazy';
       btn.replaceChildren(preview); btn.disabled = true;
-      resolveAttachment(fileId).then((url) => { preview.src = url; btn.disabled = false; const ocrButton=document.createElement('button'); ocrButton.type='button'; ocrButton.className='secondary'; ocrButton.textContent='画像の文字をコピー'; ocrButton.title='画像内の日本語・英語を読み取り、クリップボードへコピー'; ocrButton.onclick=()=>copyImageTextNow(url,ocrButton); slot.appendChild(ocrButton); }).catch((err) => { btn.disabled = false; btn.replaceChildren(document.createTextNode(`⚠ 画像を取得できません: ${err.message}`)); });
+      resolveAttachment(fileId, null, directUrl).then((url) => { preview.src = url; btn.disabled = false; const ocrButton=document.createElement('button'); ocrButton.type='button'; ocrButton.className='secondary'; ocrButton.textContent='画像の文字をコピー'; ocrButton.title='画像内の日本語・英語を読み取り、クリップボードへコピー'; ocrButton.onclick=()=>copyImageTextNow(url,ocrButton); slot.appendChild(ocrButton); }).catch((err) => { btn.disabled = false; btn.replaceChildren(document.createTextNode(`⚠ 画像を取得できません: ${err.message}`)); });
     }
     btn.onclick = async () => {
       const name = slot.dataset.name;
@@ -526,6 +543,79 @@ function bindAttachmentSlots(root) {
 }
 document.addEventListener('click',(event)=>{const button=event.target.closest('[data-open-media]');if(button)openImageViewer(button.dataset.mediaSrc,button.dataset.mediaName,button.dataset.openMedia).catch((error)=>alert(`プレビューを開けませんでした: ${error.message}`));});
 
+function showThreadList() {
+  const room = currentRoom; if (!room) return;
+  document.getElementById('threadListOverlay')?.remove();
+  const box = document.createElement('div');
+  box.id = 'threadListOverlay';
+  box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;';
+  const threads = (room.threads || []).slice().reverse();
+  const items = threads.map((t) => {
+    const parent = room.messages.find((m) => m.id === t.parentMessageId);
+    const snippet = parent ? (parent.text || parent.attachment?.name || '添付メッセージ').slice(0, 40) : '(削除されたメッセージ)';
+    const count = room.messages.filter((m) => m.threadId === t.id).length;
+    const nested = parent && parent.threadId ? '↳ ' : '';
+    return `<a class="ghost" style="display:block;text-decoration:none;margin:6px 0;padding:10px;border-radius:10px;" href="/Pocket/thread.html?id=${encodeURIComponent(room.id)}&thread=${encodeURIComponent(t.id)}"><b>${nested}${escapeHtml(t.title || 'スレッド')}</b>（${count}件）<br><small class="muted">元: ${escapeHtml(snippet)}</small></a>`;
+  }).join('') || '<p class="muted">スレッドはまだありません。メッセージを長押し →「スレッド」で作れます。</p>';
+  box.innerHTML = `<div class="card" style="max-width:480px;width:100%;max-height:80vh;overflow:auto;"><h3>スレッド一覧</h3>${items}<button type="button" class="secondary" id="threadListClose">閉じる</button></div>`;
+  box.addEventListener('click', (e) => { if (e.target === box || e.target.id === 'threadListClose') box.remove(); });
+  document.body.appendChild(box);
+}
+// ===== 差分描画: 表示済みメッセージは触らず、追加分だけ挿入し、変更があったメッセージだけ最小限更新する =====
+const __renderedMessages = new Map(); // id -> { sig, el }
+function morphNode(a, b) {
+  if (a.nodeType !== b.nodeType || a.nodeName !== b.nodeName) { a.replaceWith(b); return; }
+  if (a.nodeType === 3) { if (a.nodeValue !== b.nodeValue) a.nodeValue = b.nodeValue; return; }
+  if (a.nodeType !== 1) return;
+  // 再生中の音声/動画などは、同じファイルである限り一切触らない
+  if (a.classList.contains('attachment-slot') && b.classList.contains('attachment-slot') && a.dataset.fileId && a.dataset.fileId === b.dataset.fileId) return;
+  if (a.classList.contains('avatar-video') && a.getAttribute('src') === b.getAttribute('src')) return;
+  for (const at of Array.from(a.attributes)) if (!b.hasAttribute(at.name)) a.removeAttribute(at.name);
+  for (const at of Array.from(b.attributes)) if (a.getAttribute(at.name) !== at.value) a.setAttribute(at.name, at.value);
+  const ac = Array.from(a.childNodes), bc = Array.from(b.childNodes);
+  const n = Math.max(ac.length, bc.length);
+  for (let i = 0; i < n; i++) {
+    if (!ac[i]) a.appendChild(bc[i]);
+    else if (!bc[i]) ac[i].remove();
+    else morphNode(ac[i], bc[i]);
+  }
+}
+function bindFreshSlots(el) {
+  const fresh = Array.from(el.querySelectorAll('.attachment-slot:not([data-bound])'));
+  if (!fresh.length) return;
+  fresh.forEach((slot) => { slot.dataset.bound = '1'; });
+  bindAttachmentSlots({ querySelectorAll: () => fresh });
+}
+function patchMessageList(list, msgs, htmlFn) {
+  const touched = [];
+  if (!msgs.length) {
+    if (!list.querySelector('.empty-note')) { list.innerHTML = '<p class="muted empty-note">まだメッセージがありません。最初の1件を送ってみましょう。</p>'; __renderedMessages.clear(); }
+    return touched;
+  }
+  list.querySelector('.empty-note')?.remove();
+  const ids = new Set(msgs.map((m) => m.id));
+  for (const [id, r] of __renderedMessages) if (!ids.has(id) || r.el.parentNode !== list) { r.el.remove(); __renderedMessages.delete(id); }
+  let prev = null;
+  for (const m of msgs) {
+    const html = htmlFn(m).trim();
+    let r = __renderedMessages.get(m.id);
+    if (!r) {
+      const t = document.createElement('template'); t.innerHTML = html;
+      const el = t.content.firstElementChild;
+      list.insertBefore(el, prev ? prev.nextSibling : list.firstChild);
+      r = { sig: html, el }; __renderedMessages.set(m.id, r); touched.push(el);
+    } else if (r.sig !== html) {
+      const t = document.createElement('template'); t.innerHTML = html;
+      morphNode(r.el, t.content.firstElementChild);
+      r.sig = html; touched.push(r.el);
+    }
+    const out = prev ? prev.nextElementSibling !== r.el : (r.el.previousElementSibling && r.el.previousElementSibling.matches('.post[data-message-id]'));
+    if (out) list.insertBefore(r.el, prev ? prev.nextSibling : list.firstChild);
+    prev = r.el;
+  }
+  return touched;
+}
+
 function render() {
   const room = currentRoom;
   document.getElementById('roomTitle').textContent = room.title || (room.type === 'dm'
@@ -535,21 +625,21 @@ function render() {
   const messageList = document.getElementById('messageList');
   captureAttachmentMediaState(messageList);
   const wasAtBottom = !messageHasRendered || messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight < 80;
-  messageList.innerHTML = room.messages.map(m => {
+  const __messageHtml = (m) => {
     const canDelete = currentPerms.isAdmin || currentPerms.isHost || m.authorEmail === session.email;
     const canEdit = !m.deleted && (currentPerms.isAdmin || m.authorEmail === session.email);
     const historyCount = Array.isArray(m.editHistory) ? m.editHistory.length : 0;
-    const deletedBody = m.deleted ? `<div class="deleted-message">削除済みメッセージ${currentPerms.isAdmin ? `<br><small>監査本文: ${escapeHtml(m.deletedText || '(本文なし)')}</small>` : ''}</div>` : `${m.text ? `<div class="text">${renderMessageText(m.text)}</div>` : ''}${renderAttachment(m.attachment)}`;
+    const deletedBody = m.deleted ? `<div class="deleted-message">削除済みメッセージ${currentPerms.isAdmin ? `<br><small>監査本文: ${escapeHtml(m.deletedText || '(本文なし)')}</small>` : ''}</div>` : `${m.text ? `<div class="text">${renderMessageText(m.text, m.mentions)}</div>` : ''}${renderAttachment(m.attachment)}`;
     const replyTarget = m.replyTo ? room.messages.find(x => x.id === m.replyTo) : null;
     const childThread = (room.threads || []).find((item) => item.parentMessageId === m.id);
     const childCount = childThread ? room.messages.filter((item) => item.threadId === childThread.id).length : 0;
     return `<div class="post${m.authorEmail === session.email ? " own" : ""}" data-message-id="${escapeHtml(m.id)}" data-transformed="${m.transformed ? 'true' : 'false'}" id="message-${escapeHtml(m.id)}">
       <div class="icon">${avatarHtml(currentRoom.profiles?.[m.authorEmail], m.authorName) || escapeHtml((m.authorName || '?').slice(0,2))}</div>
       <div style="flex:1;">
-        <div class="author">${identityHtml(m.authorEmail, m.authorName)}</div>
+        <div class="author"><span class="author-click" data-mention-email="${escapeHtml(m.authorEmail)}" title="クリックでメンション">${identityHtml(m.authorEmail, m.authorName)}</span></div>
         ${replyTarget ? `<div class="muted reply-reference">返信先: <a href="#message-${escapeHtml(replyTarget.id)}">${escapeHtml((replyTarget.text || replyTarget.attachment?.name || '添付メッセージ').slice(0,80))}</a></div>` : ''}
         ${deletedBody}
-        <div class="time">${new Date(m.createdAt).toLocaleString('ja-JP')}${readReceiptHtml(m)}</div>
+        <div class="time">${new Date(m.createdAt).toLocaleString('ja-JP')}${m.editedAt ? ' ・編集済み' : ''}${readReceiptHtml(m)}</div>
         <div class="row" style="display:none;margin-top:6px;">
           <button type="button" class="ghost" data-reply-message="${m.id}">返信</button>
           ${childThread ? `<a class="ghost" href="/Pocket/thread.html?id=${encodeURIComponent(roomId)}&thread=${encodeURIComponent(childThread.id)}" style="display:inline-block;text-decoration:none;">${escapeHtml(childThread.title || 'スレッド')}（${childCount}件）</a>` : `<button type="button" class="ghost" data-thread-message="${m.id}">スレッド作成</button>`}
@@ -560,39 +650,45 @@ function render() {
         </div>
       </div>
     </div>`;
-  }).join('') || '<p class="muted">まだメッセージがありません。最初の1件を送ってみましょう。</p>';
+  };
+  const __touched = patchMessageList(messageList, room.messages.filter(m => !m.threadId), __messageHtml);
   if (wasAtBottom) messageList.scrollTop = messageList.scrollHeight;
   messageHasRendered = true;
-  bindAttachmentSlots(messageList);
-  messageList.querySelectorAll('.poll-card').forEach((poll) => { const post=poll.closest('.post'); const id=post?.dataset.messageId; poll.querySelectorAll('.poll-option').forEach((button) => { button.onclick=async () => { try { await Netrify.api('/.netlify/functions/pocket',{action:'votePoll',token:session.token,roomId,messageId:id,optionId:button.dataset.optionId}); await loadRoom(); } catch (error) { alert(error.message); } }; }); });
-  loadUrlPreviews(messageList);
+  try { if (window.onPocketRender) window.onPocketRender(room); } catch (_) {}
+  __touched.forEach(bindFreshSlots);
+  messageList.querySelectorAll('.poll-card').forEach((poll) => { const post=poll.closest('.post'); const id=post?.dataset.messageId; poll.querySelectorAll('.poll-option').forEach((button) => { button.onclick=async () => { try { await Netrify.api('/api/pocket',{action:'votePoll',token:session.token,roomId,messageId:id,optionId:button.dataset.optionId}); await loadRoom(); } catch (error) { alert(error.message); } }; }); });
+  __touched.forEach(loadUrlPreviews);
   messageList.querySelectorAll('[data-readers]').forEach((button) => { button.onclick = () => alert(`既読者\n\n${button.dataset.readers || '不明'}`); });
-  messageList.querySelectorAll('.avatar-video').forEach((video) => { video.addEventListener('loadedmetadata', () => { if (Number(video.dataset.start) > 0) video.currentTime=Number(video.dataset.start); }); video.addEventListener('timeupdate', () => { const end=Number(video.dataset.end); const start=Number(video.dataset.start)||0; if (end > start && video.currentTime >= end) video.currentTime=start; }); });
-  const unreadIds = room.messages.filter((message) => message.authorEmail !== session.email && !(message.readBy || []).includes(session.email)).map((message) => message.id);
-  if (unreadIds.length) Netrify.api('/.netlify/functions/pocket', { action:'markRead', token:session.token, roomId, messageIds:unreadIds }).catch(() => {});
+  __touched.flatMap((el) => Array.from(el.querySelectorAll('.avatar-video'))).forEach((video) => { video.addEventListener('loadedmetadata', () => { if (Number(video.dataset.start) > 0) video.currentTime=Number(video.dataset.start); }); video.addEventListener('timeupdate', () => { const end=Number(video.dataset.end); const start=Number(video.dataset.start)||0; if (end > start && video.currentTime >= end) video.currentTime=start; }); });
+  const unreadIds = room.messages.filter((message) => !message.threadId && message.authorEmail !== session.email && !(message.readBy || []).includes(session.email)).map((message) => message.id);
+  if (unreadIds.length) { Netrify.api('/api/pocket', { action:'markRead', token:session.token, roomId, messageIds:unreadIds }).catch(() => {}); if (window.ChatRT) { const fresh = unreadIds.filter((id) => !rtSentRead.has(id)); fresh.forEach((id) => rtSentRead.add(id)); ChatRT.sendRead(fresh); } }
   const typingEmails = Object.keys(room.typing || {}).filter((email) => email !== session.email);
   document.getElementById('typingIndicator').textContent = typingEmails.length ? `${typingEmails.slice(0,2).map((email,index) => index ? displayNameOf(email).slice(0,8) : displayNameOf(email)).join('、')}${typingEmails.length > 2 ? '…' : ''}が入力中…` : '';
 
-  document.getElementById('callMembers').innerHTML = room.memberEmails.filter((email) => email !== session.email).map((email) => `<div class="bot-item"><span>${identityHtml(email, displayNameOf(email))}</span><span class="row"><button type="button" class="ghost" data-call-email="${escapeHtml(email)}" data-call-mode="audio">音声</button><button type="button" class="ghost" data-call-email="${escapeHtml(email)}" data-call-mode="video">ビデオ</button><button type="button" class="ghost" data-call-email="${escapeHtml(email)}" data-call-mode="screen">画面共有</button></span></div>`).join('') || '<p class="muted">他のメンバーがいません。</p>';
-  document.querySelectorAll('[data-call-email]').forEach((button) => { button.onclick = async () => { try { await window.Netrify.startCall(button.dataset.callEmail, button.dataset.callMode); } catch (error) { alert(error.message); } }; });
+  const __cmHtml = room.memberEmails.filter((email) => email !== session.email).map((email) => `<div class="bot-item"><span>${identityHtml(email, displayNameOf(email))}</span><span class="row"><button type="button" class="ghost" data-call-email="${escapeHtml(email)}" data-call-mode="audio">音声</button><button type="button" class="ghost" data-call-email="${escapeHtml(email)}" data-call-mode="video">ビデオ</button><button type="button" class="ghost" data-call-email="${escapeHtml(email)}" data-call-mode="screen">画面共有</button></span></div>`).join('') || '<p class="muted">他のメンバーがいません。</p>';
+  {  // 描画のたびに作り直すと、押している最中にボタンが消えてクリックが無効になる(2回押さないと反応しない原因)。変わったときだけ更新し、クリックは親要素で受ける
+    const __cm = document.getElementById('callMembers');
+    if (__cm.dataset.h !== __cmHtml) { __cm.dataset.h = __cmHtml; __cm.innerHTML = __cmHtml; }
+    if (!__cm.__bound) { __cm.__bound = true; __cm.addEventListener('click', async (ev) => { const button = ev.target.closest && ev.target.closest('[data-call-email]'); if (!button) return; try { await window.Netrify.startCall(button.dataset.callEmail, button.dataset.callMode); } catch (error) { alert(error.message); } }); }
+  }
 
   document.getElementById('nicknameInput').value = room.nicknames[session.email] || '';
   document.querySelectorAll('[data-reply-message]').forEach((button) => { button.onclick = () => { const target = room.messages.find(m => m.id === button.dataset.replyMessage); document.getElementById('replyInfo').textContent = `返信先: ${(target?.text || target?.attachment?.name || '添付メッセージ').slice(0,80)}`; document.getElementById('replyInfo').style.display = 'block'; document.getElementById('replyInfo').dataset.replyTo = button.dataset.replyMessage; document.getElementById('msgBody').focus(); }; });
-  document.querySelectorAll('[data-thread-message]').forEach((button) => { button.onclick = async () => { const parent = room.messages.find(m => m.id === button.dataset.threadMessage); if (!parent) return; let thread = (room.threads || []).find(t => t.parentMessageId === parent.id); if (!thread) { const title = (await MixAllDialog.prompt('スレッド名', 'スレッド')); if (title === null) return; const result = await Netrify.api('/.netlify/functions/pocket',{action:'createThread',token:session.token,roomId,parentMessageId:parent.id,title}); thread = result.thread; } window.location.href = `/Pocket/thread.html?id=${encodeURIComponent(roomId)}&thread=${encodeURIComponent(thread.id)}`; }; });
+  document.querySelectorAll('[data-thread-message]').forEach((button) => { button.onclick = async () => { const parent = room.messages.find(m => m.id === button.dataset.threadMessage); if (!parent) return; let thread = (room.threads || []).find(t => t.parentMessageId === parent.id); if (!thread) { const title = prompt('スレッド名', 'スレッド'); if (title === null) return; const result = await Netrify.api('/api/pocket',{action:'createThread',token:session.token,roomId,parentMessageId:parent.id,title}); thread = result.thread; } window.location.href = `/Pocket/thread.html?id=${encodeURIComponent(roomId)}&thread=${encodeURIComponent(thread.id)}`; }; });
   document.querySelectorAll('[data-edit-message]').forEach((button) => { button.onclick = () => editPocketMessage(button.dataset.editMessage); });
   document.querySelectorAll('[data-history-message]').forEach((button) => { button.onclick = () => showPocketHistory(button.dataset.historyMessage); });
   document.querySelectorAll('[data-delete-message]').forEach((button) => {
     button.onclick = async () => {
-      if (!(await MixAllDialog.confirm('このメッセージを削除しますか？'))) return;
-      await Netrify.api('/.netlify/functions/pocket', { action: 'deleteMessage', token: session.token, roomId, messageId: button.dataset.deleteMessage });
+      if (!confirm('このメッセージを削除しますか？')) return;
+      await Netrify.api('/api/pocket', { action: 'deleteMessage', token: session.token, roomId, messageId: button.dataset.deleteMessage });
       loadRoom();
     };
   });
   document.querySelectorAll('[data-report-message]').forEach((button) => {
     button.onclick = async () => {
-      const reason = (await MixAllDialog.prompt('通報理由を入力してください', '迷惑行為・規約違反'));
+      const reason = prompt('通報理由を入力してください', '迷惑行為・規約違反');
       if (!reason) return;
-      const result = await Netrify.api('/.netlify/functions/pocket', { action: 'report', token: session.token, roomId, messageId: button.dataset.reportMessage, reason });
+      const result = await Netrify.api('/api/pocket', { action: 'report', token: session.token, roomId, messageId: button.dataset.reportMessage, reason });
       alert(result.duplicate ? 'このメッセージはすでに通報済みです。' : '通報を受け付けました。');
     };
   });
@@ -610,7 +706,7 @@ function render() {
   if (currentPerms.manageBots) {
     const botList = document.getElementById('botList');
     botList.innerHTML = (room.bots || []).map((bot) => `<div class="bot-item"><span>${escapeHtml(bot.icon || 'BOT')} ${escapeHtml(bot.name)} <span class="muted">@${escapeHtml(bot.name)}</span></span><button type="button" class="ghost" data-remove-bot="${escapeHtml(bot.id)}">削除</button></div>`).join('') || '<p class="muted">botはまだありません。</p>';
-    botList.querySelectorAll('[data-remove-bot]').forEach((button) => { button.onclick = async () => { if (!(await MixAllDialog.confirm('このbotを削除しますか？'))) return; await Netrify.api('/.netlify/functions/pocket', { action:'removeBot', token:session.token, roomId, botId:button.dataset.removeBot }); await loadRoom(); }; });
+    botList.querySelectorAll('[data-remove-bot]').forEach((button) => { button.onclick = async () => { if (!confirm('このbotを削除しますか？')) return; await Netrify.api('/api/pocket', { action:'removeBot', token:session.token, roomId, botId:button.dataset.removeBot }); await loadRoom(); }; });
   }
 
   if (currentPerms.manageRoles) {
@@ -634,7 +730,7 @@ function render() {
 
     memberList.querySelectorAll('[data-subhost]').forEach(btn => {
       btn.onclick = async () => {
-        await Netrify.api('/.netlify/functions/pocket', {
+        await Netrify.api('/api/pocket', {
           action: 'setSubHost', token: session.token, roomId,
           targetEmail: btn.dataset.subhost, appoint: btn.dataset.appoint === 'true'
         });
@@ -643,12 +739,12 @@ function render() {
     });
     memberList.querySelectorAll('[data-kick]').forEach(btn => {
       btn.onclick = async () => {
-        if (!(await MixAllDialog.confirm(btn.dataset.kick + ' をキックしますか?'))) return;
-        await Netrify.api('/.netlify/functions/pocket', { action: 'kickMember', token: session.token, roomId, targetEmail: btn.dataset.kick });
+        if (!confirm(btn.dataset.kick + ' をキックしますか?')) return;
+        await Netrify.api('/api/pocket', { action: 'kickMember', token: session.token, roomId, targetEmail: btn.dataset.kick });
         loadRoom();
       };
     });
-    memberList.querySelectorAll('[data-block-member]').forEach(btn => { btn.onclick = async () => { await Netrify.api('/.netlify/functions/pocket',{action:'blockMember',token:session.token,roomId,targetEmail:btn.dataset.blockMember,blocked:btn.dataset.blocked!=='true'}); await loadRoom(); }; });
+    memberList.querySelectorAll('[data-block-member]').forEach(btn => { btn.onclick = async () => { await Netrify.api('/api/pocket',{action:'blockMember',token:session.token,roomId,targetEmail:btn.dataset.blockMember,blocked:btn.dataset.blocked!=='true'}); await loadRoom(); }; });
 
     const roleList = document.getElementById('roleList');
     roleList.innerHTML = room.customRoles.map(r => `
@@ -667,7 +763,7 @@ function render() {
         const input = roleList.querySelector(`[data-role-target="${btn.dataset.roleAssign}"]`);
         const target = input.value.trim();
         if (!target) return;
-        await Netrify.api('/.netlify/functions/pocket', {
+        await Netrify.api('/api/pocket', {
           action: 'assignRole', token: session.token, roomId, roleId: btn.dataset.roleAssign, targetEmail: target, assign: true
         });
         loadRoom();
@@ -691,38 +787,32 @@ function renderThread() {
   const messages = currentRoom.messages.filter(m => m.threadId === activeThread.id);
   document.getElementById('threadMessageList').innerHTML = messages.map(m => `<div class="post"><div class="icon">${avatarHtml(currentRoom.profiles?.[m.authorEmail], m.authorName) || escapeHtml((m.authorName||'?').slice(0,2))}</div><div><strong>${escapeHtml(m.authorName||m.authorEmail)}</strong><div class="text">${renderMessageText(m.text||'')}${renderAttachment(m.attachment)}</div><div class="time">${new Date(m.createdAt).toLocaleString('ja-JP')}</div><div class="row"><button type="button" class="ghost" data-thread-message="${escapeHtml(m.id)}">この返信からスレッド</button></div></div></div>`).join('') || '<p class="muted">まだ返信がありません。</p>';
   bindAttachmentSlots(document.getElementById('threadMessageList'));
-  document.querySelectorAll('#threadMessageList [data-thread-message]').forEach((button) => { button.onclick = async () => { const parent = currentRoom.messages.find(m => m.id === button.dataset.threadMessage); if (!parent) return; const title = (await MixAllDialog.prompt('入れ子スレッド名', 'スレッド')); if (title === null) return; const result = await Netrify.api('/.netlify/functions/pocket',{action:'createThread',token:session.token,roomId,parentMessageId:parent.id,title}); window.location.href = `/Pocket/thread.html?id=${encodeURIComponent(roomId)}&thread=${encodeURIComponent(result.thread.id)}`; }; });
+  document.querySelectorAll('#threadMessageList [data-thread-message]').forEach((button) => { button.onclick = async () => { const parent = currentRoom.messages.find(m => m.id === button.dataset.threadMessage); if (!parent) return; const title = prompt('入れ子スレッド名', 'スレッド'); if (title === null) return; const result = await Netrify.api('/api/pocket',{action:'createThread',token:session.token,roomId,parentMessageId:parent.id,title}); window.location.href = `/Pocket/thread.html?id=${encodeURIComponent(roomId)}&thread=${encodeURIComponent(result.thread.id)}`; }; });
 }
 
 let pendingAttachment = null; // アップロード完了後は { fileId, name, type, sizeBytes }
+let pendingUpload = null;     // 選んだ添付(裏で保存中): { fileId, file, promise, ... }
+let bgSaves = 0;
+window.addEventListener('beforeunload', (ev) => { if (bgSaves > 0 || (pendingUpload && !pendingUpload.done)) { ev.preventDefault(); ev.returnValue = ''; } });
 let attachmentUploadId=0;
+  document.getElementById('attachButton').onclick = () => document.getElementById('msgFile').click();
   document.getElementById('msgFile').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   const preview = document.getElementById('msgFilePreview');
-  const submitButton=document.getElementById('msgSubmit');
   const uploadId=++attachmentUploadId;
-  if (!file) { pendingAttachment = null; preview.innerHTML = ''; submitButton.disabled=false; return; }
-
-  pendingAttachment = null;
-  submitButton.disabled=true;
-  preview.innerHTML = `<p class="muted">アップロード中... (0%)</p>`;
-  try {
-    const manifest = await NetrifyFiles.uploadFile(file, session.token, (done, total) => {
-      if(uploadId===attachmentUploadId)preview.innerHTML = `<p class="muted">アップロード中... (${Math.round(done / total * 100)}%)</p>`;
-    });
-    if(uploadId!==attachmentUploadId)return;
-    pendingAttachment = { fileId: manifest.fileId, name: file.name, type: file.type, sizeBytes: file.size };
-    if (file.type.startsWith('image/')) {
-      const localUrl = URL.createObjectURL(file);
-      preview.innerHTML = `<img class="attachment-preview-image" src="${localUrl}" alt="${escapeHtml(file.name)}" title="タップで拡大表示" />`;
-      preview.querySelector('img').onclick = () => openImageViewer(localUrl, file.name);
-    } else {
-      preview.innerHTML = `<span class="attachment-link">📎 ${escapeHtml(file.name)} (アップロード完了)</span>`;
-    }
-    submitButton.disabled=false;
-  } catch (err) {
-    if(uploadId===attachmentUploadId){preview.innerHTML = `<p class="error">アップロード失敗: ${err.message}</p>`;e.target.value = '';submitButton.disabled=false;}
-  }
+  pendingAttachment = null; pendingUpload = null;
+  if (!file) { preview.innerHTML = ''; return; }
+  // 送信ボタンはすぐ押せる。相手がこのルームを開いていれば、ファイルはP2Pで直接届き、Supabaseへの保存は裏で進む。
+  const state = { fileId: NetrifyFiles.newFileId(), file, progress: 0, done: false };
+  const label = () => { if (uploadId === attachmentUploadId && pendingUpload === state) { const t = preview.querySelector('[data-up]'); if (t) t.textContent = state.done ? '(保存済み)' : `(裏で保存中 ${Math.round(state.progress * 100)}%)`; } };
+  state.promise = NetrifyFiles.uploadFile(file, session.token, (done, total) => { state.progress = done / total; label(); }, state.fileId).then((m) => { state.done = true; state.manifest = m; label(); return m; });
+  state.promise.catch((err) => { if (uploadId === attachmentUploadId && pendingUpload === state) preview.innerHTML = `<p class="error">保存に失敗: ${escapeHtml(err.message)}</p>`; });
+  pendingUpload = state;
+  if (file.type.startsWith('image/')) {
+    const localUrl = URL.createObjectURL(file);
+    preview.innerHTML = `<img class="attachment-preview-image" src="${localUrl}" alt="${escapeHtml(file.name)}" title="タップで拡大表示" /><span class="muted" data-up> (裏で保存中 0%)</span>`;
+    preview.querySelector('img').onclick = () => openImageViewer(localUrl, file.name);
+  } else preview.innerHTML = `<span class="attachment-link">📎 ${escapeHtml(file.name)}</span> <span class="muted" data-up>(裏で保存中 0%)</span>`;
 });
 
   let pendingPoll = null;
@@ -734,56 +824,119 @@ let attachmentUploadId=0;
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { alert('このブラウザでは録音できません'); return; }
     try { const stream=await navigator.mediaDevices.getUserMedia({audio:true}); recordingChunks=[]; recorder=new MediaRecorder(stream); recordingStartedAt=Date.now(); recorder.ondataavailable=(e)=>{if(e.data.size)recordingChunks.push(e.data);}; recorder.onstop=async()=>{stream.getTracks().forEach((track)=>track.stop()); const blob=new Blob(recordingChunks,{type:recorder.mimeType||'audio/webm'}); const file=new File([blob],`recording-${Date.now()}.webm`,{type:blob.type}); try { const manifest=await NetrifyFiles.uploadFile(file,session.token); pendingAttachment={fileId:manifest.fileId,name:file.name,type:file.type,sizeBytes:file.size,isVoiceMessage:true,durationMs:Date.now()-recordingStartedAt}; document.getElementById('msgFilePreview').textContent='🎙 録音メッセージを送信待ち'; } catch(e){alert(`録音のアップロードに失敗しました: ${e.message}`);} }; recorder.start(); button.textContent='録音停止'; } catch(e) { alert(`マイクを利用できません: ${e.message}`); }
   };
-  document.getElementById('pollButton').onclick = async () => {
+  document.getElementById('pollButton').onclick = () => {
     if (currentRoom?.type !== 'group') { alert('投票はグループチャットでのみ作成できます'); return; }
-    const question = (await MixAllDialog.prompt('投票の質問')); if (!question) return;
-    const options = (await MixAllDialog.prompt('選択肢をカンマ区切りで入力（2つ以上）'));
+    const question = prompt('投票の質問'); if (!question) return;
+    const options = prompt('選択肢をカンマ区切りで入力（2つ以上）');
     const values = String(options || '').split(',').map((item) => item.trim()).filter(Boolean);
     if (values.length < 2) { alert('選択肢を2つ以上入力してください'); return; }
     pendingPoll = { question, options:values }; pendingLocation = null; document.getElementById('msgFilePreview').textContent = `投票: ${question}（${values.join(' / ')}）`;
   };
-  document.getElementById('locationButton').onclick = () => { if (!navigator.geolocation) { alert('この端末では位置情報を利用できません'); return; } navigator.geolocation.getCurrentPosition((position) => { pendingLocation={lat:position.coords.latitude,lng:position.coords.longitude,label:'現在地'}; pendingPoll=null; document.getElementById('msgFilePreview').textContent='現在地を送信待ち'; }, () => alert('位置情報を取得できませんでした')); };
+  document.getElementById('locationButton').onclick = async () => { const loc = await window.PocketLocation.pick(); if (!loc) return; pendingLocation = loc; pendingPoll = null; document.getElementById('msgFilePreview').textContent = loc.kind === 'destination' ? `目的地「${loc.label}」を送信待ち` : '現在地を送信待ち'; };
   document.getElementById('msgSubmit').onclick = async () => {
   const errEl = document.getElementById('msgError');
   errEl.textContent = '';
   const text = document.getElementById('msgBody').value;
-  if(document.getElementById('msgFile').files.length&&!pendingAttachment){errEl.textContent='添付のアップロードが終わるまでお待ちください';return;}
+  const up = pendingUpload;
+  let rtId = null;
   try {
     const stampAttachment = selectedStamp ? { fileId: selectedStamp.fileId, name: selectedStamp.name, type: selectedStamp.mimeType || 'image/*', sizeBytes: 0, isStamp: true, thumbnailDataUrl: selectedStamp.thumbnailDataUrl } : null;
-    await Netrify.api('/.netlify/functions/pocket', {
-      action: 'sendMessage', token: session.token, roomId, text, textChars:[...text].length, textBytes:new TextEncoder().encode(text).length, displayName: session.displayName,
-      attachment: stampAttachment || pendingAttachment, poll:pendingPoll, location:pendingLocation, replyTo: document.getElementById('replyInfo').dataset.replyTo || null
-    });
-    document.getElementById('msgBody').value = '';
-    document.getElementById('msgFile').value = '';
-    document.getElementById('msgFilePreview').innerHTML = '';
-    document.getElementById('replyInfo').textContent = '';
-    document.getElementById('replyInfo').style.display = 'none';
-    delete document.getElementById('replyInfo').dataset.replyTo;
-    pendingAttachment = null;
-    selectedStamp = null;
-    pendingPoll = null;
-    pendingLocation = null;
+    const heavy = up ? { fileId: up.fileId, name: up.file.name, type: up.file.type || 'application/octet-stream', sizeBytes: up.file.size } : null;
+    const attachment = stampAttachment || heavy || pendingAttachment || null;
+    const poll = pendingPoll, location = pendingLocation;
+    const __willAi = ((currentRoom?.bots || []).some((b) => b.enabled !== false) && /[@＠]/.test(text)) || Boolean(document.getElementById('replyInfo')?.dataset?.replyTo);
+    if (__willAi) window.mixallAiWatch?.kick('AIが考え中');
+    const replyTo = document.getElementById('replyInfo').dataset.replyTo || null;
+    const mentions = window.collectMentions ? window.collectMentions(text) : [];
+    const clientId = window.ChatRT ? ChatRT.newId() : null;
+    const trimmed = text.trim();
+    // 文字・スタンプ・投票・位置情報は軽いので、保存(Supabase)を待たずにまずP2Pで相手へ届けて、自分の画面にも先に出す
+    const pollAtt = poll ? { isPoll: true, question: String(poll.question || '').slice(0, 240), options: poll.options.map((l, i) => ({ id: String(i), label: String(l).slice(0, 80), voters: [] })), multiple: false } : null;
+    const locAtt = location ? { isLocation: true, kind: location.kind === 'destination' ? 'destination' : 'current', lat: Number(location.lat), lng: Number(location.lng), label: String(location.label || (location.kind === 'destination' ? '目的地' : '現在地')).slice(0, 120) } : null;
+    const rtAttachment = attachment || pollAtt || locAtt || null;
+    if (clientId && (trimmed || rtAttachment)) {
+      const m = { id: clientId, authorEmail: session.email, authorName: (currentRoom?.nicknames && currentRoom.nicknames[session.email]) || session.displayName || session.email, text: trimmed, textChars: [...trimmed].length, textBytes: new TextEncoder().encode(trimmed).length, attachment: rtAttachment, replyTo, threadId: replyTo, readBy: [session.email], createdAt: new Date().toISOString(), mentions, _pending: true };
+      ChatRT.sendMessage(m);
+      if (heavy) { if (!attachmentCache[heavy.fileId]) attachmentCache[heavy.fileId] = URL.createObjectURL(up.file); ChatRT.sendFile(heavy.fileId, up.file); }
+      if (currentRoom && !currentRoom.messages.some((x) => x.id === m.id)) { currentRoom.messages.push(m); render(); }
+      rtId = clientId;
+    }
+    window.__rtLastId = rtId;
+    const base = { action: 'sendMessage', clientId: clientId || undefined, token: session.token, roomId, text, textChars: [...text].length, textBytes: new TextEncoder().encode(text).length, displayName: session.displayName, poll, location, replyTo, mentions };
+    const resetComposer = () => {
+      document.getElementById('msgBody').value = '';
+      if (window.clearMentions) window.clearMentions();
+      document.getElementById('msgFile').value = '';
+      document.getElementById('msgFilePreview').innerHTML = '';
+      document.getElementById('replyInfo').textContent = '';
+      document.getElementById('replyInfo').style.display = 'none';
+      delete document.getElementById('replyInfo').dataset.replyTo;
+      pendingAttachment = null; pendingUpload = null; selectedStamp = null; pendingPoll = null; pendingLocation = null;
+    };
+    if (heavy) {
+      // 入力欄はすぐ空にして、Supabaseへの保存は裏で続ける(終わったら履歴に反映)
+      resetComposer(); bgSaves++;
+      (async () => {
+        try { await up.promise; await Netrify.api('/api/pocket', { ...base, attachment: heavy }); }
+        catch (e) {
+          errEl.textContent = '添付の保存に失敗しました: ' + e.message;
+          if (clientId && window.ChatRT) { ChatRT.dropPending(clientId); if (currentRoom) { currentRoom.messages = currentRoom.messages.filter((x) => x.id !== clientId); render(); } }
+        } finally { bgSaves--; loadRoom().catch(() => {}); }
+      })();
+      return;
+    }
+    const __sendPoll = setInterval(() => { if (!(window.ChatRT && ChatRT.connectedCount())) loadRoom().catch(() => {}); }, 1500);
+    const __draft = document.getElementById('msgBody').value;
+    resetComposer(); // 送信ボタンを押したらすぐ入力欄を空にする(失敗したら元に戻す)
+    try { await Netrify.api('/api/pocket', { ...base, attachment }); }
+    catch (e2) { const mb = document.getElementById('msgBody'); if (!mb.value) mb.value = __draft; throw e2; }
+    finally { clearInterval(__sendPoll); }
     loadRoom();
   } catch (e) {
     errEl.textContent = e.message;
+    if (window.__rtLastId && window.ChatRT) { const bad = window.__rtLastId; ChatRT.dropPending(bad); if (currentRoom) { currentRoom.messages = currentRoom.messages.filter((x) => x.id !== bad); render(); } }  // サーバーに保存できなかった分は取り消す
   }
 };
 
 let typingTimer = null;
-async function sendTyping(active) { try { await Netrify.api('/.netlify/functions/pocket', { action:'setTyping', token:session.token, roomId, active }); } catch (_) {} }
+async function sendTyping(active) { try { await Netrify.api('/api/pocket', { action:'setTyping', token:session.token, roomId, active }); } catch (_) {} }
 document.getElementById('msgBody').addEventListener('input', () => { sendTyping(true); clearTimeout(typingTimer); typingTimer=setTimeout(() => sendTyping(false), 2500); });
 document.getElementById('msgBody').addEventListener('blur', () => { clearTimeout(typingTimer); sendTyping(false); });
-document.getElementById('threadSubmit').onclick = async () => { const error=document.getElementById('threadError'); error.textContent=''; if (!activeThread) return; const text=document.getElementById('threadBody').value.trim(); if (!text) { error.textContent='返信内容を入力してください'; return; } try { await Netrify.api('/.netlify/functions/pocket',{action:'sendMessage',token:session.token,roomId,text,threadId:activeThread.id,replyTo:activeThread.parentMessageId,displayName:session.displayName}); document.getElementById('threadBody').value=''; await loadRoom(); renderThread(); } catch(e) { error.textContent=e.message; } };
+document.getElementById('threadSubmit').onclick = async () => { const error=document.getElementById('threadError'); error.textContent=''; if (!activeThread) return; const text=document.getElementById('threadBody').value.trim(); if (!text) { error.textContent='返信内容を入力してください'; return; } try { await Netrify.api('/api/pocket',{action:'sendMessage',token:session.token,roomId,text,threadId:activeThread.id,replyTo:activeThread.parentMessageId,displayName:session.displayName}); document.getElementById('threadBody').value=''; await loadRoom(); renderThread(); } catch(e) { error.textContent=e.message; } };
 document.getElementById('closeThreadButton').onclick = () => { if (dedicatedThreadId) window.location.href = `/Pocket/room.html?id=${encodeURIComponent(roomId)}`; else { activeThread=null; renderThread(); } };
 
 document.getElementById('nicknameSubmit').onclick = async () => {
   const nickname = document.getElementById('nicknameInput').value;
-  await Netrify.api('/.netlify/functions/pocket', { action: 'setNickname', token: session.token, roomId, nickname });
+  await Netrify.api('/api/pocket', { action: 'setNickname', token: session.token, roomId, nickname });
   loadRoom();
 };
-document.getElementById('searchChatButton').onclick = async () => { const query=(await MixAllDialog.prompt('検索（例: 猫 投稿者:@user タグ:写真）')); if(query===null)return; try { await Netrify.api('/.netlify/functions/pocket',{action:'saveSearchHistory',token:session.token,query}); const result=await Netrify.api('/.netlify/functions/pocket',{action:'search',token:session.token,roomId,query}); alert(`条件: ${query}\nメッセージ ${result.messages.length}件\n参加者 ${result.participants.length}人\n\n${result.messages.slice(0,10).map((m)=>`${m.authorName}: ${m.text||'[添付]'}`).join('\n')}`); } catch(e){alert(e.message);} };
-document.getElementById('exportChatButton').onclick = async () => { try { const result=await Netrify.api('/.netlify/functions/pocket',{action:'exportTxt',token:session.token,roomId}); const link=document.createElement('a'); link.href=URL.createObjectURL(new Blob([result.text],{type:'text/plain;charset=utf-8'})); link.download=result.filename; link.click(); setTimeout(()=>URL.revokeObjectURL(link.href),1000); } catch(e){alert(e.message);} };
+document.getElementById('searchChatButton').onclick = () => {
+  const bounded = (text, name) => { const key = '@' + name; let i = text.indexOf(key); while (i >= 0) { const ch = text[i + key.length]; if ((i === 0 || /\s/.test(text[i - 1])) && (ch === undefined || /[\s\u3000\u3001\u3002,.:\uFF1A!?\uFF01\uFF1F)\uFF09]/.test(ch))) return true; i = text.indexOf(key, i + 1); } return false; };
+  const avaOf = (profile, name) => avatarHtml(profile, name) || '';
+  FilterSearch.open({
+    people: () => [...currentRoom.memberEmails.map((email) => ({ id: email, name: displayNameOf(email), ava: avaOf(currentRoom.profiles?.[email], displayNameOf(email)), sub: '' })), ...(currentRoom.bots || []).map((b) => ({ id: 'bot:' + b.id, name: b.name, ava: '🤖', sub: 'bot' }))],
+    loadItems: async () => {
+      let merged = new Map(currentRoom.messages.map((m) => [m.id, m]));
+      let before = currentRoom.messages[0] && currentRoom.messages[0].id, more = currentRoom.hasMoreMessages !== false, guard = 0;
+      while (more && before && guard++ < 15) {
+        const res = await fetch('/api/pocket?roomId=' + encodeURIComponent(roomId) + '&limit=100&before=' + encodeURIComponent(before) + '&token=' + encodeURIComponent(session.token));
+        if (!res.ok) break;
+        const data = await res.json();
+        const page = data.room.messages || [];
+        page.forEach((m) => merged.set(m.id, m));
+        more = Boolean(data.room.hasMoreMessages) && page.length > 0;
+        before = page[0] && page[0].id;
+      }
+      const members = currentRoom.memberEmails.map((email) => ({ email, name: displayNameOf(email) }));
+      return [...merged.values()].filter((m) => !m.deleted).map((m) => {
+        const text = String(m.text || '');
+        return { id: m.id, authorId: m.authorEmail, authorName: m.authorName || displayNameOf(m.authorEmail), ava: avaOf(currentRoom.profiles?.[m.authorEmail], m.authorName), text, ts: new Date(m.createdAt).getTime(), isBot: Boolean(m.isBot), types: FilterSearch.typesOf(text, m.attachment), mentions: members.filter((x) => bounded(text, x.name) || bounded(text, x.email)).map((x) => x.email) };
+      });
+    },
+    onPick: (item) => { const el = document.getElementById('message-' + item.id); if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.style.outline = '2px solid var(--accent,#3b82f6)'; setTimeout(() => { el.style.outline = ''; }, 2500); } else alert('このメッセージは表示範囲外です。上にスクロールして過去のメッセージを読み込んでください。'); }
+  });
+};
+document.getElementById('exportChatButton').onclick = async () => { try { const result=await Netrify.api('/api/pocket',{action:'exportTxt',token:session.token,roomId}); const link=document.createElement('a'); link.href=URL.createObjectURL(new Blob([result.text],{type:'text/plain;charset=utf-8'})); link.download=result.filename; link.click(); setTimeout(()=>URL.revokeObjectURL(link.href),1000); } catch(e){alert(e.message);} };
 async function readMediaFiles(files,onProgress){
   const result=[]; const selected=[...files];
   for(let i=0;i<selected.length;i++){
@@ -817,59 +970,59 @@ function renderPocketNotes(notes){
   const root=document.getElementById('pocketNotes');
   root.innerHTML=filtered.map(n=>`<article class="note-post" id="pocket-note-${escapeHtml(n.id)}"><strong>ノート</strong><small class="muted"> ${new Date(n.createdAt).toLocaleString('ja-JP')}</small><p style="white-space:pre-wrap">${escapeHtml(n.body||'')}</p>${(n.media||[]).map(pocketMediaMarkup).join('')}<div class="row"><button class="ghost" data-note-share="${escapeHtml(n.id)}">チャットに共有</button><button class="ghost" data-note-delete="${escapeHtml(n.id)}">削除</button></div></article>`).join('')||'<p class="muted">該当するノートがありません。</p>';
   bindPocketMedia(root);
-  root.querySelectorAll('[data-note-delete]').forEach(b=>b.onclick=async()=>{await Netrify.api('/.netlify/functions/pocket',{action:'deleteNote',token:session.token,roomId,noteId:b.dataset.noteDelete});loadPocketNotes();});
-  root.querySelectorAll('[data-note-share]').forEach(b=>b.onclick=async()=>{await Netrify.api('/.netlify/functions/pocket',{action:'shareNote',token:session.token,roomId,noteId:b.dataset.noteShare});alert('チャットにノートへの共有ボックスを追加しました');loadRoom();});
+  root.querySelectorAll('[data-note-delete]').forEach(b=>b.onclick=async()=>{await Netrify.api('/api/pocket',{action:'deleteNote',token:session.token,roomId,noteId:b.dataset.noteDelete});loadPocketNotes();});
+  root.querySelectorAll('[data-note-share]').forEach(b=>b.onclick=async()=>{await Netrify.api('/api/pocket',{action:'shareNote',token:session.token,roomId,noteId:b.dataset.noteShare});alert('チャットにノートへの共有ボックスを追加しました');loadRoom();});
 }
-async function loadPocketNotes(){try{const d=await Netrify.api('/.netlify/functions/pocket',{action:'listNotes',token:session.token,roomId});window.pocketNotesCache=d.notes||[];renderPocketNotes(window.pocketNotesCache);}catch(e){document.getElementById('pocketNotes').textContent=e.message;}}
+async function loadPocketNotes(){try{const d=await Netrify.api('/api/pocket',{action:'listNotes',token:session.token,roomId});window.pocketNotesCache=d.notes||[];renderPocketNotes(window.pocketNotesCache);}catch(e){document.getElementById('pocketNotes').textContent=e.message;}}
 document.getElementById('pocketNoteSearch').oninput=()=>renderPocketNotes(window.pocketNotesCache||[]);
 document.getElementById('pocketNoteSave').onclick=async()=>{
   const button=document.getElementById('pocketNoteSave');button.disabled=true;
   try{
     const media=await readMediaFiles(document.getElementById('pocketNoteFiles').files,(i,total,file,done,chunks)=>{button.textContent=`${file.name} をアップロード中 (${Math.round(done/chunks*100)}%)`;});
-    await Netrify.api('/.netlify/functions/pocket',{action:'saveNote',token:session.token,roomId,body:document.getElementById('pocketNoteBody').value,media});
+    await Netrify.api('/api/pocket',{action:'saveNote',token:session.token,roomId,body:document.getElementById('pocketNoteBody').value,media});
     document.getElementById('pocketNoteBody').value='';document.getElementById('pocketNoteFiles').value='';loadPocketNotes();
   }catch(e){alert(e.message);}finally{button.disabled=false;button.textContent='投稿する';}
 };
 async function loadPocketAlbums(){
-  const d=await Netrify.api('/.netlify/functions/pocket',{action:'listAlbums',token:session.token,roomId});
+  const d=await Netrify.api('/api/pocket',{action:'listAlbums',token:session.token,roomId});
   const root=document.getElementById('pocketAlbums');
   root.innerHTML=(d.albums||[]).map(a=>`<section class="album-card"><div class="row"><strong>${escapeHtml(a.title)}</strong><span class="muted">${(a.images||[]).length}枚</span><button class="ghost" data-album-delete="${escapeHtml(a.id)}">削除</button></div><div class="album-grid">${(a.images||[]).map(pocketMediaMarkup).join('')}</div><input type="file" accept="image/*" multiple data-album-files="${escapeHtml(a.id)}"><button class="secondary" data-album-add="${escapeHtml(a.id)}">画像を追加</button></section>`).join('')||'<p class="muted">アルバムがありません。</p>';
   bindPocketMedia(root);
-  root.querySelectorAll('[data-album-delete]').forEach(b=>b.onclick=async()=>{await Netrify.api('/.netlify/functions/pocket',{action:'deleteAlbum',token:session.token,roomId,albumId:b.dataset.albumDelete});loadPocketAlbums();});
+  root.querySelectorAll('[data-album-delete]').forEach(b=>b.onclick=async()=>{await Netrify.api('/api/pocket',{action:'deleteAlbum',token:session.token,roomId,albumId:b.dataset.albumDelete});loadPocketAlbums();});
   root.querySelectorAll('[data-album-add]').forEach(b=>b.onclick=async()=>{
     const input=root.querySelector(`[data-album-files="${b.dataset.albumAdd}"]`);b.disabled=true;
-    try{const images=await readMediaFiles(input.files,(i,total,file,done,chunks)=>{b.textContent=`${file.name} (${Math.round(done/chunks*100)}%)`;});await Netrify.api('/.netlify/functions/pocket',{action:'addAlbumImages',token:session.token,roomId,albumId:b.dataset.albumAdd,images});loadPocketAlbums();}
+    try{const images=await readMediaFiles(input.files,(i,total,file,done,chunks)=>{b.textContent=`${file.name} (${Math.round(done/chunks*100)}%)`;});await Netrify.api('/api/pocket',{action:'addAlbumImages',token:session.token,roomId,albumId:b.dataset.albumAdd,images});loadPocketAlbums();}
     catch(e){alert(e.message);}finally{b.disabled=false;b.textContent='画像を追加';}
   });
 }
 document.getElementById('pocketAlbumCreate').onclick=async()=>{
   const button=document.getElementById('pocketAlbumCreate');button.disabled=true;
-  try{const images=await readMediaFiles(document.getElementById('pocketAlbumFiles').files,(i,total,file,done,chunks)=>{button.textContent=`${file.name} (${Math.round(done/chunks*100)}%)`;});await Netrify.api('/.netlify/functions/pocket',{action:'createAlbum',token:session.token,roomId,title:document.getElementById('pocketAlbumTitle').value,images});document.getElementById('pocketAlbumTitle').value='';document.getElementById('pocketAlbumFiles').value='';loadPocketAlbums();}
+  try{const images=await readMediaFiles(document.getElementById('pocketAlbumFiles').files,(i,total,file,done,chunks)=>{button.textContent=`${file.name} (${Math.round(done/chunks*100)}%)`;});await Netrify.api('/api/pocket',{action:'createAlbum',token:session.token,roomId,title:document.getElementById('pocketAlbumTitle').value,images});document.getElementById('pocketAlbumTitle').value='';document.getElementById('pocketAlbumFiles').value='';loadPocketAlbums();}
   catch(e){alert(e.message);}finally{button.disabled=false;button.textContent='アルバム送信';}
 };
 loadPocketNotes();loadPocketAlbums();document.addEventListener('click',e=>{const box=e.target.closest('[data-shared-note]');if(!box)return;const target=document.getElementById('pocket-note-'+box.dataset.sharedNote);if(target){target.scrollIntoView({behavior:'smooth',block:'center'});target.classList.add('note-highlight');setTimeout(()=>target.classList.remove('note-highlight'),1600);}else{loadPocketNotes().then(()=>document.getElementById('pocket-note-'+box.dataset.sharedNote)?.scrollIntoView({behavior:'smooth',block:'center'}));}});
 
 document.getElementById('roomNameSubmit').onclick = async () => {
   const error = document.getElementById('roomNameError'); error.textContent = '';
-  try { await Netrify.api('/.netlify/functions/pocket', { action:'renameRoom', token:session.token, roomId, title:document.getElementById('roomNameInput').value }); await loadRoom(); } catch (e) { error.textContent = e.message; }
+  try { await Netrify.api('/api/pocket', { action:'renameRoom', token:session.token, roomId, title:document.getElementById('roomNameInput').value }); await loadRoom(); } catch (e) { error.textContent = e.message; }
 };
 document.getElementById('renameRoomButton').onclick = () => { document.getElementById('roomNameInput').focus(); };
 document.getElementById('importUchBotButton').onclick = async () => {
   const error = document.getElementById('botError'); error.textContent = '';
-  const sourceThreadId = (await MixAllDialog.prompt('UchスレッドIDを入力してください')); if (!sourceThreadId) return;
-  const botId = (await MixAllDialog.prompt('Uch bot IDを入力してください')); if (!botId) return;
-  try { await Netrify.api('/.netlify/functions/pocket', { action:'importUchBot', token:session.token, roomId, sourceThreadId:sourceThreadId.trim(), botId:botId.trim() }); await loadRoom(); } catch (e) { error.textContent = e.message; }
+  const sourceThreadId = prompt('UchスレッドIDを入力してください'); if (!sourceThreadId) return;
+  const botId = prompt('Uch bot IDを入力してください'); if (!botId) return;
+  try { await Netrify.api('/api/pocket', { action:'importUchBot', token:session.token, roomId, sourceThreadId:sourceThreadId.trim(), botId:botId.trim() }); await loadRoom(); } catch (e) { error.textContent = e.message; }
 };
 
 document.getElementById('botSubmit').onclick = async () => {
   const error = document.getElementById('botError'); error.textContent = '';
-  try { await Netrify.api('/.netlify/functions/pocket', { action:'addBot', token:session.token, roomId, name:document.getElementById('botName').value, icon:document.getElementById('botIcon').value, botType:document.getElementById('botType').value, triggerType:document.getElementById('botTrigger').value, replyMessage:document.getElementById('botReply').value, instruction:document.getElementById('botInstruction').value }); document.getElementById('botName').value=''; document.getElementById('botReply').value=''; document.getElementById('botInstruction').value=''; await loadRoom(); } catch (e) { error.textContent = e.message; }
+  try { await Netrify.api('/api/pocket', { action:'addBot', token:session.token, roomId, name:document.getElementById('botName').value, icon:document.getElementById('botIcon').value, botType:document.getElementById('botType').value, triggerType:document.getElementById('botTrigger').value, replyMessage:document.getElementById('botReply').value, instruction:document.getElementById('botInstruction').value }); document.getElementById('botName').value=''; document.getElementById('botReply').value=''; document.getElementById('botInstruction').value=''; await loadRoom(); } catch (e) { error.textContent = e.message; }
 };
 document.getElementById('roleSubmit').onclick = async () => {
   const errEl = document.getElementById('roleError');
   errEl.textContent = '';
   try {
-    await Netrify.api('/.netlify/functions/pocket', {
+    await Netrify.api('/api/pocket', {
       action: 'createRole', token: session.token, roomId,
       name: document.getElementById('roleName').value,
       color: document.getElementById('roleColor').value,
@@ -888,7 +1041,7 @@ document.getElementById('inviteSubmit').onclick = async () => {
   const target = document.getElementById('inviteEmail').value.trim();
   if (!target) return;
   try {
-    await Netrify.api('/.netlify/functions/pocket', { action: 'inviteMember', token: session.token, roomId, targetEmail: target });
+    await Netrify.api('/api/pocket', { action: 'inviteMember', token: session.token, roomId, targetEmail: target });
     loadRoom();
   } catch (e) {
     alert(e.message);
@@ -897,7 +1050,7 @@ document.getElementById('inviteSubmit').onclick = async () => {
 
 async function loadMinefieldSettings() {
   try {
-    const result = await Netrify.api('/.netlify/functions/pocket',{action:'getMinefieldSettings',token:session.token});
+    const result = await Netrify.api('/api/pocket',{action:'getMinefieldSettings',token:session.token});
     document.getElementById('minefieldEnabled').checked = result.settings?.enabled === true;
     document.getElementById('minefieldInstruction').value = result.settings?.instruction || '';
   } catch (error) { document.getElementById('minefieldStatus').textContent = `設定を読み込めません: ${error.message}`; }
@@ -906,12 +1059,13 @@ document.getElementById('saveMinefieldButton').onclick = async () => {
   const status = document.getElementById('minefieldStatus');
   status.textContent = '保存中...';
   try {
-    await Netrify.api('/.netlify/functions/pocket',{action:'saveMinefieldSettings',token:session.token,enabled:document.getElementById('minefieldEnabled').checked,instruction:document.getElementById('minefieldInstruction').value});
+    await Netrify.api('/api/pocket',{action:'saveMinefieldSettings',token:session.token,enabled:document.getElementById('minefieldEnabled').checked,instruction:document.getElementById('minefieldInstruction').value});
     status.textContent = '保存しました。次の読み込みから反映されます。';
     await loadRoom();
   } catch (error) { status.textContent = `保存できません: ${error.message}`; }
 };
 loadMinefieldSettings();
+(function(){ const c=document.getElementById('msgBody')?.closest('.card'); if(!c||!window.ResizeObserver) return; const set=()=>document.documentElement.style.setProperty('--composer-h', c.offsetHeight+'px'); new ResizeObserver(set).observe(c); set(); })();
 setupMessageContextMenu();
 document.addEventListener('selectionchange', () => {
   const selection = window.getSelection(); const selected = selection?.toString().trim() || '';
@@ -931,9 +1085,110 @@ document.getElementById('messageList').addEventListener('scroll', () => {
 });
 MixAllNotifications.init(`pocket:${roomId}`, 'notificationSettings');
 MixAllNotifications.poll(`pocket:${roomId}`);
-MixAllBase.poll(() => MixAllNotifications.poll(`pocket:${roomId}`), 30000);
+(function () { let w = null; const make = () => { if (!w && window.MixAllLoading?.watchAi) w = window.MixAllLoading.watchAi({ scope: 'pocket', targetId: roomId, listEl: document.getElementById('messageList') }); return w; };
+  window.mixallAiWatch = { kick(t) { const x = make(); if (x) x.kick(t); } }; window.addEventListener('load', make); })();
+setInterval(() => MixAllNotifications.poll(`pocket:${roomId}`), 15000);
 loadRoom();
-MixAllBase.poll(loadRoom, 4000); // 常時更新: 4秒ごとに裏で読み込んで反映
+// 常時更新: 通常は4秒ごとに裏で読み込む。オンラインの相手全員とWebRTCで繋がっているときは15秒ごとに間引く(新着はWebRTCで即時に届くため)
+(function pollLoop() { setTimeout(() => { loadRoom().catch(() => {}).finally(pollLoop); }, window.ChatRT ? ChatRT.pollDelay(currentRoom) : 4000); })();
+if (window.ChatRT) {
+  const badge = document.createElement('span'); badge.id = 'rtBadge'; badge.style.cssText = 'font-size:.72rem;margin-left:8px;color:#22c55e;display:none;white-space:nowrap'; document.getElementById('roomTitle').after(badge);
+  const mergeRead = () => { if (currentRoom) { currentRoom.messages = ChatRT.applyReads(currentRoom.messages); render(); } };
+  ChatRT.init({ session, roomId,
+    hasMessage: (id) => Boolean(currentRoom && currentRoom.messages.some((m) => m.id === id)),
+    hasFile: (id) => Boolean(attachmentCache[id]),
+    onAnnounce: (att) => { const id = String(att.fileId); if (attachmentCache[id] || rtFileWait.has(id)) return; let resolve; const promise = new Promise((r) => { resolve = r; }); rtFileWait.set(id, { promise, resolve }); },
+    onFile: (id, blob) => { attachmentCache[id] = URL.createObjectURL(blob); const w = rtFileWait.get(id); if (w) w.resolve(); rtFileWait.delete(id); if (currentRoom) render(); },
+    onMessage: (m) => { if (!currentRoom || currentRoom.messages.some((x) => x.id === m.id)) return; currentRoom.messages.push({ ...m, _pending: true }); currentRoom.messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); render(); },
+    onRead: mergeRead,
+    onStatus: () => { const n = ChatRT.connectedCount(); badge.style.display = n ? 'inline' : 'none'; badge.textContent = n ? 'リアルタイム接続 ' + n + '人' : ''; },
+  });
+}
+</script>
+<script>
+(() => {
+  const body = document.getElementById('msgBody');
+  const list = document.getElementById('mentionList');
+  let picked = [];
+  const memberEmails = () => ((window.currentRoom || currentRoom || {}).memberEmails || []);
+  const nameOf = (email) => displayNameOf(email);
+  const avatar = (email) => { const p = (currentRoom.profiles || {})[email] || {}; return avatarHtml(p, nameOf(email)) || `<span class="pocket-avatar mention-ph">${escapeHtml(nameOf(email).slice(0, 1))}</span>`; };
+  const hide = () => { list.style.display = 'none'; list.innerHTML = ''; };
+  const MENTION_RE = /(^|\s)@([^\s@]*)$/;
+
+  function update() {
+    const before = body.value.slice(0, body.selectionStart);
+    const m = MENTION_RE.exec(before);
+    if (!m) return hide();
+    const q = m[2].toLowerCase();
+    const matches = memberEmails().filter((e) => e !== session.email && nameOf(e).toLowerCase().startsWith(q));
+    if (!matches.length) return hide();
+    list.innerHTML = matches.map((e) => `<button type="button" class="mention-item" role="option" data-email="${escapeHtml(e)}">${avatar(e)}<span>${escapeHtml(nameOf(e))}</span></button>`).join('');
+    list.style.display = 'block';
+  }
+
+  function insert(email) {
+    const name = nameOf(email);
+    const caret = body.selectionStart == null ? body.value.length : body.selectionStart;
+    const before = body.value.slice(0, caret), after = body.value.slice(caret);
+    const m = MENTION_RE.exec(before);
+    const head = m ? before.slice(0, before.length - m[2].length - 1) : before + (before && !/\s$/.test(before) ? ' ' : '');
+    const text = '@' + name + ' ';
+    body.value = head + text + after;
+    const pos = (head + text).length;
+    body.focus(); body.setSelectionRange(pos, pos);
+    picked = picked.filter((p) => p.email !== email); picked.push({ email, name });
+    hide();
+  }
+
+  list.addEventListener('mousedown', (e) => e.preventDefault());
+  list.addEventListener('click', (e) => { const b = e.target.closest('.mention-item'); if (b) insert(b.dataset.email); });
+  ['input', 'click', 'keyup'].forEach((ev) => body.addEventListener(ev, update));
+  body.addEventListener('keydown', (e) => { if (e.key === 'Escape') hide(); });
+  body.addEventListener('blur', () => setTimeout(hide, 150));
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest && e.target.closest('.author-click');
+    if (!el) return;
+    const email = el.dataset.mentionEmail;
+    if (!email || email === session.email || !memberEmails().includes(email)) return;
+    insert(email);
+  });
+  window.collectMentions = (text) => picked.filter((p) => text.includes('@' + p.name) && memberEmails().includes(p.email));
+  window.clearMentions = () => { picked = []; hide(); };
+
+  // ---- 友達 / メンバー(参加中) ----
+  window.__friends = []; window.__friendSet = new Set();
+  async function loadFriends() {
+    try { const d = await Netrify.api('/api/pocket', { action: 'listFriends', token: session.token }); window.__friends = d.friends || []; window.__friendSet = new Set(window.__friends.map((f) => f.email)); } catch (_) {}
+  }
+  async function copyFriendUrl() {
+    try {
+      const d = await Netrify.api('/api/pocket', { action: 'getFriendLink', token: session.token });
+      const url = `${location.origin}/Pocket/?friend=${d.code}`;
+      try { await navigator.clipboard.writeText(url); alert('友達追加URLをコピーしました。友達に開いてもらってください。\n' + url); } catch (_) { prompt('友達追加URL(コピーしてください)', url); }
+    } catch (e) { alert(e.message); }
+  }
+  function renderMembers(room) {
+    const box = document.getElementById('membersBody'); if (!box) return;
+    document.getElementById('membersCount').textContent = `(${room.memberEmails.length}人)`;
+    box.innerHTML = '<div class="row" style="margin-bottom:6px;"><button type="button" class="secondary" id="copyFriendUrlBtn">友達追加URLをコピー</button></div>' + room.memberEmails.map((m) => {
+      const state = m === session.email ? '<span class="muted">あなた</span>' : (window.__friendSet.has(m) ? '<span class="muted">友達</span>' : `<button type="button" class="ghost" data-add-friend="${escapeHtml(m)}">友達追加</button>`);
+      return `<div class="member-row"><span style="display:flex;align-items:center;gap:8px;">${avatar(m)}${identityHtml(m, nameOf(m))}</span>${state}</div>`;
+    }).join('');
+    document.getElementById('copyFriendUrlBtn').onclick = copyFriendUrl;
+    box.querySelectorAll('[data-add-friend]').forEach((b) => { b.onclick = async () => {
+      try { await Netrify.api('/api/pocket', { action: 'addFriendFromRoom', token: session.token, roomId, targetEmail: b.dataset.addFriend }); await loadFriends(); renderMembers(room); renderInvite(room); } catch (e) { alert(e.message); }
+    }; });
+  }
+  function renderInvite(room) {
+    const sel = document.getElementById('inviteEmail'); if (!sel || sel.tagName !== 'SELECT') return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">友達から選択</option>' + window.__friends.filter((f) => !room.memberEmails.includes(f.email)).map((f) => `<option value="${escapeHtml(f.email)}">${escapeHtml((f.profile && f.profile.displayName) || f.email)} (${escapeHtml(f.email)})</option>`).join('');
+    sel.value = cur;
+  }
+  window.onPocketRender = (room) => { renderMembers(room); renderInvite(room); };
+  loadFriends().then(() => { try { if (currentRoom && currentRoom.memberEmails) window.onPocketRender(currentRoom); } catch (_) {} });
+})();
 </script>
 </body>
 </html>

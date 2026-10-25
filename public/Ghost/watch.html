@@ -1,33 +1,151 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ghost動画 - MixAll +（二世代）</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/auth.js"></script><script src="/js/language-input.js"></script><script src="/js/mixall-nav.js" defer></script><style>
-.video-card{margin-bottom:18px}.video-player{width:100%;max-height:72vh;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}.video-player video,.video-player iframe{width:100%;height:100%;border:0;object-fit:contain}.video-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.video-actions button{padding:7px 11px}.video-comments{border-top:1px solid var(--border);margin-top:12px;padding-top:10px}.video-comment{padding:8px 0;border-bottom:1px solid var(--border)}.video-comment .meta{font-size:.8rem;color:var(--text-dim)}.video-comment-form{display:flex;gap:8px;margin-top:10px}.video-comment-form .language-input-wrap{flex:1;min-width:0;margin:0}.video-comment-form .language-editor{min-height:40px}.video-comment-form button{flex:none}
-</style>
-  <meta name="description" content="MixAll +（二世代） Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="MixAll Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Ghost動画 - MixAll +（二世代）">
-  <meta property="og:description" content="MixAll +（二世代） Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/watch">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="Ghostの横長動画">
+  <meta property="og:title" content="Ghost動画 - MixAll">
+  <meta property="og:description" content="MixAll Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Ghost/watch">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/02-ghost-video-wide.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/02-ghost-video-wide.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="Ghost - 横長動画">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ghost動画 - MixAll +（二世代）">
-  <meta name="twitter:description" content="MixAll +（二世代） Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/02-ghost-video-wide.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="Ghost動画 - MixAll">
+  <meta name="twitter:description" content="MixAll Ghostの横長動画フィード。動画を視聴し、コメントやブックマークを楽しめます。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/02-ghost-video-wide.jpg?v=20261019-2"><title>Ghost動画</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script><script src="/js/auth.js"></script><script src="/js/ghost-comments.js"></script><script src="/js/language-input.js"></script><script src="/js/mixall-nav.js" defer></script><style>
+:root{--yt-bg:var(--bg,#fff);--yt-sub:var(--text-dim,#6b7280)}
+.yt-list{margin:0 -16px}
+.yt-item{padding:0 0 18px;cursor:pointer}
+.yt-thumb{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden}
+.yt-thumb video,.yt-thumb img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.yt-dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.78);color:#fff;font-size:.78rem;font-weight:700;padding:2px 6px;border-radius:6px}
+.yt-live{position:absolute;left:8px;bottom:8px;background:#e11d48;color:#fff;font-size:.78rem;font-weight:700;padding:2px 7px;border-radius:6px}
+.yt-row{display:flex;gap:12px;padding:12px 14px 0;align-items:flex-start}
+.yt-ava{flex:none;width:40px;height:40px;border-radius:50%;background:var(--panel-2,#e5e7eb);display:flex;align-items:center;justify-content:center;font-weight:700;overflow:hidden}
+.yt-ava img{width:100%;height:100%;object-fit:cover}
+.yt-info{flex:1;min-width:0}
+.yt-title{font-weight:700;font-size:1.02rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.yt-meta{color:var(--yt-sub);font-size:.86rem;margin-top:3px}
+.yt-more{flex:none;border:0;background:transparent;font-size:1.4rem;line-height:1;padding:4px 8px;color:inherit;cursor:pointer}
+.yt-menu{position:absolute;right:10px;z-index:30;background:var(--card,#fff);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:4px;min-width:150px}
+.yt-menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;color:inherit}
+.yt-menu button:hover{background:rgba(80,120,220,.12)}
+.yt-player{position:sticky;top:0;z-index:20;width:calc(100% + 32px);margin:0 -16px;background:#000;aspect-ratio:16/9;max-height:56vh}
+.yt-player video,.yt-player iframe{width:100%;height:100%;border:0;object-fit:contain;display:block}
+.yt-live-box{display:grid;place-items:center;height:100%;color:#fff;text-align:center}
+.yt-wtitle{font-size:1.2rem;font-weight:700;line-height:1.4;margin:14px 0 6px;word-break:break-word}
+.yt-wmeta{color:var(--yt-sub);font-size:.88rem}
+.yt-wmeta button{border:0;background:transparent;color:inherit;font-weight:700;padding:0 0 0 8px;cursor:pointer}
+.yt-desc{margin-top:10px;padding:12px;border-radius:12px;background:var(--panel-2,rgba(120,120,120,.1));font-size:.93rem}
+.yt-actionbar{display:flex;align-items:center;gap:10px;margin:14px 0 4px;flex-wrap:wrap}
+.yt-ch{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none;min-width:0}
+.yt-ch strong{max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.yt-pills{display:flex;gap:8px;overflow-x:auto;padding:4px 0;flex:1 1 100%;-webkit-overflow-scrolling:touch}
+.yt-pill{flex:none;border:0;border-radius:999px;background:var(--panel-2,rgba(120,120,120,.14));color:inherit;padding:9px 14px;font-size:.92rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.yt-pill.on{background:#111;color:#fff}
+.yt-follow{border:0;border-radius:999px;background:#111;color:#fff;padding:9px 16px;font-weight:700;cursor:pointer}
+.yt-follow.on{background:var(--panel-2,rgba(120,120,120,.14));color:inherit}
+.yt-commentcard{margin:12px 0;padding:12px 14px;border-radius:14px;background:var(--panel-2,rgba(120,120,120,.1));cursor:pointer}
+.yt-commentcard b{margin-right:6px}
+.yt-commentcard .pv{margin-top:8px;font-size:.93rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.yt-next{font-weight:700;margin:18px 0 10px}
+.video-comments{border-top:0;margin-top:6px;padding-top:4px}.video-comment{padding:8px 0;border-bottom:1px solid var(--border)}.video-comment .meta{font-size:.8rem;color:var(--text-dim)}.video-comment-form{display:flex;gap:8px;margin-top:10px}.video-comment-form .language-input-wrap{flex:1;min-width:0;margin:0}.video-comment-form .language-editor{min-height:40px}.video-comment-form button{flex:none}
+</style>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="/manifest.webmanifest">
-</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Ghost">通常投稿</a><a href="/Ghost/watch.html" class="active">動画</a><a href="/Ghost/live.html">ライブ</a><a href="/Ghost/videos.html">縦長動画</a></nav></header><main><div class="card"><h2>動画</h2><p class="muted">YouTube風の通常動画フィードです。動画の視聴、いいね、コメント、ブックマークに対応しています。</p></div><div id="feed"><p class="muted">読み込み中...</p></div></main><script>
-const session=Netrify.requireLogin();const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const yt=u=>{const m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/);return m?'https://www.youtube.com/embed/'+m[1]:''};
-function renderVideo(m){if(m.kind==='videoFile')return `<video src="${esc(m.dataUrl)}" controls playsinline></video>`;if(m.kind==='videoBlob')return `<video src="${esc(m.mediaUrl)}" controls playsinline></video>`;const embed=yt(m.url);return embed?`<iframe src="${embed}" allowfullscreen></iframe>`:`<video src="${esc(m.url)}" controls playsinline></video>`}
-function renderComments(post){if(post.isLive)return '<div class="video-comments"><p class="muted">配信中のコメントはライブチャットに表示されます。</p></div>';const comments=post.comments||[];return `<div class="video-comments" id="comments-${esc(post.id)}" hidden>${comments.map(c=>`<div class="video-comment"><div class="meta">${esc(c.authorProfile?.displayName||c.authorName||'ユーザー')} · ${new Date(c.createdAt).toLocaleString('ja-JP')}</div><div>${NetrifyLanguage.renderText(c.text||'')}</div></div>`).join('')||'<p class="muted">まだコメントがありません。</p>'}<div class="video-comment-form"><input type="text" data-comment-input="${esc(post.id)}" placeholder="コメントする"><button type="button" class="secondary" data-comment-send="${esc(post.id)}">送信</button></div></div>`}
-async function load(){const q='/.netlify/functions/ghost?channel=video&limit=100'+(session?'&token='+encodeURIComponent(session.token):'');const r=await fetch(q);const d=await r.json();const feed=document.getElementById('feed');feed.innerHTML=(d.posts||[]).map(p=>{const likes=p.likes||[];const liked=session&&likes.includes(session.email);const canDelete=session&&(session.email===p.authorEmail||session.isAdmin);const media=(p.media||[]).filter(m=>['videoFile','videoBlob','videoUrl'].includes(m.kind));const isLive=p.contentType==='live'&&p.isLive===true;return `<article class="card video-card" data-post="${esc(p.id)}"><h3>${esc(p.title||'動画')}</h3><div class="muted">${esc(p.authorProfile?.displayName||p.authorName||'ユーザー')} · ${new Date(p.createdAt).toLocaleString('ja-JP')}</div><div class="ghost-text-content">${NetrifyLanguage.renderText(p.description||p.text||'')}</div>${isLive?'<div class="video-player" style="display:grid;place-items:center;color:white"><div><strong>🔴 LIVE配信中</strong><p>リアルタイム映像とチャットを視聴できます</p></div></div>':`<div class="video-player">${media.map(renderVideo).join('')||'<p class="muted" style="padding:20px">動画がありません。</p>'}</div>`}<div class="video-actions">${isLive?`<a class="secondary" href="/Ghost/live.html?id=${encodeURIComponent(p.id)}" style="padding:7px 11px;border:1px solid var(--border);border-radius:8px">ライブを視聴・チャット</a>`:''}<button type="button" class="${liked?'':'ghost'}" data-like="${esc(p.id)}">♥ ${likes.length}</button><button type="button" class="ghost" data-toggle-comments="${esc(p.id)}">💬 ${(p.comments||[]).length}</button><button type="button" class="ghost" data-bookmark="${esc(p.id)}">🔖 保存</button>${canDelete?`<button type="button" class="ghost" data-delete="${esc(p.id)}">削除</button>`:''}<a class="ghost" href="/Ghost/post/${encodeURIComponent(p.id)}" style="padding:7px 11px;border:1px solid var(--border);border-radius:8px;">詳細</a></div>${renderComments(p)}</article>`}).join('')||'<p class="muted">まだ通常動画がありません。</p>';NetrifyLanguage.refresh();bind();}
-function bind(){const feed=document.getElementById('feed');feed.querySelectorAll('[data-like]').forEach(b=>b.onclick=async()=>{const s=Netrify.requireLogin();if(!s)return;await Netrify.api('/.netlify/functions/ghost',{action:'likePost',token:s.token,postId:b.dataset.like});load()});feed.querySelectorAll('[data-toggle-comments]').forEach(b=>b.onclick=()=>{const box=document.getElementById('comments-'+b.dataset.toggleComments);box.hidden=!box.hidden});feed.querySelectorAll('[data-bookmark]').forEach(b=>b.onclick=async()=>{const s=Netrify.requireLogin();if(!s)return;try{const lists=await fetch('/.netlify/functions/ghost?bookmarks=1&listsOnly=1&token='+encodeURIComponent(s.token)).then(r=>r.json());const list=lists.lists?.[0]||{id:'saved'};await Netrify.api('/.netlify/functions/ghost',{action:'bookmarkPost',token:s.token,postId:b.dataset.bookmark,listId:list.id,save:true});b.textContent='✓ 保存済み'}catch(e){alert(e.message)}});feed.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async()=>{const s=Netrify.requireLogin();if(!s||!(await MixAllDialog.confirm('この動画を削除しますか？')))return;try{await Netrify.api('/.netlify/functions/ghost',{action:'deletePost',token:s.token,postId:b.dataset.delete});load()}catch(e){alert(e.message)}});feed.querySelectorAll('[data-comment-send]').forEach(b=>b.onclick=async()=>{const s=Netrify.requireLogin();if(!s)return;const input=feed.querySelector(`[data-comment-input="${b.dataset.commentSend}"]`);if(!input.value.trim())return;await Netrify.api('/.netlify/functions/ghost',{action:'addComment',token:s.token,postId:b.dataset.commentSend,text:input.value.trim()});load()})}
+</head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Ghost">通常投稿</a><a href="/Ghost/watch.html" class="active">動画</a><a href="/Ghost/live.html">ライブ</a><a href="/Ghost/videos.html">縦長動画</a></nav></header><main><div id="feed"><p class="muted">読み込み中...</p></div></main><script>
+const session=Netrify.requireLogin();
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const yt=u=>{const m=String(u||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/);return m?m[1]:''};
+let posts=[];
+const replyTargets=new Map();
+const videosOf=p=>(p.media||[]).filter(m=>['videoFile','videoBlob','videoUrl'].includes(m.kind));
+const isLiveNow=p=>p.contentType==='live'&&p.isLive===true;
+function videoSrc(m){return m.kind==='videoFile'?m.dataUrl:(m.kind==='videoBlob'?m.mediaUrl:m.url)}
+function ago(iso){const s=Math.max(1,(Date.now()-Date.parse(iso))/1000);if(s<3600)return Math.floor(s/60)+' 分前';if(s<86400)return Math.floor(s/3600)+' 時間前';if(s<2592000)return Math.floor(s/86400)+' 日前';if(s<31536000)return Math.floor(s/2592000)+' か月前';return Math.floor(s/31536000)+' 年前'}
+function avatar(p,size){const ap=p.authorProfile||{};const name=ap.displayName||p.authorName||'?';const img=ap.avatarUrl&&!String(ap.avatarType||'').startsWith('video/')?`<img src="${esc(ap.avatarUrl)}" alt="">`:esc(String(name).slice(0,1));return `<span class="yt-ava" style="width:${size}px;height:${size}px">${img}</span>`}
+function profileHref(p){const h=p.authorProfile&&p.authorProfile.handle;return h?'/Ghost/profile.html?handle='+encodeURIComponent(h):''}
+function thumbHtml(p){
+  const m=videosOf(p)[0];let inner='';
+  if(isLiveNow(p))return `<div class="yt-thumb"><div class="yt-live-box" style="height:100%"><strong>LIVE配信中</strong></div><span class="yt-live">LIVE</span></div>`;
+  if(m){const id=m.kind==='videoUrl'?yt(m.url):'';
+    inner=id?`<img src="https://i.ytimg.com/vi/${esc(id)}/hqdefault.jpg" alt="">`:`<video src="${esc(videoSrc(m))}#t=0.1" preload="metadata" muted playsinline data-dur></video>`;}
+  else inner='<div style="color:#aaa;display:grid;place-items:center;height:100%">動画がありません</div>';
+  return `<div class="yt-thumb">${inner}<span class="yt-dur" hidden></span></div>`;
+}
+function itemHtml(p){
+  const likes=(p.likes||[]).length;
+  return `<article class="yt-item" data-open="${esc(p.id)}" data-post="${esc(p.id)}">${thumbHtml(p)}<div class="yt-row">${profileHref(p)?`<a href="${profileHref(p)}" data-profile aria-label="プロフィールを開く" style="color:inherit;text-decoration:none">${avatar(p,40)}</a>`:avatar(p,40)}<div class="yt-info"><div class="yt-title">${esc(p.title||'動画')}</div><div class="yt-meta">${profileHref(p)?`<a href="${profileHref(p)}" data-profile style="color:inherit;text-decoration:none">${esc(p.authorProfile?.displayName||p.authorName||'ユーザー')}</a>`:esc(p.authorProfile?.displayName||p.authorName||'ユーザー')}　♥${likes}　${ago(p.createdAt)}</div></div><button type="button" class="yt-more" data-menu="${esc(p.id)}" aria-label="メニュー">⋯</button></div></article>`;
+}
+function renderVideo(m){const id=m.kind==='videoUrl'?yt(m.url):'';if(id)return `<iframe src="https://www.youtube.com/embed/${esc(id)}" allowfullscreen></iframe>`;return `<video src="${esc(videoSrc(m))}" controls playsinline autoplay></video>`}
+function renderComments(post){if(post.isLive)return '<div class="video-comments"><p class="muted">配信中のコメントはライブチャットに表示されます。</p></div>';const comments=post.comments||[];return `<div class="video-comments" id="comments-${esc(post.id)}" hidden>${GhostComments.tree(comments,(c,parent)=>`<div class="video-comment"><div class="meta">${parent?`<span class="gc-to"> ${esc(GhostComments.nameOf(parent))}</span> `:''}${esc(GhostComments.nameOf(c))}  ${new Date(c.createdAt).toLocaleString('ja-JP')}</div><div class="ghost-text-content">${NetrifyLanguage.renderText(c.text||'')}</div>${session?`<button type="button" class="ghost" data-reply-comment="${esc(c.id)}" data-reply-post="${esc(post.id)}" data-reply-name="${esc(GhostComments.nameOf(c))}">返信</button>`:''}</div>`)||'<p class="muted">まだコメントがありません。</p>'}<div data-reply-chip-host></div><div class="video-comment-form"><textarea rows="2" data-comment-input="${esc(post.id)}" placeholder="コメントする（改行できます）" style="flex:1"></textarea><button type="button" class="secondary" data-comment-send="${esc(post.id)}">送信</button></div></div>`}
+function applyReplyUi(postId){const box=document.getElementById('comments-'+postId);if(!box)return;box.querySelectorAll('.gc-node.gc-target').forEach(n=>n.classList.remove('gc-target'));const host=box.querySelector('[data-reply-chip-host]');if(!host)return;const cid=replyTargets.get(postId);const node=cid?box.querySelector(`.gc-node[data-cid="${cid}"]`):null;if(!node){replyTargets.delete(postId);host.innerHTML='';return}node.classList.add('gc-target');const name=node.querySelector('[data-reply-comment]')?.dataset.replyName||'コメント';host.innerHTML=`<div class="gc-chip"> ${esc(name)} への返信 <button type="button" class="ghost" data-reply-cancel> 解除</button></div>`;host.querySelector('[data-reply-cancel]').onclick=()=>{replyTargets.delete(postId);applyReplyUi(postId)}}
+
+function watchHtml(p){
+  const likes=p.likes||[];const liked=session&&likes.includes(session.email);
+  const canDelete=session&&(session.email===p.authorEmail||session.isAdmin);
+  const m=videosOf(p)[0];const live=isLiveNow(p);
+  const ap=p.authorProfile||{};const name=ap.displayName||p.authorName||'ユーザー';
+  const cs=p.comments||[];const first=cs[0];
+  const chInner=`${avatar(p,40)}<strong>${esc(name)}</strong>`;
+  const ch=profileHref(p)?`<a class="yt-ch" href="${profileHref(p)}">${chInner}</a>`:`<span class="yt-ch">${chInner}</span>`;
+  const canFollow=session&&ap.handle&&session.email!==p.authorEmail;
+  const player=live?`<div class="yt-live-box"><div><strong>LIVE配信中</strong><p><a href="/Ghost/live.html?id=${encodeURIComponent(p.id)}" style="color:#fff;text-decoration:underline">ライブを視聴・チャット</a></p></div></div>`:(m?renderVideo(m):'<div class="yt-live-box">動画がありません</div>');
+  return `<article class="yt-watch" data-post="${esc(p.id)}"><div class="yt-player" id="player">${player}</div>
+  <h1 class="yt-wtitle">${esc(p.title||'動画')}</h1>
+  <div class="yt-wmeta">${ap.handle?'@'+esc(ap.handle)+'　':''}高評価 ${likes.length} 件　${ago(p.createdAt)}<button type="button" data-toggle-desc>その他</button></div>
+  <div class="yt-desc" id="desc" hidden><div class="ghost-text-content">${NetrifyLanguage.renderText(p.description||p.text||'')||'<span class="muted">説明はありません</span>'}</div>${GhostSound.chipHtml(p)}<div class="muted" style="margin-top:8px">${new Date(p.createdAt).toLocaleString('ja-JP')}</div></div>
+  <div class="yt-actionbar">${ch}${canFollow?`<button type="button" class="yt-follow ${ap.following?'on':''}" data-follow="${esc(ap.handle)}" data-following="${Boolean(ap.following)}">${ap.following?'フォロー中':'フォロー'}</button>`:''}
+    <div class="yt-pills"><button type="button" class="yt-pill ${liked?'on':''}" data-like="${esc(p.id)}">👍 ${likes.length}</button><button type="button" class="yt-pill" data-share="${esc(p.id)}">↗ 共有</button><button type="button" class="yt-pill" data-bookmark="${esc(p.id)}">🔖 保存</button>${canDelete?`<button type="button" class="yt-pill" data-delete="${esc(p.id)}">🗑 削除</button>`:''}</div></div>
+  <div class="yt-commentcard" data-toggle-comments="${esc(p.id)}"><b>コメント</b><span class="muted">${cs.length}</span>${first?`<div class="pv">${esc(GhostComments.nameOf(first))}　${esc(String(first.text||'').slice(0,80))}</div>`:'<div class="pv muted">コメントを追加…</div>'}</div>
+  ${renderComments(p)}</article>`;
+}
+function render(){
+  const feed=document.getElementById('feed');
+  const id=new URLSearchParams(location.search).get('v')||new URLSearchParams(location.search).get('id');
+  const cur=id?posts.find(p=>p.id===id):null;
+  if(cur){
+    const others=posts.filter(p=>p.id!==cur.id);
+    feed.innerHTML=watchHtml(cur)+`<div class="yt-next">次の動画</div><div class="yt-list">${others.map(itemHtml).join('')||'<p class="muted" style="padding:0 14px">ほかの動画はまだありません。</p>'}</div>`;
+    document.title=(cur.title||'動画')+' - Ghost';
+  }else{
+    feed.innerHTML=`<div class="yt-list">${posts.map(itemHtml).join('')||'<p class="muted" style="padding:0 14px">まだ通常動画がありません。</p>'}</div>`;
+    document.title='動画 - Ghost';
+  }
+  NetrifyLanguage.refresh();
+  if(cur&&cur.soundPostId){const el=feed.querySelector('#player');GhostSound.bind(el,cur);}
+  feed.querySelectorAll('video[data-dur]').forEach(v=>{v.addEventListener('loadedmetadata',()=>{const b=v.parentElement.querySelector('.yt-dur');if(b&&isFinite(v.duration)){const s=Math.round(v.duration);b.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');b.hidden=false}})});
+  bind();
+}
+async function load(){const q='/api/ghost?channel=video&limit=100'+(session?'&token='+encodeURIComponent(session.token):'');const r=await fetch(q);const d=await r.json();posts=d.posts||[];const want=new URLSearchParams(location.search).get('v')||new URLSearchParams(location.search).get('id');if(want&&!posts.some(p=>p.id===want)){try{const r2=await fetch('/api/ghost?post='+encodeURIComponent(want)+(session?'&token='+encodeURIComponent(session.token):''));const d2=await r2.json();if(r2.ok&&d2.post)posts.unshift(d2.post)}catch(_){}}render();jumpToComment()}
+let jumped=false;function jumpToComment(){if(jumped)return;const q=new URLSearchParams(location.search);const c=q.get('c');const v=q.get('v')||q.get('id');if(!c||!v)return;const box=document.getElementById('comments-'+v);if(!box)return;jumped=true;box.hidden=false;const el=box.querySelector('.gc-node[data-cid="'+CSS.escape(c)+'"]');if(el){el.scrollIntoView({block:'center'});el.style.outline='2px solid #f90';el.style.borderRadius='8px';}else box.scrollIntoView({block:'center'})}
+function openWatch(id){history.pushState({v:id},'','/Ghost/watch.html?v='+encodeURIComponent(id));render();window.scrollTo(0,0)}
+window.addEventListener('popstate',render);
+function closeMenus(){document.querySelectorAll('.yt-menu').forEach(m=>m.remove())}
+document.addEventListener('click',e=>{if(!e.target.closest('.yt-menu')&&!e.target.closest('[data-menu]'))closeMenus()});
+function bind(){const feed=document.getElementById('feed');
+  feed.querySelectorAll('[data-open]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-menu]')||e.target.closest('.yt-menu')||e.target.closest('[data-profile]'))return;openWatch(el.dataset.open)});
+  feed.querySelectorAll('[data-menu]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.menu;const had=b.parentElement.querySelector('.yt-menu');closeMenus();if(had)return;const p=posts.find(x=>x.id===id);const canDel=session&&p&&(session.email===p.authorEmail||session.isAdmin);const menu=document.createElement('div');menu.className='yt-menu';menu.innerHTML=`<button data-m="open">再生する</button><button data-m="save">保存</button><button data-m="share">共有</button>${canDel?'<button data-m="del">削除</button>':''}`;b.closest('.yt-row').style.position='relative';b.closest('.yt-row').appendChild(menu);menu.style.top='44px';menu.onclick=async ev=>{const k=ev.target.dataset.m;if(!k)return;ev.stopPropagation();closeMenus();if(k==='open')openWatch(id);if(k==='save')saveBookmark(id);if(k==='share')shareVideo(id);if(k==='del')deleteVideo(id)}});
+  feed.querySelectorAll('[data-like]').forEach(b=>b.onclick=async()=>{const s=Netrify.requireLogin();if(!s)return;await Netrify.api('/api/ghost',{action:'likePost',token:s.token,postId:b.dataset.like});load()});
+  feed.querySelectorAll('[data-toggle-comments]').forEach(b=>b.onclick=()=>{const box=document.getElementById('comments-'+b.dataset.toggleComments);if(box)box.hidden=!box.hidden});
+  feed.querySelectorAll('[data-toggle-desc]').forEach(b=>b.onclick=()=>{const d=document.getElementById('desc');d.hidden=!d.hidden;b.textContent=d.hidden?'その他':'閉じる'});
+  feed.querySelectorAll('[data-bookmark]').forEach(b=>b.onclick=()=>saveBookmark(b.dataset.bookmark,b));
+  feed.querySelectorAll('[data-share]').forEach(b=>b.onclick=()=>shareVideo(b.dataset.share));
+  feed.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteVideo(b.dataset.delete));
+  feed.querySelectorAll('[data-follow]').forEach(b=>b.onclick=async()=>{const s=Netrify.requireLogin();if(!s)return;const r=await fetch('/api/ghost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'followAccount',token:s.token,targetHandle:b.dataset.follow,follow:b.dataset.following!=='true'})});const d=await r.json();if(r.ok){b.dataset.following=String(d.following);b.textContent=d.following?'フォロー中':'フォロー';b.classList.toggle('on',Boolean(d.following))}});
+  feed.querySelectorAll('[data-comment-send]').forEach(b=>b.onclick=async()=>{const s=Netrify.requireLogin();if(!s)return;const input=feed.querySelector(`[data-comment-input="${b.dataset.commentSend}"]`);if(!input.value.trim())return;await Netrify.api('/api/ghost',{action:'addComment',token:s.token,postId:b.dataset.commentSend,text:input.value.trim(),parentCommentId:replyTargets.get(b.dataset.commentSend)||undefined});replyTargets.delete(b.dataset.commentSend);const keep=b.dataset.commentSend;await load();const box=document.getElementById('comments-'+keep);if(box)box.hidden=false});
+  feed.querySelectorAll('[data-reply-comment]').forEach(b=>b.onclick=()=>{replyTargets.set(b.dataset.replyPost,b.dataset.replyComment);applyReplyUi(b.dataset.replyPost);feed.querySelector(`[data-comment-input="${b.dataset.replyPost}"]`)?.focus()});
+  replyTargets.forEach((cid,postId)=>applyReplyUi(postId))}
+async function saveBookmark(id,btn){const s=Netrify.requireLogin();if(!s)return;try{const lists=await fetch('/api/ghost?bookmarks=1&listsOnly=1&token='+encodeURIComponent(s.token)).then(r=>r.json());const list=lists.lists?.[0]||{id:'saved'};await Netrify.api('/api/ghost',{action:'bookmarkPost',token:s.token,postId:id,listId:list.id,save:true});if(btn)btn.textContent='🔖 保存済み';else alert('保存しました')}catch(e){alert(e.message)}}
+async function shareVideo(id){const url=location.origin+'/Ghost/watch.html?v='+encodeURIComponent(id);try{if(navigator.share){await navigator.share({url})}else{await navigator.clipboard.writeText(url);alert('リンクをコピーしました')}}catch(_){}}
+async function deleteVideo(id){const s=Netrify.requireLogin();if(!s||!confirm('この動画を削除しますか？'))return;try{await Netrify.api('/api/ghost',{action:'deletePost',token:s.token,postId:id});if(new URLSearchParams(location.search).get('v')){history.pushState({},'','/Ghost/watch.html')}load()}catch(e){alert(e.message)}}
 load();document.addEventListener('netrify-language-ready',load);
-</script><script src="/js/ghost-nav.js"></script></body></html>
+</script><script src="/js/ghost-nav.js"></script><script src="/js/ghost-sound.js"></script>
+</body></html>

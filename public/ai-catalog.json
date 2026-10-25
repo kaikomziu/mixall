@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "name": "MixAll",
+  "description": "無料で使える日本語のコミュニティサービス（掲示板・チャット・SNS・学校モード・Wiki・ツール）",
+  "url": "https://mixalls.edgeone.dev/",
+  "language": "ja",
+  "contact": "https://mixalls.edgeone.dev/company/",
+  "resources": [
+    {"type": "llms-txt", "url": "https://mixalls.edgeone.dev/llms.txt"},
+    {"type": "sitemap", "url": "https://mixalls.edgeone.dev/sitemap.xml"},
+    {"type": "robots", "url": "https://mixalls.edgeone.dev/robots.txt"}
+  ],
+  "services": [
+    {"name": "Uch掲示板", "url": "https://mixalls.edgeone.dev/Uch/"},
+    {"name": "ぽけっと", "url": "https://mixalls.edgeone.dev/Pocket/"},
+    {"name": "Ghost", "url": "https://mixalls.edgeone.dev/Ghost/"},
+    {"name": "ツールセンター", "url": "https://mixalls.edgeone.dev/Tools/"},
+    {"name": "みんなのWiki", "url": "https://mixalls.edgeone.dev/Wiki/"},
+    {"name": "Custom", "url": "https://mixalls.edgeone.dev/Custom/"},
+    {"name": "学校モード", "url": "https://mixalls.edgeone.dev/school/"}
+  ]
+}

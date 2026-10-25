@@ -3,32 +3,32 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>アカウント設定 - MixAll +（二世代）</title>
-<link rel="stylesheet" href="/css/style.css" />
-<script src="/js/settings.js"></script>
-<script src="/js/site-lock.js" defer></script>
-<script src="/js/calls.js" defer></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
-<script src="/js/mixall-nav.js" defer></script>
-<script src="/js/language-input.js"></script>
-
-  <meta name="description" content="アカウント設定 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
+  <meta name="description" content="アカウント設定 - MixAll（ミックスオール）。MixAllのサービスページです。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="アカウント設定 - MixAll +（二世代）">
-  <meta property="og:description" content="アカウント設定 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/account/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="MixAll +ログイン">
+  <meta property="og:title" content="アカウント設定 - MixAll（ミックスオール）">
+  <meta property="og:description" content="アカウント設定 - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/account/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="MixAll">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="アカウント設定 - MixAll +（二世代）">
-  <meta name="twitter:description" content="アカウント設定 - MixAll +（二世代）。MixAll +（二世代）のサービスページです。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="アカウント設定 - MixAll（ミックスオール）">
+  <meta name="twitter:description" content="アカウント設定 - MixAll（ミックスオール）。MixAllのサービスページです。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/00-mixall.jpg?v=20261019-2">
+<title>アカウント設定 - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -37,7 +37,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></div>
+  <div class="brand">Mix<span>All</span></div>
   <nav class="services">
     <a href="/" class="active">ホーム</a>
     <a href="/Uch">Uch (掲示板)</a>
@@ -110,11 +110,12 @@
 
   <div class="card" id="profileCard" style="display:none;">
     <h3>プロフィール画像・表示名</h3>
-    <div class="row mx-profile-editor" style="align-items:center;"><div id="avatarPreviewWrap"><img id="avatarPreview" alt="アイコン" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);" /></div><div style="flex:1;min-width:180px;"><input type="text" id="profileDisplayName" placeholder="表示名" /><input type="file" id="avatarFile" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/ogg" /><div class="mx-crop-grid muted"><label>左右の位置 <input type="range" id="avatarX" min="0" max="100" value="50" /></label><label>上下の位置 <input type="range" id="avatarY" min="0" max="100" value="50" /></label><label>大きさ <input type="range" id="avatarSize" min="10" max="100" value="80" /></label><label>動画の使う部分（秒） <span class="mx-crop-time"><input type="number" id="avatarStart" min="0" step="0.1" value="0" />〜<input type="number" id="avatarEnd" min="0" step="0.1" value="0" /></span></label></div></div></div>
+    <div class="row" style="align-items:center;"><div id="avatarPreviewWrap"><img id="avatarPreview" alt="アイコン" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);" /></div><div style="flex:1;min-width:180px;"><input type="text" id="profileDisplayName" placeholder="表示名" /><input type="file" id="avatarFile" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/ogg" /><div class="muted">範囲: 中心X <input type="range" id="avatarX" min="0" max="100" value="50" /> 中心Y <input type="range" id="avatarY" min="0" max="100" value="50" /> サイズ <input type="range" id="avatarSize" min="10" max="100" value="80" /> 動画秒数 <input type="number" id="avatarStart" min="0" step="0.1" value="0" style="width:70px;" />〜<input type="number" id="avatarEnd" min="0" step="0.1" value="0" style="width:70px;" /></div></div></div>
     <div class="error" id="profileError"></div><button type="button" id="saveProfile">プロフィールを保存</button>
   </div>
 
-  <div class="card" id="accountSwitcher" style="display:none;"><h3>ログイン中のアカウント</h3><p class="muted">複数アカウントを保存して、すぐに切り替えられます。</p><div id="savedAccounts"></div></div>
+  <div class="card" id="langCard"><h3>表示言語</h3><p class="muted">サイトの表示言語を変更できます（自動翻訳）。登録時に選んだ言語が初期値です。</p><select id="siteLang"></select></div>
+<div class="card" id="accountSwitcher" style="display:none;"><h3>ログイン中のアカウント</h3><p class="muted">複数アカウントを保存して、すぐに切り替えられます。</p><div id="savedAccounts"></div></div>
 
   <div class="card" id="deviceCard" style="display:none;">
     <h3>ログイン中のデバイス</h3>
@@ -142,9 +143,6 @@
     </div>
     <div class="admin-actions"><button type="button" id="sendRecoveryVerification">確認コードを送信</button></div>
   </div>
-
-  <!-- 中身は /js/google-drive-sync.js が描画する（ログイン中だけ表示） -->
-  <div class="card" id="driveSyncCard" style="display:none;"></div>
 
   <div class="card" id="deleteAccountCard" style="display:none; border-color:#b42318;">
     <h3>アカウント削除</h3>
@@ -200,7 +198,7 @@ async function loadDevices() {
       </div>`).join('') : '<p class="muted">有効なセッションはありません。</p>';
     el.querySelectorAll('[data-revoke-session]').forEach((button) => {
       button.onclick = async () => {
-        if (!(await MixAllDialog.confirm('この端末をログアウトしますか？'))) return;
+        if (!confirm('この端末をログアウトしますか？')) return;
         await Netrify.revokeSession(button.dataset.revokeSession);
         if (!Netrify.getSession()) { renderSession(); return; }
         loadDevices();
@@ -221,7 +219,7 @@ async function loadRecoveryEmailStatus() {
   const session=Netrify.getSession();if(!session)return;
   const status=document.getElementById('recoveryEmailStatus');const input=document.getElementById('recoveryEmailInput');const codePanel=document.getElementById('recoveryCodePanel');
   try{
-    const result=await Netrify.api('/.netlify/functions/auth',{action:'getRecoveryEmailStatus',token:session.token});
+    const result=await Netrify.api('/api/auth',{action:'getRecoveryEmailStatus',token:session.token});
     if(result.verified){input.value=result.recoveryEmail||'';status.textContent=`確認済み: ${result.recoveryEmail}`;codePanel.style.display='none';}
     else{status.textContent='回復用メールはまだ登録されていません。確認コードを送信後、ここに入力してください。';codePanel.style.display='block';}
   }catch(error){status.textContent=`回復用メール状態を取得できません: ${error.message}`;}
@@ -253,35 +251,18 @@ let pendingAvatarType = null;
 function avatarCropValue() { return { x:Number(document.getElementById('avatarX').value), y:Number(document.getElementById('avatarY').value), size:Number(document.getElementById('avatarSize').value), start:Number(document.getElementById('avatarStart').value)||0, end:Number(document.getElementById('avatarEnd').value)||0 }; }
 function applyAvatarCrop() { const media=document.querySelector('#avatarPreviewWrap img,#avatarPreviewWrap video'); if (media) media.style.objectPosition=`${document.getElementById('avatarX').value}% ${document.getElementById('avatarY').value}%`; }
 ['avatarX','avatarY','avatarSize'].forEach((id) => document.getElementById(id).addEventListener('input', applyAvatarCrop));
-// 静止画のアイコンは保存前に縮小する（短い辺を256pxまで・WebP）。表示は最大72px程度なので見た目は変わらず、
-// 保存・配信するデータ量を大きく減らせる。GIF（アニメーション）と動画はそのまま。縦横比は保つので位置調整もそのまま効く
-const AVATAR_MAX_SIDE = 256;
-async function shrinkAvatarDataUrl(dataUrl, type) {
-  if (!/^image\/(png|jpeg|jpg|webp)$/i.test(type)) return dataUrl;
-  try {
-    const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = dataUrl; });
-    const scale = Math.min(1, AVATAR_MAX_SIDE / Math.min(img.naturalWidth, img.naturalHeight));
-    const w = Math.max(1, Math.round(img.naturalWidth * scale)), h = Math.max(1, Math.round(img.naturalHeight * scale));
-    const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d'); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(img, 0, 0, w, h);
-    let out = canvas.toDataURL('image/webp', 0.86);
-    // WebPに対応していないブラウザでは、透過のある形式はPNG、それ以外はJPEGにする
-    if (!out.startsWith('data:image/webp')) out = /png/i.test(type) ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.88);
-    return out.length < dataUrl.length ? out : dataUrl;
-  } catch (_) { return dataUrl; }
-}
 document.getElementById('avatarFile').addEventListener('change', (event) => {
   const file = event.target.files?.[0]; if (!file) return;
   const error = document.getElementById('profileError'); error.textContent = '';
   if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) { error.textContent = '画像・GIF・動画ファイルを選択してください'; return; }
   if (file.size > 8 * 1024 * 1024) { error.textContent = 'アイコン画像・動画は8MB以下にしてください'; event.target.value = ''; return; }
-  pendingAvatarType = file.type; const reader = new FileReader(); reader.onload = async () => { pendingAvatar = await shrinkAvatarDataUrl(String(reader.result), file.type); pendingAvatarType = pendingAvatar.slice(5, pendingAvatar.indexOf(';')) || file.type; const wrap=document.getElementById('avatarPreviewWrap'); wrap.innerHTML=file.type.startsWith('video/') ? `<video id="avatarPreview" muted autoplay loop playsinline style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);"></video>` : `<img id="avatarPreview" alt="アイコン" src="${pendingAvatar}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);" />`; const media=document.getElementById('avatarPreview'); if (file.type.startsWith('video/')) media.src=pendingAvatar; applyAvatarCrop(); }; reader.readAsDataURL(file);
+  pendingAvatarType = file.type; const reader = new FileReader(); reader.onload = () => { pendingAvatar = String(reader.result); const wrap=document.getElementById('avatarPreviewWrap'); wrap.innerHTML=file.type.startsWith('video/') ? `<video id="avatarPreview" muted autoplay loop playsinline style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);"></video>` : `<img id="avatarPreview" alt="アイコン" src="${pendingAvatar}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;background:var(--panel-2);border:1px solid var(--border);" />`; const media=document.getElementById('avatarPreview'); if (file.type.startsWith('video/')) media.src=pendingAvatar; applyAvatarCrop(); }; reader.readAsDataURL(file);
 });
 document.getElementById('saveProfile').onclick = async () => {
   const s = Netrify.getSession(); if (!s) return;
   const error = document.getElementById('profileError'); error.textContent = '';
   try {
-    const result = await Netrify.api('/.netlify/functions/auth', { action:'updateProfile', token:s.token, displayName:document.getElementById('profileDisplayName').value, avatarDataUrl:pendingAvatar, avatarType:pendingAvatarType, avatarCrop:avatarCropValue() });
+    const result = await Netrify.api('/api/auth', { action:'updateProfile', token:s.token, displayName:document.getElementById('profileDisplayName').value, avatarDataUrl:pendingAvatar, avatarType:pendingAvatarType, avatarCrop:avatarCropValue() });
     localStorage.setItem('netrify_session', JSON.stringify({ ...s, displayName:result.displayName, avatarUrl:result.avatarUrl, avatarType:result.avatarType, avatarCrop:result.avatarCrop })); pendingAvatar = null; pendingAvatarType = null; renderSession();
   } catch (e) { error.textContent = e.message; }
 };
@@ -348,8 +329,8 @@ document.getElementById('deleteAccountSubmit').onclick = async () => {
   const error = document.getElementById('deleteAccountError'); error.textContent='';
   const s = Netrify.getSession(); if (!s || s.isAdmin) return;
   if (document.getElementById('deleteAccountConfirm').value.trim() !== 'DELETE') { error.textContent='DELETE と入力してください'; return; }
-  if (!(await MixAllDialog.confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。'))) return;
-  try { await Netrify.api('/.netlify/functions/auth',{action:'deleteAccount',token:s.token,password:document.getElementById('deleteAccountPassword').value,confirm:'DELETE'}); Netrify.clearSession(); alert('アカウントを削除しました。'); renderSession(); } catch(e) { error.textContent=e.message; }
+  if (!confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。')) return;
+  try { await Netrify.api('/api/auth',{action:'deleteAccount',token:s.token,password:document.getElementById('deleteAccountPassword').value,confirm:'DELETE'}); Netrify.clearSession(); alert('アカウントを削除しました。'); renderSession(); } catch(e) { error.textContent=e.message; }
 };
 
 document.getElementById('passwordSubmit').onclick = async () => {
@@ -371,25 +352,30 @@ document.getElementById('passwordSubmit').onclick = async () => {
 
 document.getElementById('requestPasswordReset').onclick=async()=>{
   const button=document.getElementById('requestPasswordReset');const status=document.getElementById('resetRequestStatus');status.textContent='';button.disabled=true;
-  try{const result=await Netrify.api('/.netlify/functions/auth',{action:'requestPasswordReset',accountEmail:document.getElementById('resetLoginId').value});status.textContent=result.message||'該当アカウントに確認済みの回復メールが登録されている場合、案内を送信しました。';}
+  try{const result=await Netrify.api('/api/auth',{action:'requestPasswordReset',accountEmail:document.getElementById('resetLoginId').value});status.textContent=result.maskedEmail ? result.maskedEmail + ' に再設定メールを送信しました。届かない場合は迷惑メールも確認してください。' : (result.message || '該当アカウントに確認済みの回復メールが登録されている場合、案内を送信しました。');}
   catch(error){status.textContent=error.message||'メール送信設定を確認してください。';}
   finally{button.disabled=false;}
 };
 document.getElementById('sendRecoveryVerification').onclick=async()=>{
   const button=document.getElementById('sendRecoveryVerification');const status=document.getElementById('recoveryEmailStatus');status.textContent='';button.disabled=true;
-  try{const session=Netrify.getSession();if(!session)throw new Error('ログインが必要です');const result=await Netrify.api('/.netlify/functions/auth',{action:'requestRecoveryEmailVerification',token:session.token,recoveryEmail:document.getElementById('recoveryEmailInput').value});status.textContent=result.message||'確認コードを送信しました。';document.getElementById('recoveryCodePanel').style.display=result.verified?'none':'block';if(result.verified)await loadRecoveryEmailStatus();}
+  try{const session=Netrify.getSession();if(!session)throw new Error('ログインが必要です');const result=await Netrify.api('/api/auth',{action:'requestRecoveryEmailVerification',token:session.token,recoveryEmail:document.getElementById('recoveryEmailInput').value});status.textContent=result.message||'確認コードを送信しました。';document.getElementById('recoveryCodePanel').style.display=result.verified?'none':'block';if(result.verified)await loadRecoveryEmailStatus();}
   catch(error){status.textContent=error.message||'確認コードを送信できませんでした。';}
   finally{button.disabled=false;}
 };
 document.getElementById('verifyRecoveryEmail').onclick=async()=>{
   const button=document.getElementById('verifyRecoveryEmail');const status=document.getElementById('recoveryEmailStatus');status.textContent='';button.disabled=true;
-  try{const session=Netrify.getSession();if(!session)throw new Error('ログインが必要です');const result=await Netrify.api('/.netlify/functions/auth',{action:'verifyRecoveryEmail',token:session.token,code:document.getElementById('recoveryEmailCode').value});status.textContent=`本人確認が完了しました: ${result.recoveryEmail}`;document.getElementById('recoveryEmailCode').value='';document.getElementById('recoveryCodePanel').style.display='none';await loadRecoveryEmailStatus();}
+  try{const session=Netrify.getSession();if(!session)throw new Error('ログインが必要です');const result=await Netrify.api('/api/auth',{action:'verifyRecoveryEmail',token:session.token,code:document.getElementById('recoveryEmailCode').value});status.textContent=`本人確認が完了しました: ${result.recoveryEmail}`;document.getElementById('recoveryEmailCode').value='';document.getElementById('recoveryCodePanel').style.display='none';await loadRecoveryEmailStatus();}
   catch(error){status.textContent=error.message||'確認コードを確認できませんでした。';}
   finally{button.disabled=false;}
 };
 
 renderSession();
+
+(function(){
+  const sel=document.getElementById('siteLang'); if(!sel||!window.MixAllI18n) return;
+  sel.innerHTML=MixAllI18n.langs.map(l=>`<option value="${l[0]}"${l[0]===MixAllI18n.lang?' selected':''}>${l[1]}</option>`).join('');
+  sel.onchange=()=>MixAllI18n.set(sel.value);
+})();
 </script>
-<script src="/js/account-plus.js" defer></script>
 </body>
 </html>

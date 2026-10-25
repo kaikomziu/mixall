@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta name="description" content="MixAllのFomasu。無料で使えるコミュニティ機能。登録不要で気軽に参加できます。" />
+<link rel="canonical" href="https://mixalls.edgeone.dev/Fomasu/" />
+<meta property="og:type" content="website" /><meta property="og:site_name" content="MixAll" /><meta property="og:title" content="Fomasu｜MixAll" /><meta property="og:description" content="MixAllのFomasu。無料で使えるコミュニティ機能。登録不要で気軽に参加できます。" /><meta property="og:url" content="https://mixalls.edgeone.dev/Fomasu/" /><meta property="og:image" content="https://mixalls.edgeone.dev/icons/icon-512.png" /><meta name="twitter:card" content="summary" />
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ふぉます - MixAll</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script><script src="/js/i18n.js"></script><script src="/js/auth.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/mixall-nav.js" defer></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32"><link rel="manifest" href="/manifest.webmanifest">
+<style>
+.fm-tabs{display:flex;gap:4px;margin:10px 0;overflow-x:auto}.fm-tabs button{flex:1;white-space:nowrap}.fm-tabs button.on{background:var(--accent);color:#fff}
+.fm-chip{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:5px 13px;margin:3px 4px 3px 0;cursor:pointer;font-size:.9rem;background:transparent;color:inherit}.fm-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.fm-big{width:100%;padding:18px;font-size:1.2rem;font-weight:800;border-radius:16px;margin-top:10px}
+.fm-card{border:1px solid var(--border);border-radius:14px;padding:12px;margin:10px 0}.fm-card h3{margin:0 0 2px;font-size:1.05rem}.fm-card .id{color:var(--text-dim);font-size:.8rem;margin-left:6px}.fm-card p{margin:6px 0;overflow-wrap:anywhere}
+.fm-tag{display:inline-block;font-size:.75rem;background:var(--panel-2);border-radius:6px;padding:1px 8px;margin:0 4px 4px 0}.fm-open{color:#16a34a;font-size:.8rem;font-weight:700;margin-left:6px}
+.fm-row{display:flex;gap:10px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--border);cursor:pointer}.fm-row .t{flex:1;min-width:0}.fm-row .last{color:var(--text-dim);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fm-dot{width:10px;height:10px;border-radius:50%;background:#e5484d;flex:none}
+.fm-chat{display:flex;flex-direction:column;height:70vh}.fm-msgs{flex:1;overflow-y:auto;padding:8px 2px;display:flex;flex-direction:column;gap:6px}.fm-b{max-width:78%;padding:8px 12px;border-radius:16px;overflow-wrap:anywhere;white-space:pre-wrap;background:var(--panel-2)}.fm-b.me{align-self:flex-end;background:var(--accent);color:#fff}.fm-b small{display:block;opacity:.65;font-size:.68rem;margin-top:2px}
+.fm-form{display:flex;gap:6px;margin-top:6px}.fm-form input{flex:1;min-width:0}
+.fm-spin{display:inline-block;width:22px;height:22px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:fmsp 1s linear infinite;vertical-align:middle;margin-right:8px}@keyframes fmsp{to{transform:rotate(360deg)}}
+</style></head>
+<body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Fomasu" class="active">ふぉます</a><a href="/">トップへ</a></nav></header>
+<main>
+<div class="card"><h2 style="margin:0">💞 ふぉます</h2><div class="muted">ゲーム・恋愛・友達づくり・雑談…いつでもマッチング。Ghostと同じで、本名ではなく「ふぉます名」と「ID」で出会います。</div><div class="muted" style="font-size:.8rem;margin-top:4px">安全のため、18歳未満と18歳以上はマッチングが完全に分かれています。恋愛は18歳以上のみ。</div></div>
+<div id="app"><div class="card"><p class="muted">読み込み中…</p></div></div>
+</main>
+<script src="/js/auth.js"></script>
+<script>
+(function(){
+const s=Netrify.requireLogin(); if(!s) return;
+const $=(i)=>document.getElementById(i), app=$('app');
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(action,body){const r=await fetch('/api/fomasu',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,token:s.token,...body})});const d=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(d.error||'通信に失敗しました'),{data:d});return d;}
+let state={me:null,purposes:[],tab:'match',quick:{purpose:'',tag:''},room:null,timers:[]};
+const clearTimers=()=>{state.timers.forEach(clearInterval);state.timers=[];};
+const label=(id)=>(state.purposes.find(p=>p.id===id)||{}).label||id;
+function chips(sel,multi,name){return state.purposes.map(p=>`<button type="button" class="fm-chip ${sel.includes(p.id)?'on':''}" data-${name}="${p.id}">${esc(p.label)}</button>`).join('');}
+async function boot(){
+  try{const d=await api('me');state.me=d.profile;state.purposes=d.purposes;state.group=d.group;state.searching=d.searching;}
+  catch(e){app.innerHTML=`<div class="card"><p class="error">${esc(e.message)}</p>${e.data&&e.data.needBirth?'<p><a href="/account/">アカウント設定で生年月日を登録</a>してください。</p>':''}</div>`;return;}
+  const h=location.hash;
+  if(!state.me){renderProfile(true);return;}
+  const m=/room=([a-z0-9]+)/.exec(h);
+  if(m){openRoom(m[1]);return;}
+  state.tab=/tab=inbox/.test(h)?'matches':'match';render();
+}
+function tabs(){const t=[['match','マッチング'],['find','さがす'],['matches','マッチ'],['profile','プロフィール']];return `<div class="fm-tabs">${t.map(([k,l])=>`<button type="button" class="${state.tab===k?'on':'secondary'}" data-tab="${k}">${l}</button>`).join('')}</div>`;}
+function render(){
+  clearTimers();
+  app.innerHTML=tabs()+'<div id="pane"></div>';
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;render();});
+  ({match:renderMatch,find:renderFind,matches:renderMatches,profile:()=>renderProfile(false)})[state.tab]();
+}
+// ---- いますぐマッチング ----
+function renderMatch(){
+  const pane=$('pane'); const mine=state.me.purposes;
+  if(!state.quick.purpose||!mine.includes(state.quick.purpose))state.quick.purpose=mine[0];
+  pane.innerHTML=`<div class="card"><h3 style="margin-top:0">いますぐマッチング</h3><div class="muted">目的を選んでボタンを押すと、同じ目的で待っている人と、すぐにマッチングします。</div><div style="margin-top:8px" id="qp">${state.purposes.filter(p=>mine.includes(p.id)).map(p=>`<button type="button" class="fm-chip ${state.quick.purpose===p.id?'on':''}" data-p="${p.id}">${esc(p.label)}</button>`).join('')}</div><input id="qtag" placeholder="ゲーム名・趣味など(任意) 例: Apex" value="${esc(state.quick.tag)}" style="width:100%;margin-top:8px"><div id="qstate"></div><button type="button" class="fm-big" id="qgo">⚡ いますぐマッチング</button></div>
+  <div class="card"><div class="row" style="justify-content:space-between;align-items:center"><div><strong>🟢 いま募集中にする</strong><div class="muted" style="font-size:.85rem">「さがす」の一覧に出て、申請を受けやすくなります(2時間)。</div></div><button type="button" id="qopen" class="${state.me.open?'':'secondary'}">${state.me.open?'募集中(タップで停止)':'募集中にする'}</button></div></div>`;
+  pane.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{state.quick.purpose=b.dataset.p;pane.querySelectorAll('[data-p]').forEach(x=>x.classList.toggle('on',x===b));});
+  $('qtag').oninput=(e)=>{state.quick.tag=e.target.value;};
+  $('qopen').onclick=async()=>{try{await api('setOpen',{open:!state.me.open,purpose:state.quick.purpose});state.me.open=!state.me.open;renderMatch();}catch(e){alert(e.message);}};
+  $('qgo').onclick=startQuick;
+  if(state.searching)paintSearching();
+}
+function paintSearching(){
+  $('qstate').innerHTML='<div class="muted" style="margin-top:10px"><span class="fm-spin"></span>相手を探しています…(最大10分。画面を閉じても、見つかると通知します)</div>';
+  const go=$('qgo');go.textContent='✕ やめる';go.className='fm-big secondary';go.onclick=async()=>{await api('quickCancel').catch(()=>{});state.searching=null;clearTimers();renderMatch();};
+  clearTimers();state.timers.push(setInterval(async()=>{try{const d=await api('quickPoll');if(d.matched){clearTimers();state.searching=null;openRoom(d.matched.id);}else if(d.searching===false){clearTimers();state.searching=null;renderMatch();$('qstate').innerHTML='<div class="muted" style="margin-top:10px">見つかりませんでした。もう一度試すか、「さがす」から申請してみてください。</div>';}}catch(_){}},3000));
+}
+async function startQuick(){
+  try{const d=await api('quick',{purpose:state.quick.purpose,tag:state.quick.tag});
+    if(d.matched){openRoom(d.matched.id);return;}
+    state.searching=true;paintSearching();}catch(e){alert(e.message);}
+}
+// ---- さがす ----
+let findQ={purpose:'',tag:'',q:''};
+function renderFind(){
+  const pane=$('pane');
+  pane.innerHTML=`<div class="card"><div class="row" style="gap:6px;flex-wrap:wrap"><select id="fp"><option value="">すべての目的</option>${state.purposes.map(p=>`<option value="${p.id}" ${findQ.purpose===p.id?'selected':''}>${esc(p.label)}</option>`).join('')}</select><input id="fq" placeholder="名前・ID・タグで検索" value="${esc(findQ.q)}" style="flex:1;min-width:120px"><button type="button" id="fgo">検索</button></div></div><div id="flist"><p class="muted">読み込み中…</p></div>`;
+  const run=async()=>{findQ={purpose:$('fp').value,q:$('fq').value.trim(),tag:''};try{const d=await api('browse',findQ);$('flist').innerHTML=d.items.length?d.items.map(card).join(''):'<p class="muted">該当する人がいません。「いま募集中にする」で自分が見つけてもらうこともできます。</p>';bindCards();}catch(e){$('flist').innerHTML=`<p class="error">${esc(e.message)}</p>`;}};
+  $('fgo').onclick=run;$('fq').onkeydown=(e)=>{if(e.key==='Enter')run();};$('fp').onchange=run;run();
+}
+function card(i){
+  const btn=i.liked?`<button type="button" class="secondary" data-unlike="${esc(i.handle)}">申請済み(取り消す)</button>`:`<button type="button" data-like="${esc(i.handle)}">${i.likesMe?'💞 マッチする':'♥ マッチ申請'}</button>`;
+  return `<div class="fm-card"><h3>${esc(i.name)}<span class="id">@${esc(i.handle)}</span>${i.open?`<span class="fm-open">🟢 募集中${i.openPurpose?'('+esc(label(i.openPurpose))+')':''}</span>`:''}</h3><div>${i.purposes.map(p=>`<span class="fm-tag">${esc(label(p))}</span>`).join('')}${i.tags.map(t=>`<span class="fm-tag">#${esc(t)}</span>`).join('')}</div>${i.bio?`<p>${esc(i.bio)}</p>`:''}<div class="row" style="gap:6px;flex-wrap:wrap">${btn}<button type="button" class="secondary" data-block="${esc(i.handle)}">ブロック</button><button type="button" class="secondary" data-report="${esc(i.handle)}">通報</button></div></div>`;
+}
+function bindCards(){
+  document.querySelectorAll('[data-like]').forEach(b=>b.onclick=async()=>{try{const d=await api('like',{handle:b.dataset.like});if(d.matched){openRoom(d.matched.id);}else{b.textContent='申請しました';b.disabled=true;}}catch(e){alert(e.message);}});
+  document.querySelectorAll('[data-unlike]').forEach(b=>b.onclick=async()=>{await api('unlike',{handle:b.dataset.unlike}).catch(()=>{});renderFind();});
+  document.querySelectorAll('[data-block]').forEach(b=>b.onclick=async()=>{if(!confirm('この人をブロックしますか？(お互いに表示されなくなります)'))return;await api('block',{handle:b.dataset.block}).catch(e=>alert(e.message));render();});
+  document.querySelectorAll('[data-report]').forEach(b=>b.onclick=async()=>{const reason=prompt('通報理由を入力してください','迷惑行為・不適切な内容');if(!reason)return;await api('report',{handle:b.dataset.report,reason}).then(()=>alert('通報を受け付けました')).catch(e=>alert(e.message));});
+}
+// ---- マッチ一覧 ----
+async function renderMatches(){
+  const pane=$('pane');pane.innerHTML='<p class="muted">読み込み中…</p>';
+  try{const [inb,ms]=await Promise.all([api('inbox'),api('matches')]);
+    pane.innerHTML=(inb.items.length?`<div class="card"><h3 style="margin-top:0">💌 申請が届いています</h3>${inb.items.map(card).join('')}</div>`:'')+`<div class="card"><h3 style="margin-top:0">マッチ</h3>${ms.items.length?ms.items.map(m=>`<div class="fm-row" data-room="${m.id}"><div class="t"><strong>${esc(m.other.name)}</strong> <span class="muted" style="font-size:.78rem">@${esc(m.other.handle)} ・ ${esc(m.purposeLabel)}</span><div class="last">${esc(m.lastText||'マッチしました！メッセージを送ってみましょう')}</div></div>${m.unread?'<span class="fm-dot"></span>':''}</div>`).join(''):'<p class="muted">まだマッチはありません。「マッチング」からすぐ探せます。</p>'}</div>`;
+    bindCards();pane.querySelectorAll('[data-room]').forEach(r=>r.onclick=()=>openRoom(r.dataset.room));
+  }catch(e){pane.innerHTML=`<p class="error">${esc(e.message)}</p>`;}
+}
+// ---- チャット ----
+async function openRoom(id){
+  clearTimers();state.room={id,since:0};
+  app.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><button type="button" class="secondary" id="back">← 戻る</button><div id="rtitle" style="font-weight:700">…</div><button type="button" class="secondary" id="rmenu">⋯</button></div><div class="fm-chat"><div class="fm-msgs" id="msgs"></div><div class="fm-form"><input id="mtext" maxlength="500" placeholder="メッセージ"><button type="button" id="msend">送信</button></div></div></div>`;
+  $('back').onclick=()=>{history.replaceState(null,'',location.pathname);state.tab='matches';render();};
+  const draw=(items)=>{const box=$('msgs');if(!box)return;const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;items.forEach(m=>{const d=document.createElement('div');d.className='fm-b'+(m.mine?' me':'');d.innerHTML=esc(m.text)+`<small>${new Date(m.at).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}</small>`;box.appendChild(d);state.room.since=Math.max(state.room.since,m.at);});if(near||items.length&&!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init='1';}};
+  const poll=async()=>{try{const d=await api('messages',{matchId:id,since:state.room.since});state.room.info=d.room;$('rtitle').textContent=d.room.other.name+' (@'+d.room.other.handle+')';draw(d.items);}catch(e){if(/見つかりません/.test(e.message)){clearTimers();alert('このルームは終了しました');state.tab='matches';render();}}};
+  await poll();state.timers.push(setInterval(poll,4000));
+  const send=async()=>{const t=$('mtext').value.trim();if(!t)return;$('mtext').value='';try{await api('send',{matchId:id,text:t});await poll();}catch(e){alert(e.message);$('mtext').value=t;}};
+  $('msend').onclick=send;$('mtext').onkeydown=(e)=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();send();}};
+  $('rmenu').onclick=async()=>{const o=state.room.info&&state.room.info.other;const c=prompt('1: マッチを解除  2: 相手をブロック  3: 通報','');
+    try{if(c==='1'){if(confirm('マッチを解除しますか？')){await api('unmatch',{matchId:id});state.tab='matches';render();}}
+    else if(c==='2'&&o){if(confirm('ブロックしますか？')){await api('block',{handle:o.handle});state.tab='matches';render();}}
+    else if(c==='3'){const r=prompt('通報理由を入力してください','不適切な内容');if(r){await api('report',{handle:o&&o.handle,matchId:id,reason:r});alert('通報を受け付けました');}}}catch(e){alert(e.message);}};
+}
+// ---- プロフィール ----
+function renderProfile(first){
+  const m=state.me||{handle:'',name:'',bio:'',purposes:[],tags:[]};let sel=m.purposes.slice();
+  const html=`<div class="card"><h3 style="margin-top:0">${first?'はじめに、プロフィールを作りましょう':'プロフィール'}</h3><label>ふぉます名(ニックネーム)</label><input id="pn" maxlength="20" value="${esc(m.name)}" style="width:100%"><label>ID(半角英数字とアンダースコア 3〜20文字)</label><input id="ph" maxlength="20" value="${esc(m.handle)}" style="width:100%" autocapitalize="off"><label>目的(いくつでも)</label><div id="pp">${chips(sel,true,'pp')}</div><label>ゲーム・趣味タグ(スペースかカンマ区切り)</label><input id="pt" value="${esc(m.tags.join(' '))}" placeholder="Apex マイクラ 音楽" style="width:100%"><label>ひとこと</label><textarea id="pb" maxlength="300" style="width:100%;min-height:90px">${esc(m.bio)}</textarea><div class="error" id="perr"></div><button type="button" id="psave" style="margin-top:8px">${first?'はじめる':'保存'}</button></div>`;
+  if(first)app.innerHTML=html;else $('pane').innerHTML=html;
+  document.querySelectorAll('[data-pp]').forEach(b=>b.onclick=()=>{const k=b.dataset.pp;sel=sel.includes(k)?sel.filter(x=>x!==k):[...sel,k];b.classList.toggle('on');});
+  $('psave').onclick=async()=>{try{const d=await api('saveProfile',{name:$('pn').value,handle:$('ph').value,purposes:sel,tags:$('pt').value,bio:$('pb').value});state.me={...state.me,...d.profile};state.tab='match';render();}catch(e){$('perr').textContent=e.message;}};
+}
+boot();
+})();
+</script><script src="/js/push-client.js"></script></body></html>

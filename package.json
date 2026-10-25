@@ -2,16 +2,15 @@
   "name": "mixall",
   "version": "0.1.0",
   "private": true,
-  "description": "MixAll - GitHub Pages + Supabase版",
+  "description": "MixAll +（二世代） - GitHub Pages + Supabase版（EdgeOne版 v27c ベース）",
   "scripts": {
+    "import:edgeone": "node scripts/import-edgeone.mjs",
     "build:edge": "node scripts/build-edge.mjs",
     "build:pages": "node scripts/build-pages.mjs",
-    "test": "node server/smoke-test.js"
+    "test": "node scripts/smoke-test.mjs"
   },
   "dependencies": {
-    "fflate": "^0.8.3",
-    "postgres": "3.4.5",
-    "web-push": "^3.6.7"
+    "fflate": "^0.8.3"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",

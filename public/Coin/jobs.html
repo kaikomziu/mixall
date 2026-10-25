@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>みつばち - Mcコイン</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+  .tabs button{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .jobbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .jobbar input[type=search],.jobbar input[type=text]{flex:1;min-width:160px;margin:0}
+  .jobbar select{margin:0;width:auto}
+  .job{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:10px 0;background:var(--panel)}
+  .job h3{margin:0 0 4px;font-size:1.05rem}
+  .reward{display:inline-block;font-weight:700;color:var(--accent-2);white-space:nowrap}
+  .badge{display:inline-block;font-size:.75rem;padding:1px 8px;border-radius:99px;border:1px solid var(--border);margin-left:6px;vertical-align:middle}
+  .job .desc{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}
+  .job .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .job .note{background:var(--panel-2,rgba(128,128,128,.12));border-radius:8px;padding:6px 10px;margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}
+  .job details{margin-top:6px;font-size:.85rem}
+  .danger{border-color:#d9534f !important;color:#d9534f !important;background:transparent !important}
+  .grid2{display:grid;grid-template-columns:1fr 160px;gap:10px}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+</style>
+</head><body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Coin">Mcコイン</a><a href="/">トップ</a></nav></header>
+<main>
+  <div class="card">
+    <h2>みつばち</h2>
+    <p class="muted">Mcコインを添付して仕事を発注し、受注した人が終わったら申請 → 発注者が「仕事をしたな」と確認すると、預けたMcコインが受注者に渡ります。</p>
+    <p>所持Mcコイン: <strong id="bal">…</strong></p>
+    <div id="error" class="error"></div>
+  </div>
+
+  <div class="card">
+    <div class="tabs" id="tabs">
+      <button data-v="open" class="on">募集中の仕事</button>
+      <button data-v="taken">自分が受注</button>
+      <button data-v="posted">自分が発注</button>
+      <button data-v="done">完了した仕事</button>
+      <button data-v="new">＋ 仕事を発注する</button>
+    </div>
+
+    <form id="newForm" hidden>
+      <label class="muted">タイトル(60文字まで)<input type="text" id="nTitle" maxlength="60" required></label>
+      <label class="muted">仕事の内容(2000文字まで)<textarea id="nDesc" maxlength="2000" required placeholder="何をしてほしいか、納期、完了の条件などを書いてください"></textarea></label>
+      <div class="grid2"><div></div><label class="muted">報酬(Mcコイン)<input type="number" id="nReward" min="1" step="1" value="10" required></label></div>
+      <p class="muted">発注すると、報酬ぶんのMcコインがすぐ預かりになります。受注される前なら取り下げて戻せます。</p>
+      <button type="submit">Mcコインを添付して発注する</button> <span id="nMsg" class="muted"></span>
+    </form>
+
+    <div id="listWrap">
+      <div class="jobbar">
+        <input type="search" id="q" placeholder="仕事を検索(タイトル・内容・発注者名)">
+        <select id="sort"><option value="new">新しい順</option><option value="reward">報酬が高い順</option></select>
+        <label class="muted" style="display:flex;align-items:center;gap:4px">報酬≥<input type="number" id="minR" min="0" style="width:90px;margin:0" placeholder="0"></label>
+      </div>
+      <div id="list"><p class="muted">読み込み中...</p></div>
+    </div>
+  </div>
+</main>
+<script src="/js/auth.js"></script>
+<script>
+const session = Netrify.requireLogin();
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (n) => Number(n || 0).toLocaleString('ja-JP');
+const STATUS = { open:'募集中', accepted:'受注中', submitted:'完了申請中', completed:'完了', cancelled:'取り下げ' };
+let view = 'open', timer = null, loadSeq = 0;
+
+function setBal(v, unlimited){ $('bal').textContent = unlimited ? '無限(運営・公認)' : fmt(v) + ' Mcコイン'; }
+function showErr(m){ $('error').textContent = m || ''; }
+
+async function load(){
+  if (!session) return;
+  const seq = ++loadSeq;
+  try {
+    const p = new URLSearchParams({ token: session.token, action:'list', view, q: $('q').value.trim(), sort: $('sort').value === 'reward' ? 'reward' : 'new', minReward: $('minR').value || '0' });
+    const res = await fetch('/api/jobs?' + p);
+    const data = await res.json();
+    if (seq !== loadSeq) return;
+    if (!res.ok) throw new Error(data.error || '読み込めません');
+    setBal(data.balance, data.unlimited); showErr('');
+    render(data.jobs || []);
+  } catch (e) { showErr(e.message); }
+}
+
+function actions(j){
+  const b = [];
+  if (j.status === 'open') {
+    if (j.isClient) b.push(['cancel','取り下げ(返金)','danger']);
+    else b.push(['accept','この仕事を受ける','']);
+  } else if (j.status === 'accepted') {
+    if (j.isWorker) { b.push(['submit','終わったので申請する','']); b.push(['giveUp','辞退する','danger']); }
+  } else if (j.status === 'submitted') {
+    if (j.isClient) { b.push(['approve','仕事をしたな!(報酬を渡す)','']); b.push(['reject','やり直しを依頼','danger']); }
+    if (j.isWorker) b.push(['giveUp','辞退する','danger']);
+  }
+  return b;
+}
+
+function render(jobs){
+  if (!jobs.length) { $('list').innerHTML = '<p class="muted">該当する仕事はありません。</p>'; return; }
+  $('list').innerHTML = jobs.map((j) => {
+    const who = j.isClient ? '(あなた)' : '';
+    const btns = actions(j).map(([a, l, cls]) => `<button type="button" class="${cls}" data-act="${a}" data-id="${esc(j.id)}">${esc(l)}</button>`).join('');
+    const notes = (j.submitNote ? `<div class="note"><strong>完了申請:</strong> ${esc(j.submitNote)}</div>` : '') + (j.rejectNote && j.status === 'accepted' ? `<div class="note"><strong>やり直し依頼:</strong> ${esc(j.rejectNote)}</div>` : '');
+    const log = j.log && j.log.length ? `<details><summary>やりとりの履歴</summary>${j.log.map((l) => `<div class="muted">${new Date(l.t).toLocaleString('ja-JP')} ・ ${esc(l.type)} ${esc(l.note)}</div>`).join('')}</details>` : '';
+    return `<article class="job"><h3>${esc(j.title)}<span class="badge">${STATUS[j.status] || j.status}</span></h3>
+      <div><span class="reward">${fmt(j.reward)} Mcコイン</span> <span class="muted">発注: ${esc(j.clientName)}${who}${j.workerName ? ' / 受注: ' + esc(j.workerName) + (j.isWorker ? '(あなた)' : '') : ''} ・ ${new Date(j.createdAt).toLocaleString('ja-JP')}</span></div>
+      <div class="desc">${esc(j.description)}</div>${notes}${log}
+      ${btns ? `<div class="acts">${btns}</div>` : ''}</article>`;
+  }).join('');
+}
+
+$('list').addEventListener('click', async (ev) => {
+  const btn = ev.target.closest('button[data-act]'); if (!btn) return;
+  const act = btn.dataset.act, id = btn.dataset.id; let note = '';
+  if (act === 'approve' && !confirm('仕事の内容を確認しましたか? 報酬のMcコインを受注者に渡します(取り消せません)。')) return;
+  if (act === 'cancel' && !confirm('取り下げて、預けたMcコインを戻しますか?')) return;
+  if (act === 'accept' && !confirm('この仕事を受けますか?')) return;
+  if (act === 'submit') { const n = prompt('発注者へのメッセージ(任意。成果物の場所や報告など)', ''); if (n === null) return; note = n; }
+  if (act === 'reject') { const n = prompt('どこを直してほしいか書いてください', ''); if (n === null) return; note = n; }
+  if (act === 'giveUp') { if (!confirm('受注を辞退しますか? 仕事は募集中に戻ります。')) return; }
+  btn.disabled = true;
+  try { await Netrify.api('/api/jobs', { action: act, token: session.token, id, note }); showErr(''); }
+  catch (e) { showErr(e.message); }
+  load();
+});
+
+$('tabs').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button[data-v]'); if (!b) return;
+  [...$('tabs').children].forEach((x) => x.classList.toggle('on', x === b));
+  view = b.dataset.v;
+  const isNew = view === 'new';
+  $('newForm').hidden = !isNew; $('listWrap').hidden = isNew;
+  if (!isNew) load();
+});
+let st; $('q').addEventListener('input', () => { clearTimeout(st); st = setTimeout(load, 300); });
+$('sort').addEventListener('change', load); $('minR').addEventListener('change', load);
+
+$('newForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const btn = ev.submitter || ev.target.querySelector('button[type=submit]'); btn.disabled = true; $('nMsg').textContent = '';
+  try {
+    const r = await Netrify.api('/api/jobs', { action:'create', token: session.token, title: $('nTitle').value, description: $('nDesc').value, reward: Number($('nReward').value) });
+    $('nTitle').value = ''; $('nDesc').value = '';
+    showErr(''); view = 'posted';
+    [...$('tabs').children].forEach((x) => x.classList.toggle('on', x.dataset.v === 'posted'));
+    $('newForm').hidden = true; $('listWrap').hidden = false; load();
+  } catch (e) { $('nMsg').textContent = e.message; }
+  btn.disabled = false;
+});
+
+if (session) { load(); timer = setInterval(() => { if (!document.hidden && !$('listWrap').hidden) load(); }, 20000); }
+</script></body></html>

@@ -1,5 +1,5 @@
 (() => {
-  const root = document.getElementById('animeImageSearch');
+  const root = document.getElementById('animeImageSearch') || document.getElementById('anime-search');
   if (!root) return;
   const drop = root.querySelector('[data-anime-drop]');
   const input = root.querySelector('[data-anime-file]');
@@ -9,6 +9,7 @@
   const form = root.querySelector('form');
   const searchButton = root.querySelector('[data-anime-search]');
   const blur = root.querySelector('[data-anime-blur]');
+  const bar = window.MxProgress ? MxProgress.lazy(() => results) : { busy() {}, hide() {} };
   const siteNames = ['pixiv', 'skeb', 'bilibili', 'misskey', 'danbooru'];
   let imageFile = null;
   let previewUrl = '';
@@ -30,12 +31,20 @@
     const items = Array.isArray(payload?.result) ? payload.result : Array.isArray(payload?.results) ? payload.results : [];
     if (!items.length) { results.innerHTML = '<p class="muted">一致する画像が見つかりませんでした。</p>'; return; }
     results.innerHTML = items.map((item) => {
-      const image = item.cdn_path ? `https://cdn.onegai.moe/${String(item.cdn_path).replace(/^\/+/, '')}` : (item.thumbnail || item.image || '');
-      const href = item.url || image || '#';
-      const score = Number(item.nsfw_score || 0);
+      const image = item.pixivId ? '' : (item.image || '');
+      const href = item.viewerUrl || item.url || item.image || '#';
+      const score = Number(item.nsfw || 0);
       const isBlurred = blur.checked && score > 0.85;
-      return `<article class="anime-result"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer" class="anime-result-image${isBlurred ? ' is-nsfw' : ''}" data-nsfw="${isBlurred ? '1' : '0'}"><img src="${esc(image)}" alt="${esc(item.title || '検索結果')}" loading="lazy">${isBlurred ? '<span>クリックで表示</span>' : ''}</a><a class="anime-result-title" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(item.title || item.site_instance || '結果を開く')}</a><small class="muted">${esc(item.site_instance || '')}</small></article>`;
+      const external = item.viewerUrl ? '' : ' target="_blank" rel="noopener noreferrer"';
+      const pic = image ? `<img src="${esc(image)}" alt="${esc(item.title || '検索結果')}" loading="lazy">` : `<img data-pixiv-thumb="${esc(item.pixivId || '')}" alt="${esc(item.title || 'pixiv')}" loading="lazy">`;
+      const sim = item.score ? ` ・ 類似度 ${Math.round(item.score * (item.score <= 1 ? 100 : 1))}%` : '';
+      return `<article class="anime-result"><a href="${esc(href)}"${external} class="anime-result-image${isBlurred ? ' is-nsfw' : ''}" data-nsfw="${isBlurred ? '1' : '0'}">${pic}${isBlurred ? '<span>クリックで表示</span>' : ''}</a><a class="anime-result-title" href="${esc(href)}"${external}>${esc(item.title || item.source || '結果')}</a><small class="muted">${esc(item.source || '')}${sim}</small></article>`;
     }).join('');
+    // pixivの結果はサムネイルもサーバー経由で読み込む(直接読むとReferer制限で表示されない)
+    results.querySelectorAll('img[data-pixiv-thumb]').forEach(async (img) => {
+      const id = img.dataset.pixivThumb; if (!id) return;
+      try { const r = await fetch('/api/tools', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'pixivImage', url: id }) }); const d = await r.json(); if (r.ok && d.pages?.[0]) img.src = d.pages[0].proxyUrl; } catch (_) {}
+    });
     results.querySelectorAll('.anime-result-image.is-nsfw').forEach((link) => link.addEventListener('click', (event) => {
       if (link.dataset.nsfw === '1') { event.preventDefault(); link.dataset.nsfw = '0'; link.classList.remove('is-nsfw'); link.querySelector('span')?.remove(); }
     }));
@@ -53,20 +62,19 @@
     if (!sites.length) { setStatus('検索先を1つ以上選択してください。', true); return; }
     searchButton.disabled = true;
     results.innerHTML = '';
-    setStatus('画像を検索しています…');
+    setStatus('画像を検索しています…'); bar.busy('検索中');
     try {
-      const body = new FormData();
-      body.set('image', await normalizeImage(imageFile), 'search.png');
-      body.set('sites', sites.join(','));
-      const response = await fetch('https://api.onegai.moe/search', { method: 'POST', body, signal: AbortSignal.timeout(30000) });
+      const blob = await normalizeImage(imageFile);
+      const dataUrl = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
+      const response = await fetch('/api/anime-search', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ image: dataUrl, sites }), signal: AbortSignal.timeout(45000) });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || payload.error) throw new Error(payload.error || `検索に失敗しました (${response.status})`);
       renderResults(payload);
-      setStatus('検索結果を表示しました。画像をクリックすると元サイトを開けます。');
+      setStatus((payload.note ? payload.note + ' ' : '') + '検索結果を表示しました。pixivの作品はMixAll内のビューアで開きます。');
     } catch (error) {
       results.innerHTML = '<p class="error">検索結果を取得できませんでした。</p>';
       setStatus(`画像検索に失敗しました: ${error.message}`, true);
-    } finally { searchButton.disabled = false; }
+    } finally { searchButton.disabled = false; bar.hide(); }
   };
   input.addEventListener('change', () => setImage(input.files?.[0]));
   drop.addEventListener('click', () => input.click());

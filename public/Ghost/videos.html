@@ -3,10 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="MixAll Ghostの縦長ショート動画フィード。">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MixAll">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:title" content="Ghostショート動画 - MixAll">
+  <meta property="og:description" content="MixAll Ghostの縦長ショート動画フィード。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Ghost/videos">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/03-ghost-video-vertical.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/03-ghost-video-vertical.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="Ghost - 縦長動画">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ghostショート動画 - MixAll">
+  <meta name="twitter:description" content="MixAll Ghostの縦長ショート動画フィード。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/03-ghost-video-vertical.jpg?v=20261019-2">
   <meta name="theme-color" content="#000000">
-  <title>Ghost ショート動画 - MixAll +（二世代）</title>
+  <title>Ghost ショート動画</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
   <style>
     :root { color-scheme:dark; }
     html,body { width:100%; height:100%; margin:0; overflow:hidden; background:#000; color:#fff; }
@@ -76,27 +94,9 @@
     @media (prefers-reduced-motion:reduce) { .short-sheet { transition:none; } }
     @media (min-width:700px) { .short-top { left:50%; right:auto; width:min(500px,100%); transform:translateX(-50%); } }
   </style>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
+  <meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc">
   <script src="/js/mixall-nav.js" defer></script>
 <script src="/js/language-input.js"></script>
-
-  <meta name="description" content="MixAll +（二世代） Ghostの縦長ショート動画フィード。">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
-  <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Ghostショート動画 - MixAll +（二世代）">
-  <meta property="og:description" content="MixAll +（二世代） Ghostの縦長ショート動画フィード。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/videos">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/03-ghost-video-vertical.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/03-ghost-video-vertical.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="Ghostの縦長ショート動画">
-  <meta property="og:image:type" content="image/jpeg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ghostショート動画 - MixAll +（二世代）">
-  <meta name="twitter:description" content="MixAll +（二世代） Ghostの縦長ショート動画フィード。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/03-ghost-video-vertical.jpg?v=20261020-plus">
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -123,7 +123,7 @@
       <form id="commentForm" class="short-sheet-footer" hidden><div id="replyingTo" class="replying-to" hidden></div><textarea id="commentInput" rows="1" maxlength="1000" placeholder="コメントを追加..."></textarea><button type="submit">送信</button></form>
     </section>
   </div>
-  <script src="/js/auth.js"></script>
+  <script src="/js/auth.js"></script><script src="/js/ghost-sound.js"></script>
   <script>
     const feed = document.getElementById('feed');
     const session = Netrify.requireLogin();
@@ -187,20 +187,25 @@
           <button type="button" class="short-action ${liked?'liked':''}" data-like="${esc(post.id)}" aria-label="いいね"><span class="symbol">${liked?'♥':'♡'}</span><span class="count">${likes.length}</span></button>
           <button type="button" class="short-action" data-comments="${esc(post.id)}" aria-label="コメントを見る"><span class="symbol">▢</span><span class="count">${(post.comments||[]).length || 'コメント'}</span></button>
           <button type="button" class="short-action" data-save="${esc(post.id)}" aria-label="保存先を選ぶ"><span class="symbol">♧</span><span class="count">保存</span></button>
+          ${GhostSound.rootIdOf(post) ? `<button type="button" class="short-action" data-sound="${esc(GhostSound.rootIdOf(post))}" aria-label="音源"><span class="symbol">♪</span><span class="count">音源</span></button>` : ''}
           <button type="button" class="short-action" data-share="${esc(post.id)}" aria-label="共有"><span class="symbol">↗</span><span class="count">共有</span></button>
         </div>
         <div class="short-meta">
           <div class="short-author">${creatorHtml}</div>
           <button type="button" class="short-title" aria-expanded="false">${esc(title)}</button>
           <div class="short-description" hidden>${esc(description || '概要はありません。')}</div>
-          <a class="short-link" href="/Ghost/post.html?id=${encodeURIComponent(post.id)}">▶ 投稿詳細・コメント</a>
+          ${GhostSound.chipHtml(post).replace('class="ghost-sound-chip"','class="short-link" style="margin-right:6px"')}
+          <a class="short-link" href="/Ghost/post.html?id=${encodeURIComponent(post.id)}&stay=1">▶ 投稿詳細・コメント</a>
         </div>
       </article>`;
     }
     function makeCard(clip) {
       const holder = document.createElement('div');
       holder.innerHTML = cardMarkup(clip);
-      return holder.firstElementChild;
+      const cardEl = holder.firstElementChild;
+      cardEl.querySelectorAll('[data-sound]').forEach(btn => btn.addEventListener('click', (event) => { event.stopPropagation(); location.href = '/Ghost/sound.html?id=' + encodeURIComponent(btn.dataset.sound); }));
+      if (clip.post.soundPostId) GhostSound.bind(cardEl.querySelector('.short-media'), clip.post, { mirrorMuted: true });
+      return cardEl;
     }
     function pauseCard(card) {
       if (!card) return;
@@ -289,7 +294,7 @@
     }
     async function loadShorts() {
       try {
-        const response = await fetch('/.netlify/functions/ghost?channel=short&limit=100' + (session ? '&token=' + encodeURIComponent(session.token) : ''));
+        const response = await fetch('/api/ghost?channel=short&limit=100' + (session ? '&token=' + encodeURIComponent(session.token) : ''));
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || '動画を読み込めませんでした');
         clips = [];
@@ -309,6 +314,7 @@
         feed.innerHTML = clips.map(cardMarkup).join('');
         observeCards();
         document.getElementById('shortCount').textContent=`1 / ${clips.length}`;
+        (function(){const q=new URLSearchParams(location.search);const v=q.get('v');if(!v)return;const card=feed.querySelector(`.short-card[data-post="${CSS.escape(v)}"]`);if(!card)return;card.scrollIntoView({block:'start'});const c=q.get('c');if(c||q.get('comments')){openComments(v).then(()=>{if(!c)return;const el=sheetBody.querySelector(`[data-comment-id="${CSS.escape(c)}"]`);if(el){el.scrollIntoView({block:'center'});el.style.outline='2px solid #f90';el.style.borderRadius='8px';}});}})();
       } catch (error) {
         feed.innerHTML = `<div class="short-empty"><h1>ショート動画</h1><p class="short-error">${esc(error.message)}</p><button class="short-link" data-reload>再読み込み</button></div>`;
       }
@@ -336,7 +342,7 @@
       const like = event.target.closest('[data-like]');
       if (like) {
         const current=Netrify.requireLogin(); if(!current) return;
-        try { const result=await Netrify.api('/.netlify/functions/ghost',{action:'likePost',token:current.token,postId:like.dataset.like}); feed.querySelectorAll(`[data-like="${CSS.escape(like.dataset.like)}"]`).forEach(button=>{button.classList.toggle('liked',result.liked);button.querySelector('.symbol').textContent=result.liked?'♥':'♡';button.querySelector('.count').textContent=result.likes;}); }
+        try { const result=await Netrify.api('/api/ghost',{action:'likePost',token:current.token,postId:like.dataset.like}); feed.querySelectorAll(`[data-like="${CSS.escape(like.dataset.like)}"]`).forEach(button=>{button.classList.toggle('liked',result.liked);button.querySelector('.symbol').textContent=result.liked?'♥':'♡';button.querySelector('.count').textContent=result.likes;}); }
         catch(error){alert(error.message);} return;
       }
       const save = event.target.closest('[data-save]');
@@ -376,7 +382,7 @@
     }
     async function loadBookmarkLists() {
       const current=Netrify.getSession(); if(!current) throw new Error('ログインが必要です');
-      const response=await fetch('/.netlify/functions/ghost?bookmarks=1&listsOnly=1&token='+encodeURIComponent(current.token));
+      const response=await fetch('/api/ghost?bookmarks=1&listsOnly=1&token='+encodeURIComponent(current.token));
       const data=await response.json(); if(!response.ok) throw new Error(data.error||'保存先を読み込めません');
       bookmarkLists=data.lists||[{id:'saved',name:'保存済み',count:0}]; return bookmarkLists;
     }
@@ -388,12 +394,12 @@
         sheetBody.querySelectorAll('[data-save-list]').forEach(button=>button.addEventListener('click',async()=>{
           const current=Netrify.requireLogin(); if(!current)return;
           button.disabled=true;
-          try { await Netrify.api('/.netlify/functions/ghost',{action:'bookmarkPost',token:current.token,postId,listId:button.dataset.saveList,save:true}); button.textContent='保存済み'; button.classList.add('saved'); }
+          try { await Netrify.api('/api/ghost',{action:'bookmarkPost',token:current.token,postId,listId:button.dataset.saveList,save:true}); button.textContent='保存済み'; button.classList.add('saved'); }
           catch(error){button.disabled=false;alert(error.message);}
         }));
         sheetBody.querySelector('#bookmarkCreate').addEventListener('submit',async event=>{
           event.preventDefault(); const input=event.currentTarget.querySelector('input'); const name=input.value.trim(); if(!name)return;
-          try { const current=Netrify.requireLogin(); if(!current)return; await Netrify.api('/.netlify/functions/ghost',{action:'createBookmarkList',token:current.token,name}); await openBookmarkPicker(postId); }
+          try { const current=Netrify.requireLogin(); if(!current)return; await Netrify.api('/api/ghost',{action:'createBookmarkList',token:current.token,name}); await openBookmarkPicker(postId); }
           catch(error){alert(error.message);}
         });
       } catch(error) { sheetBody.innerHTML=`<p class="short-sheet-status">${esc(error.message)}</p>`; }
@@ -420,7 +426,7 @@
       sheetPostId=postId; openSheet('コメント','<div class="short-sheet-status">コメントを読み込み中...</div>',true);
       document.getElementById('commentForm').hidden=!Netrify.getSession();
       try {
-        const current=Netrify.getSession(); const query='/.netlify/functions/ghost?post='+encodeURIComponent(postId)+(current?'&token='+encodeURIComponent(current.token):'');
+        const current=Netrify.getSession(); const query='/api/ghost?post='+encodeURIComponent(postId)+(current?'&token='+encodeURIComponent(current.token):'');
         const response=await fetch(query); const data=await response.json(); if(!response.ok)throw new Error(data.error||'コメントを読み込めません');
         const comments=data.post.comments||[];
         sheetBody.innerHTML=renderCommentTree(comments)||'<p class="short-sheet-status">まだコメントがありません。</p>';
@@ -436,7 +442,7 @@
     document.getElementById('commentForm').addEventListener('submit',async event=>{
       event.preventDefault(); const current=Netrify.requireLogin(); if(!current||!sheetPostId)return;
       const input=document.getElementById('commentInput'); const text=input.value.trim(); if(!text)return;
-      try { await Netrify.api('/.netlify/functions/ghost',{action:'addComment',token:current.token,postId:sheetPostId,text,parentCommentId:replyParentCommentId}); input.value=''; replyParentCommentId=null; document.getElementById('replyingTo').hidden=true; document.getElementById('replyingTo').textContent=''; input.placeholder='コメントを追加...'; await openComments(sheetPostId); }
+      try { await Netrify.api('/api/ghost',{action:'addComment',token:current.token,postId:sheetPostId,text,parentCommentId:replyParentCommentId}); input.value=''; replyParentCommentId=null; document.getElementById('replyingTo').hidden=true; document.getElementById('replyingTo').textContent=''; input.placeholder='コメントを追加...'; await openComments(sheetPostId); }
       catch(error){alert(error.message);}
     });
     document.addEventListener('visibilitychange', () => { if(document.hidden) pauseCard(activeCard); else playCard(activeCard); });

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<link rel="canonical" href="https://mixalls.edgeone.dev/MAWS/" />
+<meta property="og:type" content="website" /><meta property="og:site_name" content="MixAll" /><meta property="og:title" content="MAWS｜MixAllの安全なWeb閲覧・検索" /><meta property="og:description" content="MAWSはMixAllの検索・Web閲覧ツール。タグ検索やNGタグ除外、画像・動画のまとめ検索が無料で使えます。" /><meta property="og:url" content="https://mixalls.edgeone.dev/MAWS/" /><meta property="og:image" content="https://mixalls.edgeone.dev/icons/icon-512.png" /><meta name="twitter:card" content="summary" />
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="description" content="MixAll Web Search (MAWS)。URLを登録するだけで検索に載せられる、MixAllの検索の入口。">
+<title>MixAll Web Search (MAWS)</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script><script src="/js/auth.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/mixall-nav.js" defer></script>
+<style>
+.maws-wrap{display:grid;gap:12px}
+.maws-search{display:flex;gap:8px}.maws-search input{flex:1;min-width:0}
+.maws-item{padding:12px 0;border-bottom:1px solid var(--border,#ddd);overflow-wrap:anywhere}
+.maws-item:last-child{border-bottom:0}
+.maws-item a.maws-title{font-weight:700;font-size:1.02rem}
+.maws-url{display:block;font-size:.8rem;color:var(--text-dim,#777);margin:2px 0}
+.maws-desc{font-size:.9rem;margin:4px 0 0}
+.maws-badge{display:inline-block;font-size:.7rem;padding:1px 7px;border-radius:999px;border:1px solid var(--border,#888);margin-right:6px;vertical-align:middle}
+.maws-meta{font-size:.8rem;color:var(--text-dim,#777)}
+</style></head>
+<body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div><nav class="services"><a href="/MAWS" class="active">MAWS</a><a href="/Tools">ツール</a><a href="/">トップへ</a></nav></header>
+<main>
+<div class="maws-wrap">
+  <div class="card">
+    <h2>MixAll Web Search <small class="muted">(MAWS)</small></h2>
+    <p class="muted" style="margin-top:0;">登録されたWebページと、MixAllのGhost投稿をまとめて検索します。入力欄をタップすると、キーワードに <b>site / 投稿者・日付・種類</b> などの条件を重ねて絞り込めます。結果は関連度の高い順に並びます。</p>
+    <input type="search" id="mawsSearch" readonly style="cursor:pointer;width:100%;box-sizing:border-box" placeholder="🔍 タップして検索（from: on: before: type: など）">
+    <div id="mawsStatus" class="muted" role="status" aria-live="polite" style="margin-top:8px;"></div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0;">MAWSプロキシ</h3>
+    <p class="muted" style="margin-top:0;">PlayStationなど、サイト側にbot扱いされやすい端末でも開けるように、MixAllのサーバー経由でページを表示します。URLかキーワードを入れてください（<code>/MAWS/?ServerAction=https://example.com</code> でも開けます）。pixivは専用のpixiv画面で開きます。ログインやパスワード入力は使えません。</p>
+    <form class="maws-search" id="proxyForm"><input type="text" id="proxyUrl" placeholder="https://www.pixiv.net/ や ドメイン・キーワード" required><button type="submit">開く</button></form>
+    <p style="margin:8px 0 0"><a href="/MAWS/?ServerAction=https%3A%2F%2Fwww.pixiv.net%2F">pixiv</a>　<a href="/MAWS/?ServerAction=https%3A%2F%2Fwww.dmm.co.jp%2F">FANZA <small>(18+)</small></a>　<a href="/MAWS/?ServerAction=https%3A%2F%2Fwww.pornhub.com%2F">Pornhub <small>(18+)</small></a></p><p class="muted" style="margin:4px 0 0;font-size:.8rem">FANZA・Pornhubは、18歳以上で成人確認を済ませたログインユーザーだけ開けます。</p>
+  </div>
+  <div class="card"><h3 style="margin-top:0;">おすすめ・新着</h3><div id="mawsList"><p class="muted">読み込み中...</p></div></div>
+  <div class="card">
+    <h3 style="margin-top:0;">URLを登録して検索に載せる</h3>
+    <p class="muted" style="margin-top:0;">URLを入れるだけで登録できます(所有権の確認は不要)。登録後にURLを編集・削除する管理機能はありません。ページのタイトル・説明・本文の冒頭を保存して検索に使います。noindexのページ、HTML以外、公開されていないアドレスは登録できません。登録できるのは1日20件までです。</p>
+    <form class="maws-search" id="submitForm"><input type="url" id="submitUrl" placeholder="https://example.com/" required><button type="submit" id="submitBtn">登録</button></form>
+    <div id="submitStatus" class="muted" role="status" aria-live="polite" style="margin-top:8px;"></div>
+  </div>
+</div>
+</main>
+<style>.px-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px}.px-tile{display:flex;flex-direction:column;gap:3px;text-align:left;padding:0;background:none;border:0;color:inherit;cursor:pointer}.px-img{position:relative;display:block;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--panel-2)}.px-img img{width:100%;height:100%;object-fit:cover}.px-img i{position:absolute;right:6px;top:6px;background:rgba(0,0,0,.65);color:#fff;font-style:normal;font-size:.7rem;padding:1px 6px;border-radius:8px}.px-tile b{font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.px-tile small{color:var(--text-dim,#888);font-size:.72rem}</style>
+<script src="/js/maws-proxy.js"></script>
+<script src="/js/filter-search.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  if (new URLSearchParams(location.search).has('ServerAction')) return;
+  // アカウント無し(ゲスト)でも使える: 外部検索(DuckDuckGo/Google)・プロキシ・pixiv(全年齢)。MixAll内の検索や登録はログインが必要
+  const session = (window.Netrify && Netrify.getSession && Netrify.getSession()) || { token: '' };
+  if (!session.token) { const n = document.createElement('p'); n.className = 'muted'; n.style.cssText = 'margin:8px 0'; n.innerHTML = 'ゲストとして利用中です。外部検索とプロキシは使えます。Ghost投稿・登録ページの検索やURL登録には <a href="/login/">ログイン</a> が必要です。'; document.querySelector('main').prepend(n); }
+  document.getElementById('proxyForm').addEventListener('submit', (e) => { e.preventDefault(); location.href = '/MAWS/?ServerAction=' + encodeURIComponent(document.getElementById('proxyUrl').value.trim()); });
+  const token = encodeURIComponent(session.token);
+  let itemsPromise = null;
+
+  // 検索対象: 登録Webページ(kind=web)とGhost投稿(kind=ghost)を同じ形にそろえる
+  async function loadItems(force) {
+    if (itemsPromise && !force) return itemsPromise;
+    itemsPromise = (async () => {
+      const [webRes, ghostRes] = await Promise.allSettled([
+        fetch(`/api/maws?all=1&token=${token}`).then((r) => r.json().then((d) => ({ ok: r.ok, d }))),
+        fetch(`/api/ghost?limit=100&token=${token}`).then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      ]);
+      const web = (webRes.status === 'fulfilled' && webRes.value.ok ? webRes.value.d.entries || [] : []).map((e) => ({
+        id: 'w' + e.id, kind: 'web', url: e.url, domain: e.domain, title: e.title || e.domain, description: e.description || '', snippet: String(e.snippet || '').toLowerCase(),
+        authorId: e.domain, authorName: e.domain, ava: '🌐', ts: Date.parse(e.addedAt) || 0, types: ['link'], isBot: false,
+        text: [e.title, e.description, e.snippet].filter(Boolean).join('\n')
+      }));
+      const posts = ghostRes.status === 'fulfilled' && ghostRes.value.ok ? ghostRes.value.d.posts || [] : [];
+      const byId = new Map(posts.map((p) => [p.id, p]));
+      const ghost = FilterSearch.ghostItems(posts).map((it) => {
+        const p = byId.get(it.id) || {};
+        return Object.assign(it, { id: 'g' + it.id, kind: 'ghost', url: '/Ghost/post/' + encodeURIComponent(it.id), pop: (Array.isArray(p.likes) ? p.likes.length : 0) + 2 * (Array.isArray(p.comments) ? p.comments.length : 0), likes: Array.isArray(p.likes) ? p.likes.length : 0, comments: Array.isArray(p.comments) ? p.comments.length : 0 });
+      });
+      const all = [...web, ...ghost];
+      all.forEach((it) => {
+        const p = it.kind === 'ghost' ? byId.get(String(it.id).slice(1)) || {} : {};
+        const txt = String(it.title || '') + ' ' + String(it.text || '');
+        const jp = (txt.match(/[\u3040-\u30ff\u4e00-\u9fff]/g) || []).length, lat = (txt.match(/[A-Za-z]/g) || []).length;
+        it.attr = {
+          lang: jp > 3 && jp >= lat * 0.3 ? 'ja' : (lat > 3 ? 'en' : 'other'),
+          len: txt.length < 80 ? 'short' : txt.length > 400 ? 'long' : 'mid',
+          age: it.kind === 'ghost' ? ((p.ageReview && p.ageReview.categories && p.ageReview.categories.length) ? '18' : 'all') : 'unknown',
+          tags: (p.tags || []).map((t) => String(t).replace(/^#/, '')),
+          likes: it.kind === 'ghost' ? (it.likes || 0) : 0, comments: it.kind === 'ghost' ? (Array.isArray(p.comments) ? p.comments.length : 0) : 0,
+          who: it.kind === 'ghost' ? (p.isOfficial ? 'official' : p.isBot ? 'bot' : 'user') : 'site',
+          media: p.contentType === 'video' || p.contentType === 'short' ? 'video' : ''
+        };
+      });
+      return all;
+    })();
+    return itemsPromise;
+  }
+
+  // 関連度順: タイトル > ドメイン > 説明 > 本文。Ghostは本文一致に人気(いいね・コメント)を加味、Webは新しいほど少し加点
+  function rank(items, terms) {
+    const now = Date.now();
+    const score = (it) => {
+      let s = 0;
+      const title = String(it.title || '').toLowerCase(), domain = String(it.domain || '').toLowerCase(), desc = String(it.description || '').toLowerCase();
+      const body = String(it.text || '').toLowerCase();
+      for (const t of terms) {
+        if (it.kind === 'web') { if (title.includes(t)) s += 5; if (domain.includes(t)) s += 3; if (desc.includes(t)) s += 2; if (it.snippet.includes(t)) s += 1; }
+        else if (body.includes(t)) s += 3;
+      }
+      if (terms.length > 1 && title.includes(terms.join(' '))) s += 4;
+      s += it.kind === 'ghost' ? Math.log1p(it.pop || 0) * 1.2 : Math.max(0, 1 - (now - it.ts) / (30 * 864e5));
+      return s;
+    };
+    return items.map((it) => ({ it, s: score(it) })).sort((a, b) => b.s - a.s || b.it.ts - a.it.ts).map((x) => x.it);
+  }
+
+  const AGE = (it) => it.attr && it.attr.age;
+  const host = (it) => String(it.domain || '').toLowerCase();
+  const TLD = { jp: (h) => h.endsWith('.jp') && !/\.(ac|go|ed)\.jp$/.test(h), com: (h) => h.endsWith('.com'), net: (h) => h.endsWith('.net'), org: (h) => h.endsWith('.org'), edu: (h) => h.endsWith('.edu') || h.endsWith('.ac.jp'), gov: (h) => h.endsWith('.gov') || h.endsWith('.go.jp'), io: (h) => h.endsWith('.io') || h.endsWith('.dev') || h.endsWith('.app') };
+  const FRESH = { d1: DAYMS(1), w1: DAYMS(7), m1: DAYMS(30), y1: DAYMS(365) };
+  function DAYMS(n) { return n * 864e5; }
+  const extraFilters = [
+    { key: 'age', title: '対象年齢', hint: '全年齢向け / 年齢制限あり(18+) / 未確認', icon: '🔞', options: [['all', '全年齢向け'], ['18', '年齢制限あり (18+)'], ['unknown', '未確認 (Webページ)']], match: (it, v) => v.includes(AGE(it)) },
+    { key: 'lang', title: '言語', hint: '本文の言語', icon: '🌐', options: [['ja', '日本語'], ['en', '英語'], ['other', 'その他']], match: (it, v) => v.includes(it.attr.lang) },
+    { key: 'fresh', title: '更新時期', hint: '投稿・登録がいつ頃か', icon: '🕒', options: [['d1', '24時間以内'], ['w1', '1週間以内'], ['m1', '1か月以内'], ['y1', '1年以内']], match: (it, v) => v.some((k) => Date.now() - it.ts <= FRESH[k]) },
+    { key: 'pop', title: '人気', hint: 'いいね・コメントの数(Ghost)', icon: '🔥', options: [['l5', 'いいね5以上'], ['l20', 'いいね20以上'], ['l50', 'いいね50以上'], ['c1', 'コメントあり']], match: (it, v) => v.every((k) => k[0] === 'l' ? it.attr.likes >= Number(k.slice(1)) : it.attr.comments >= Number(k.slice(1))) },
+    { key: 'len', title: '文章量', hint: '短文 / 標準 / 長文', icon: '📏', options: [['short', '短文 (80字未満)'], ['mid', '標準'], ['long', '長文 (400字以上)']], match: (it, v) => v.includes(it.attr.len) },
+    { key: 'tld', title: 'ドメイン種別', hint: '.jp .com .org .edu(学校) .gov(官公庁) など', icon: '🏷', options: [['jp', '.jp'], ['com', '.com'], ['net', '.net'], ['org', '.org'], ['edu', '教育機関 (.edu/.ac.jp)'], ['gov', '官公庁 (.gov/.go.jp)'], ['io', '開発系 (.io/.dev/.app)']], match: (it, v) => it.kind === 'web' && v.some((k) => TLD[k](host(it))) },
+    { key: 'tag', title: 'Ghostタグ', hint: 'Ghost投稿のタグ', icon: '#', options: (items) => { const c = new Map(); (items || []).forEach((i) => ((i.attr && i.attr.tags) || []).forEach((t) => c.set(t, (c.get(t) || 0) + 1))); return [...c.entries()].sort((a, b) => b[1] - a[1]).slice(0, 40).map(([t, n]) => [t, '#' + t + ' (' + n + ')']); }, match: (it, v) => v.some((t) => (it.attr.tags || []).includes(t)) },
+    { key: 'who', title: '投稿元', hint: '公式 / bot / 一般ユーザー / Webサイト', icon: '👥', options: [['official', '公式アカウント'], ['bot', 'bot'], ['user', '一般ユーザー'], ['site', 'Webサイト']], match: (it, v) => v.includes(it.attr.who) },
+    { key: 'file', title: 'ファイル形式 (Google)', hint: 'PDF・Word・Excel・PowerPointなど', icon: '📄', options: [['pdf', 'PDF'], ['docx', 'Word'], ['xlsx', 'Excel'], ['pptx', 'PowerPoint'], ['txt', 'テキスト']], match: () => false },
+    { key: 'safe', title: 'セーフサーチ (外部検索)', hint: '外部検索の安全フィルター。「オフ」は18歳以上のアカウントだけ有効', icon: '🛡', options: [['strict', '厳しい'], ['moderate', '標準'], ['off', 'オフ (18歳以上)']], match: () => true },
+    { key: 'sort', title: '並び替え', hint: '関連度 / 新しい順 / 人気順', icon: '↕', options: [['rel', '関連度順'], ['new', '新しい順'], ['pop', '人気順']], match: () => true }
+  ];
+  const SORT_ONLY = ['sort'], GOOGLE_OK = ['fresh', 'lang', 'tld', 'file', 'type', 'sort', 'from', 'safe'];
+  const chipVals = (chips, k) => chips.filter((c) => c.key === k).map((c) => c.value);
+  function googleQuery(q, chips) {
+    let query = q; const p = {};
+    const tld = chipVals(chips, 'tld')[0]; if (tld) query += ' site:' + ({ jp: 'jp', com: 'com', net: 'net', org: 'org', edu: 'edu', gov: 'gov', io: 'io' }[tld] || tld);
+    const from = chipVals(chips, 'from')[0]; if (from && /\./.test(from)) query += ' site:' + from;
+    const fresh = chipVals(chips, 'fresh')[0]; if (fresh) p.dr = fresh;
+    const lang = chipVals(chips, 'lang')[0]; if (lang && lang !== 'other') p.lr = 'lang_' + lang;
+    const file = chipVals(chips, 'file')[0]; if (file) p.ft = file;
+    return { query, p };
+  }
+  function googleUrl(q, chips) {
+    const g = googleQuery(q, chips), u = new URL('https://www.google.com/search'); u.searchParams.set('q', g.query);
+    if (g.p.dr) u.searchParams.set('tbs', 'qdr:' + g.p.dr[0] + (g.p.dr.slice(1) === '1' ? '' : g.p.dr.slice(1)));
+    if (g.p.lr) u.searchParams.set('lr', g.p.lr); if (g.p.ft) u.searchParams.set('as_filetype', g.p.ft);
+    return u.toString();
+  }
+  const searchOpts = {
+    extraFilters,
+    placeholder: '🔍 タップして検索（site: from: on: before: type: など）',
+    labels: { messages: 'すべて', links: 'リンクあり', empty: '条件に一致する結果が見つかりませんでした。' },
+    hideFilters: ['mentions'],
+    filterLabels: {
+      from: { title: 'サイト・投稿者', hint: '特定のサイト(ドメイン)またはGhostユーザー', icon: '🌐' },
+      has: { title: '含むもの', hint: '画像・動画・リンクなどを含む結果' },
+      type: { title: '種類', hint: 'Webページ または Ghost投稿' }
+    },
+    typeOptions: [['web', 'Webページ'], ['ghost', 'Ghost投稿'], ['pixiv', 'pixiv'], ['google', 'Google'], ['ddg', 'DuckDuckGo']],
+    typeOf: (item) => item.kind,
+    loadItems: () => loadItems(false),
+    sort: (items, terms, chips) => {
+      const mode = chipVals(chips || [], 'sort')[0];
+      if (mode === 'new') return items.slice().sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      if (mode === 'pop') return items.slice().sort((a, b) => ((b.pop || 0) - (a.pop || 0)) || ((b.ts || 0) - (a.ts || 0)));
+      return rank(items, terms);
+    },
+    remote: async (q, chips) => {
+      chips = chips || [];
+      const out = [];
+      const word = q.trim();
+      const blocked = chips.some((c) => !GOOGLE_OK.includes(c.key));
+      if (blocked) return out;
+      const looksUrl = /^https?:\/\//i.test(word) || (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(word));
+      if (looksUrl) out.push({ id: 'pxopen', kind: 'proxy', url: '/MAWS/?ServerAction=' + encodeURIComponent(/^https?:/i.test(word) ? word : 'https://' + word), title: word, authorId: 'proxy', authorName: 'MAWSプロキシ', ava: '🌐', text: 'プロキシで開く: ' + word, ts: 0, types: ['link'] });
+      try {
+        const r = await fetch('/api/pixiv?' + new URLSearchParams({ a: 'search', q: word, p: 1 })); const d = await r.json();
+        if (r.ok) (d.items || []).slice(0, 12).forEach((x) => out.push({ id: 'px' + x.id, kind: 'pixiv', url: '/MAWS/?ServerAction=' + encodeURIComponent('https://www.pixiv.net/artworks/' + x.id), title: x.title, authorId: 'pixiv', authorName: 'pixiv · ' + x.author, ava: x.thumb ? '<img src="' + esc(x.thumb) + '" alt="" referrerpolicy="no-referrer">' : '🎨', text: x.title + ' ' + (x.tags || []).map((t) => '#' + t).join(' '), ts: 0, types: ['image'] }));
+      } catch (_) {}
+      try {
+        const g0 = googleQuery(word, chips);
+        const dq = new URLSearchParams({ ddg: g0.query, token: session.token, safe: chipVals(chips, 'safe')[0] || 'moderate', ...(g0.p.dr ? { dr: g0.p.dr } : {}), ...(g0.p.lr ? { lr: g0.p.lr } : {}) });
+        const rd = await fetch('/api/maws?' + dq); const dd = await rd.json();
+        if (rd.ok) (dd.items || []).forEach((x, i) => out.push({ id: 'dd' + i, kind: 'ddg', url: x.url, title: x.title, authorId: x.domain, authorName: 'DuckDuckGo · ' + (x.domain || ''), ava: '🦆', text: x.title + '\n' + x.snippet, ts: 0, types: ['link'] }));
+      } catch (_) {}
+      try {
+        const g = googleQuery(word, chips);
+        const qs = new URLSearchParams({ google: g.query, token: session.token, ...g.p });
+        const r = await fetch('/api/maws?' + qs); const d = await r.json();
+        if (r.ok && d.configured) (d.items || []).forEach((x, i) => out.push({ id: 'gg' + i, kind: 'google', url: x.url, title: x.title, authorId: x.domain, authorName: 'Google · ' + (x.domain || ''), ava: '🔍', text: x.title + '\n' + x.snippet, ts: 0, types: ['link'] }));
+        else if (r.ok && d.limited) out.push({ id: 'ggl', kind: 'google', url: googleUrl(word, chips), title: 'Googleで検索', authorId: 'google', authorName: 'Google', ava: '🔍', text: '本日のGoogle連携の回数上限に達しました。Googleで直接開く', ts: 0, types: ['link'] });
+      } catch (_) {}
+      out.push({ id: 'ggopen', kind: 'google', url: googleUrl(word, chips), title: 'Googleで検索', authorId: 'google', authorName: 'Google', ava: '🔍', text: '「' + word + '」をGoogleで開く（新しいタブ）', ts: 0, types: ['link'] });
+      return out;
+    },
+    onPick: (item) => { if (item.kind === 'pixiv' || item.kind === 'proxy') location.href = item.url; else if ((item.kind === 'google' || item.kind === 'ddg') && /(^|\.)pixiv\.net$/.test((() => { try { return new URL(item.url).hostname; } catch (_) { return ''; } })())) location.href = '/MAWS/?ServerAction=' + encodeURIComponent(item.url);
+      else if (item.kind === 'web' || item.kind === 'google' || item.kind === 'ddg') window.open(item.url, '_blank', 'noopener,noreferrer'); else location.href = item.url; }
+  };
+  FilterSearch.attach($('mawsSearch'), searchOpts);
+
+  function card(it) {
+    if (it.kind === 'web') return `<div class="maws-item"><span class="maws-badge">Web</span><a class="maws-title" href="${esc(it.url)}" target="_blank" rel="noopener noreferrer nofollow">${esc(it.title)}</a><span class="maws-url">${esc(it.url)}</span>${it.description ? `<p class="maws-desc">${esc(it.description)}</p>` : ''}</div>`;
+    const body = String(it.text || '').replace(/\s+/g, ' ').trim();
+    return `<div class="maws-item"><span class="maws-badge">Ghost</span><a class="maws-title" href="${esc(it.url)}">${esc(body.slice(0, 90) || '(本文なし)')}</a><div class="maws-meta">${esc(it.authorName)} · ♥ ${it.likes} · 💬 ${it.comments}</div></div>`;
+  }
+  async function renderDefault() {
+    const items = await loadItems(false);
+    const top = rank(items.slice(), []).slice(0, 30);
+    $('mawsList').innerHTML = top.map(card).join('') || '<p class="muted">まだ結果がありません。下のフォームからWebページを登録できます。</p>';
+    $('mawsStatus').textContent = `検索対象: Webページ ${items.filter((i) => i.kind === 'web').length}件 / Ghost投稿 ${items.filter((i) => i.kind === 'ghost').length}件`;
+  }
+
+  $('submitForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const status = $('submitStatus'); const button = $('submitBtn');
+    status.textContent = 'ページを取得しています...'; button.disabled = true;
+    try {
+      const result = await Netrify.api('/api/maws', { action: 'submit', token: session.token, url: $('submitUrl').value.trim() });
+      status.textContent = (result.updated ? '更新しました: ' : '登録しました: ') + (result.entry?.title || '');
+      $('submitUrl').value = '';
+      itemsPromise = null;
+      renderDefault();
+    } catch (error) { status.textContent = error.message || '登録できませんでした'; }
+    finally { button.disabled = false; }
+  });
+  renderDefault();
+})();
+</script>
+</body></html>

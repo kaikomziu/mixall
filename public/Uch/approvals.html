@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uch 承認画面 - MixAll</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/mixall-nav.js" defer></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32"><link rel="manifest" href="/manifest.webmanifest"></head>
+<body><header class="top"><div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div><nav class="services"><a href="/Uch">Uch (掲示板)</a><a href="/Uch/approvals.html" class="active">承認画面</a><a href="/">トップへ</a></nav></header>
+<main><div class="card"><h2>承認画面</h2><p class="muted">自分が立てた承認制スレッドへの参加申請を承認・却下します（運営は全スレッド）。</p><div id="list"></div><div class="error" id="err"></div></div></main>
+<script src="/js/auth.js"></script>
+<script>
+const session = Netrify.requireLogin();
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function load() {
+  if (!session) return;
+  try {
+    const d = await Netrify.api('/api/uch', { action:'pendingApprovals', token:session.token });
+    document.getElementById('list').innerHTML = d.threads.map((t) => '<div class="thread-list-item"><div><a href="/Uch/thread.html?id=' + encodeURIComponent(t.threadId) + '" style="color:inherit"><div class="title">' + esc(t.title) + '</div></a>' + t.requests.map((r) => '<div class="row" style="margin-top:6px;align-items:center"><span style="flex:1">' + esc(r.name) + ' <small class="muted">' + esc(r.email) + ' ・ ' + new Date(r.at).toLocaleString() + (r.message ? ' ・ ' + esc(r.message) : '') + '</small></span><button class="secondary" data-a="approve" data-t="' + esc(t.threadId) + '" data-e="' + esc(r.email) + '">承認</button> <button class="ghost" data-a="deny" data-t="' + esc(t.threadId) + '" data-e="' + esc(r.email) + '">却下</button></div>').join('') + '</div></div>').join('') || '<p class="muted">承認待ちの申請はありません。</p>';
+    document.querySelectorAll('[data-a]').forEach((b) => b.onclick = async () => {
+      try { await Netrify.api('/api/uch', { action:'resolveJoin', token:session.token, threadId:b.dataset.t, targetEmail:b.dataset.e, decision:b.dataset.a }); load(); } catch (e) { document.getElementById('err').textContent = e.message; }
+    });
+  } catch (e) { document.getElementById('err').textContent = e.message; }
+}
+load(); setInterval(load, 10000);
+</script></body></html>

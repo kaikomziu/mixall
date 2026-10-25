@@ -4,7 +4,7 @@
   const api = (body) => {
     const session = window.Netrify?.requireLogin?.() || window.Netrify?.getSession?.();
     if (!session?.token) return Promise.reject(new Error('ログインが必要です'));
-    return window.Netrify.api('/.netlify/functions/custom', { token: session.token, ...body });
+    return window.Netrify.api('/api/custom', { token: session.token, ...body });
   };
   window.NetrifyCustom = {
     saveGameData(projectId, key, value) { return api({ action:'saveData', projectId, scope:'game', key, value }); },

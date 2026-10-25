@@ -4,32 +4,36 @@
 <style>.unread-badge{display:inline-flex;min-width:22px;height:22px;align-items:center;justify-content:center;padding:0 6px;border-radius:999px;background:var(--danger);color:#fff;font-size:.75rem;font-weight:700;margin-left:8px}.room-row{display:flex;justify-content:space-between;gap:10px;align-items:center}.room-row>div:first-child{min-width:0}</style>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ぽけっと - MixAll +（二世代）</title>
-<link rel="stylesheet" href="/css/style.css" />
-<script src="/js/settings.js"></script>
-<script src="/js/site-lock.js" defer></script>
-<script src="/js/calls.js" defer></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
-<script src="/js/mixall-nav.js" defer></script>
-<script src="/js/language-input.js"></script>
+  <meta name="keywords" content="MixAll, MiXaLl, MIXALL, mixall, Mix All, Mix-All, mix all, ミックスオール, ミクスオール, みっくすおーる, ﾐｯｸｽｵｰﾙ, ミックス・オール, mixalls, ぽけっと, ポケット, Pocket, pocket, チャット, グループチャット, 個人チャット, DM, 友達追加, メンション, 既読, トーク, MixAll, ミックスオール, ぽけっと, MixAll チャット, 無料チャット, グループチャット, 匿名チャット, 通話, ビデオ通話, 画像送信, スタンプ, 投票, 位置情報">
+  <link rel="canonical" href="https://mixalls.edgeone.dev/Pocket/">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 
-  <meta name="description" content="MixAll +（二世代）の個人・グループチャットと音声・ビデオ通話。">
+  <meta name="description" content="MixAllの個人・グループチャットと音声・ビデオ通話。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="ぽけっと - MixAll +（二世代）">
-  <meta property="og:description" content="MixAll +（二世代）の個人・グループチャットと音声・ビデオ通話。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/Pocket/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="ぽけっとのチャット">
+  <meta property="og:title" content="ぽけっと - MixAll">
+  <meta property="og:description" content="MixAllの個人・グループチャットと音声・ビデオ通話。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Pocket/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="ぽけっと">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ぽけっと - MixAll +（二世代）">
-  <meta name="twitter:description" content="MixAll +（二世代）の個人・グループチャットと音声・ビデオ通話。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/07-pocket-chat.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="ぽけっと - MixAll">
+  <meta name="twitter:description" content="MixAllの個人・グループチャットと音声・ビデオ通話。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/07-pocket-chat.jpg?v=20261019-2">
+<title>ぽけっと - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -38,7 +42,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><a href="/" style="color:inherit;"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div>
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
   <nav class="services">
     <a href="/Uch">Uch</a>
     <a href="/Pocket" class="active">ぽけっと</a>
@@ -49,23 +53,30 @@
 
 <main>
   <div class="card">
-    <h2>新しいチャット</h2>
-    <div class="row" style="margin-bottom: 12px;">
-      <button id="tabDm">個人チャット</button>
-      <button id="tabGroup" class="secondary">グループチャット</button>
+    <h2>友達追加</h2>
+    <p class="muted">この友達追加URLを友達に開いてもらうと、お互いに友達になります。</p>
+    <div class="row">
+      <input type="text" id="friendUrl" readonly style="flex:1;" placeholder="読み込み中..." />
+      <button type="button" id="copyFriendUrl" class="secondary">コピー</button>
     </div>
+    <div class="error" id="friendMsg"></div>
+  </div>
 
-    <div id="dmForm">
-      <input type="text" id="dmTarget" placeholder="相手のアドレス (例: taro01@bix.3erver)" />
+  <div class="card">
+    <h2>友達</h2>
+    <div id="friendList"><p class="muted">読み込み中...</p></div>
+  </div>
+
+  <div class="card">
+    <h2>グループを作る</h2>
+    <input type="text" id="groupTitle" placeholder="グループ名" />
+    <div style="position:relative;margin-top:8px;">
+      <input type="text" id="groupSearch" placeholder="友達を検索して選択（名前の一部）" autocomplete="off" />
+      <div id="groupPick" style="display:none;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:12px;margin-top:4px;padding:4px;background:var(--card,#fff);"></div>
     </div>
-
-    <div id="groupForm" style="display:none;">
-      <input type="text" id="groupTitle" placeholder="グループ名" />
-      <textarea id="groupMembers" placeholder="招待するアドレス (改行またはカンマ区切りで複数指定可)"></textarea>
-    </div>
-
+    <div id="groupChips" style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;"></div>
     <div class="error" id="createError"></div>
-    <button id="createSubmit">作成する</button>
+    <button id="createSubmit">グループを作成</button>
   </div>
 
   <div class="card">
@@ -74,65 +85,134 @@
   </div>
 </main>
 
+<script>
+// 友達追加URL(/Pocket/?friend=コード)から来た場合、ログイン後に処理できるよう控えておく
+(function () {
+  const code = new URLSearchParams(location.search).get('friend');
+  if (code) { try { localStorage.setItem('pocketPendingFriend', code); } catch (_) {} history.replaceState(null, '', '/Pocket/'); }
+})();
+</script>
 <script src="/js/auth.js"></script>
 <script>
 const session = Netrify.requireLogin();
-
-const tabDm = document.getElementById('tabDm');
-const tabGroup = document.getElementById('tabGroup');
-tabDm.onclick = () => { document.getElementById('dmForm').style.display='block'; document.getElementById('groupForm').style.display='none'; tabDm.className=''; tabGroup.className='secondary'; };
-tabGroup.onclick = () => { document.getElementById('dmForm').style.display='none'; document.getElementById('groupForm').style.display='block'; tabGroup.className=''; tabDm.className='secondary'; };
+const api = (body) => Netrify.api('/api/pocket', Object.assign({ token: session.token }, body));
+let friends = [];
+let rooms = [];
+const selected = new Map(); // email -> friend
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-
-async function loadRooms() {
-  if (!session) return;
-  const res = await fetch('/.netlify/functions/pocket?token=' + encodeURIComponent(session.token));
-  const data = await res.json();
-  const el = document.getElementById('roomList');
-  if (!data.rooms || data.rooms.length === 0) {
-    el.innerHTML = '<p class="muted">まだチャットがありません。</p>';
-    return;
+function avatar(profile, name) {
+  if (profile && profile.avatarUrl && !String(profile.avatarType || '').startsWith('video/')) {
+    return `<img src="${escapeHtml(profile.avatarUrl)}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;">`;
   }
-  el.innerHTML = data.rooms.map(r => `
-    <a class="thread-list-item" href="/Pocket/room.html?id=${encodeURIComponent(r.id)}" style="color:inherit;">
-      <div class="room-row"><div>
-        <div class="title">${escapeHtml(r.title || (r.type === 'dm' ? '個人チャット' : 'グループ'))}</div>
-        <div class="meta">${r.lastMessage ? escapeHtml(r.lastMessage.authorName) + ': ' + escapeHtml(r.lastMessage.text || '').slice(0,40) : 'まだメッセージがありません'}</div>
-      </div>${r.unreadCount ? `<span class="unread-badge" aria-label="未読${r.unreadCount}件">${r.unreadCount > 99 ? '99+' : r.unreadCount}</span>` : ''}</div>
-    </a>
-  `).join('');
+  return `<span style="width:34px;height:34px;border-radius:50%;background:var(--panel-2,#eee);display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none;">${escapeHtml(String(name || '?').slice(0, 1))}</span>`;
 }
+const nameOf = (f) => (f.profile && f.profile.displayName) || f.email;
+
+async function processPendingFriend() {
+  let code = null;
+  try { code = localStorage.getItem('pocketPendingFriend'); } catch (_) {}
+  if (!code || !session) return;
+  try { localStorage.removeItem('pocketPendingFriend'); } catch (_) {}
+  const msg = document.getElementById('friendMsg');
+  try {
+    const data = await api({ action: 'addFriendByCode', code });
+    msg.style.color = 'var(--ok, #0a7a3b)';
+    msg.textContent = `${nameOf(data.friend)} さんと友達になりました`;
+  } catch (e) { msg.style.color = ''; msg.textContent = e.message; }
+}
+
+async function loadFriendUrl() {
+  try {
+    const d = await api({ action: 'getFriendLink' });
+    document.getElementById('friendUrl').value = `${location.origin}/Pocket/?friend=${d.code}`;
+  } catch (e) { document.getElementById('friendUrl').placeholder = e.message; }
+}
+document.getElementById('copyFriendUrl').onclick = async () => {
+  const input = document.getElementById('friendUrl');
+  if (!input.value) return;
+  try { await navigator.clipboard.writeText(input.value); } catch (_) { input.select(); document.execCommand && document.execCommand('copy'); }
+  const msg = document.getElementById('friendMsg'); msg.style.color = 'var(--ok, #0a7a3b)'; msg.textContent = 'コピーしました';
+};
+
+async function loadFriends() {
+  try { const d = await api({ action: 'listFriends' }); friends = d.friends || []; } catch (_) { friends = []; }
+  const el = document.getElementById('friendList');
+  if (!friends.length) { el.innerHTML = '<p class="muted">まだ友達がいません。上の友達追加URLを送ってみましょう。</p>'; return; }
+  el.innerHTML = friends.map((f) => `
+    <div class="room-row" style="padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="display:flex;align-items:center;gap:10px;">${avatar(f.profile, nameOf(f))}<span>${escapeHtml(nameOf(f))}</span></span>
+      <button type="button" class="secondary" data-dm="${escapeHtml(f.email)}">チャット</button>
+    </div>`).join('');
+  el.querySelectorAll('[data-dm]').forEach((b) => { b.onclick = async () => {
+    const email = b.dataset.dm;
+    const existing = rooms.find((r) => r.type === 'dm' && Array.isArray(r.memberEmails) && r.memberEmails.includes(email));
+    try {
+      const id = existing ? existing.id : (await api({ action: 'createRoom', type: 'dm', memberEmails: [email] })).room.id;
+      location.href = '/Pocket/room.html?id=' + encodeURIComponent(id);
+    } catch (e) { alert(e.message); }
+  }; });
+}
+
+// ---- グループ作成(友達を選ぶ) ----
+const search = document.getElementById('groupSearch');
+const pick = document.getElementById('groupPick');
+function renderPick() {
+  const q = search.value.trim().toLowerCase();
+  const items = friends.filter((f) => !selected.has(f.email) && (!q || nameOf(f).toLowerCase().includes(q)));
+  if (!items.length) { pick.style.display = 'none'; return; }
+  pick.innerHTML = items.map((f) => `<button type="button" data-pick="${escapeHtml(f.email)}" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;border-radius:8px;color:inherit;">${avatar(f.profile, nameOf(f))}<span>${escapeHtml(nameOf(f))}</span></button>`).join('');
+  pick.style.display = 'block';
+}
+function renderChips() {
+  document.getElementById('groupChips').innerHTML = Array.from(selected.values()).map((f) =>
+    `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:rgba(11,111,196,.12);">${avatar(f.profile, nameOf(f))}${escapeHtml(nameOf(f))}<button type="button" data-unpick="${escapeHtml(f.email)}" style="border:0;background:transparent;color:inherit;font-size:1.1rem;">×</button></span>`).join('');
+}
+pick.addEventListener('mousedown', (e) => e.preventDefault());
+pick.addEventListener('click', (e) => { const b = e.target.closest('[data-pick]'); if (!b) return; const f = friends.find((x) => x.email === b.dataset.pick); if (f) selected.set(f.email, f); search.value = ''; renderChips(); renderPick(); });
+document.getElementById('groupChips').addEventListener('click', (e) => { const b = e.target.closest('[data-unpick]'); if (!b) return; selected.delete(b.dataset.unpick); renderChips(); renderPick(); });
+search.addEventListener('focus', renderPick);
+search.addEventListener('input', renderPick);
+search.addEventListener('blur', () => setTimeout(() => { pick.style.display = 'none'; }, 150));
 
 document.getElementById('createSubmit').onclick = async () => {
   const errEl = document.getElementById('createError');
   errEl.textContent = '';
-  const isDm = document.getElementById('dmForm').style.display !== 'none';
+  if (!selected.size) { errEl.textContent = '追加する友達を選んでください'; return; }
   try {
-    let data;
-    if (isDm) {
-      const target = document.getElementById('dmTarget').value.trim();
-      if (!target) { errEl.textContent = '相手のアドレスを入力してください'; return; }
-      data = await Netrify.api('/.netlify/functions/pocket', {
-        action: 'createRoom', token: session.token, type: 'dm', memberEmails: [target]
-      });
-    } else {
-      const title = document.getElementById('groupTitle').value.trim();
-      const members = document.getElementById('groupMembers').value.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
-      data = await Netrify.api('/.netlify/functions/pocket', {
-        action: 'createRoom', token: session.token, type: 'group', title, memberEmails: members
-      });
-    }
-    window.location.href = '/Pocket/room.html?id=' + encodeURIComponent(data.room.id);
-  } catch (e) {
-    errEl.textContent = e.message;
-  }
+    const title = document.getElementById('groupTitle').value.trim();
+    const data = await api({ action: 'createRoom', type: 'group', title, memberEmails: Array.from(selected.keys()) });
+    location.href = '/Pocket/room.html?id=' + encodeURIComponent(data.room.id);
+  } catch (e) { errEl.textContent = e.message; }
 };
 
-loadRooms();
-MixAllBase.poll(loadRooms, 12000); // 常時更新
+async function loadRooms() {
+  if (!session) return;
+  const res = await fetch('/api/pocket?token=' + encodeURIComponent(session.token));
+  const data = await res.json();
+  rooms = data.rooms || [];
+  const el = document.getElementById('roomList');
+  if (!rooms.length) { el.innerHTML = '<p class="muted">まだチャットがありません。</p>'; return; }
+  el.innerHTML = rooms.map(r => `
+    <a class="thread-list-item" href="/Pocket/room.html?id=${encodeURIComponent(r.id)}" style="color:inherit;">
+      <div class="room-row"><div>
+        <div class="title">${r.pinned ? '📌 ' : ''}${escapeHtml(r.title || (r.type === 'dm' ? '個人チャット' : 'グループ'))}</div>
+        <div class="meta">${r.lastMessage ? escapeHtml(r.lastMessage.authorName) + ': ' + escapeHtml(r.lastMessage.text || '').slice(0,40) : 'まだメッセージがありません'}</div>
+      </div><span style="display:flex;align-items:center;gap:6px;"><button type="button" class="ghost" data-pin="${escapeHtml(r.id)}" data-pinned="${r.pinned ? '1' : '0'}" title="${r.pinned ? 'ピン留めを外す' : 'ピン留め'}" style="padding:2px 8px;${r.pinned ? '' : 'opacity:.55;'}">📌</button>${r.unreadCount ? `<span class="unread-badge" aria-label="未読${r.unreadCount}件">${r.unreadCount > 99 ? '99+' : r.unreadCount}</span>` : ''}</span></div>
+    </a>
+  `).join('');
+  el.querySelectorAll('[data-pin]').forEach((b) => { b.onclick = async (ev) => { ev.preventDefault(); ev.stopPropagation(); b.disabled = true; try { await api({ action: 'pinRoom', roomId: b.dataset.pin, pinned: b.dataset.pinned !== '1' }); await loadRooms(); } catch (e) { alert(e.message); b.disabled = false; } }; });
+}
+
+(async () => {
+  await processPendingFriend();
+  await loadRooms();
+  await loadFriends();
+  loadFriendUrl();
+  setInterval(loadRooms, 8000);
+})();
 </script>
 </body>
 </html>

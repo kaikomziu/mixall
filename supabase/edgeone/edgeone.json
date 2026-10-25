@@ -1,0 +1,294 @@
+{
+  "rewrites": [
+    {
+      "source": "/reset-password",
+      "destination": "/reset-password/index.html"
+    },
+    {
+      "source": "/unlock",
+      "destination": "/unlock/index.html"
+    },
+    {
+      "source": "/unlock/",
+      "destination": "/unlock/index.html"
+    },
+    {
+      "source": "/Store",
+      "destination": "/Store/index.html"
+    },
+    {
+      "source": "/Store/",
+      "destination": "/Store/index.html"
+    },
+    {
+      "source": "/MAWS",
+      "destination": "/MAWS/index.html"
+    },
+    {
+      "source": "/MAWS/",
+      "destination": "/MAWS/index.html"
+    },
+    {
+      "source": "/Wiki",
+      "destination": "/Wiki/index.html"
+    },
+    {
+      "source": "/Wiki/",
+      "destination": "/Wiki/index.html"
+    },
+    {
+      "source": "/app",
+      "destination": "/app/index.html"
+    },
+    {
+      "source": "/app/",
+      "destination": "/app/index.html"
+    },
+    {
+      "source": "/Notifications",
+      "destination": "/Notifications/index.html"
+    },
+    {
+      "source": "/Notifications/",
+      "destination": "/Notifications/index.html"
+    },
+    {
+      "source": "/Tools",
+      "destination": "/Tools/index.html"
+    },
+    {
+      "source": "/Tools/",
+      "destination": "/Tools/index.html"
+    },
+    {
+      "source": "/Tools/*",
+      "destination": "/Tools/index.html"
+    },
+    {
+      "source": "/Uch",
+      "destination": "/Uch/index.html"
+    },
+    {
+      "source": "/Pocket",
+      "destination": "/Pocket/index.html"
+    },
+    {
+      "source": "/Language",
+      "destination": "/Language/index.html"
+    },
+    {
+      "source": "/Mail",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/lending",
+      "destination": "/lending/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/Custom",
+      "destination": "/Custom/index.html"
+    },
+    {
+      "source": "/Webhook",
+      "destination": "/Webhook/index.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/login/index.html"
+    },
+    {
+      "source": "/login/",
+      "destination": "/login/index.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/register/index.html"
+    },
+    {
+      "source": "/register/",
+      "destination": "/register/index.html"
+    },
+    {
+      "source": "/Create/text",
+      "destination": "/Create/text.html"
+    },
+    {
+      "source": "/ghost",
+      "destination": "/Ghost/index.html"
+    },
+    {
+      "source": "/ghost/",
+      "destination": "/Ghost/index.html"
+    },
+    {
+      "source": "/Ghost",
+      "destination": "/Ghost/index.html"
+    },
+    {
+      "source": "/Mail/Inbox",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/Mail/Inbox/",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/Mail/Sent",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/Mail/Sent/",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/Mail/All",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/Mail/All/",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/Mail/Compose",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/Mail/Compose/",
+      "destination": "/Mail/index.html"
+    },
+    {
+      "source": "/Mail/Thread/:id",
+      "destination": "/Mail/thread.html"
+    },
+    {
+      "source": "/Mail/Thread/:id/",
+      "destination": "/Mail/thread.html"
+    },
+    {
+      "source": "/company",
+      "destination": "/company/index.html"
+    },
+    {
+      "source": "/company/",
+      "destination": "/company/index.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms/index.html"
+    },
+    {
+      "source": "/terms/",
+      "destination": "/terms/index.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy/index.html"
+    },
+    {
+      "source": "/privacy/",
+      "destination": "/privacy/index.html"
+    },
+    {
+      "source": "/school/classroom",
+      "destination": "/school/classroom/index.html"
+    },
+    {
+      "source": "/school/classroom/",
+      "destination": "/school/classroom/index.html"
+    },
+    {
+      "source": "/school/register",
+      "destination": "/school/register/index.html"
+    },
+    {
+      "source": "/school/register/",
+      "destination": "/school/register/index.html"
+    },
+    {
+      "source": "/school",
+      "destination": "/school/index.html"
+    },
+    {
+      "source": "/school/",
+      "destination": "/school/index.html"
+    },
+    {
+      "source": "/Fomasu",
+      "destination": "/Fomasu/index.html"
+    },
+    {
+      "source": "/Fomasu/",
+      "destination": "/Fomasu/index.html"
+    },
+    {
+      "source": "/fomasu",
+      "destination": "/Fomasu/index.html"
+    },
+    {
+      "source": "/fomasu/",
+      "destination": "/Fomasu/index.html"
+    },
+    {
+      "source": "/Kodomiru",
+      "destination": "/Kodomiru/index.html"
+    },
+    {
+      "source": "/Kodomiru/",
+      "destination": "/Kodomiru/index.html"
+    },
+    {
+      "source": "/kodomiru",
+      "destination": "/Kodomiru/index.html"
+    },
+    {
+      "source": "/kodomiru/",
+      "destination": "/Kodomiru/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/ogp/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    },
+    {
+      "source": "/data/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=30"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
+  ],
+  "cloudFunctions": {
+    "nodejs": {
+      "maxDuration": 120
+    }
+  }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex"><title>ロック解除 - MixAll</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script></head>
+<body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div></header>
+<main><div class="card" style="max-width:420px;margin:24px auto;">
+  <h2 style="margin-top:0;">🔒 この端末はロックされています</h2>
+  <p class="muted" id="who">確認しています…</p>
+  <input type="password" id="pw" placeholder="この端末のパスワード" autocomplete="current-password" style="width:100%;box-sizing:border-box">
+  <div id="msg" class="muted" role="status" aria-live="polite" style="margin:8px 0;min-height:1.2em"></div>
+  <button type="button" id="go" style="width:100%">ロックを解除</button>
+  <p style="margin:14px 0 0"><a href="#" id="normal">パスワードを忘れた場合 / 別のアカウントでログイン</a></p>
+</div></main>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const LOCK_KEY = 'mixall_device_lock';
+  const next = new URLSearchParams(location.search).get('next') || '/';
+  const safeNext = /^\/(?!\/)/.test(next) ? next : '/';
+  let rec = null; try { rec = JSON.parse(localStorage.getItem(LOCK_KEY) || 'null'); } catch (_) {}
+  const api = async (body) => { const r = await fetch('/api/device-lock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); const d = await r.json().catch(() => ({})); if (!r.ok) throw Object.assign(new Error(d.error || '失敗しました'), { data: d }); return d; };
+  const toLogin = () => { location.replace('/login/?next=' + encodeURIComponent(safeNext)); };
+  $('normal').onclick = (e) => { e.preventDefault(); toLogin(); };
+  if (!rec || !rec.d) { toLogin(); return; }
+  api({ action: 'status', deviceToken: rec.d }).then((s) => {
+    if (!s.exists) { localStorage.removeItem(LOCK_KEY); toLogin(); return; }
+    $('who').textContent = (s.displayName || s.email) + ' のアカウントを開きます';
+  }).catch(() => { $('who').textContent = 'パスワードを入力してください'; });
+  async function unlock() {
+    $('msg').textContent = '確認中…'; $('go').disabled = true;
+    try {
+      const r = await api({ action: 'unlock', deviceToken: rec.d, password: $('pw').value });
+      if (r.needLogin || !r.session) { localStorage.removeItem(LOCK_KEY); alert('ログインの有効期限が切れました。もう一度ログインしてください。'); toLogin(); return; }
+      localStorage.setItem('netrify_session', JSON.stringify(r.session));
+      try { const list = JSON.parse(localStorage.getItem('netrify_accounts') || '[]').filter((a) => a && a.email !== r.session.email); list.unshift(r.session); localStorage.setItem('netrify_accounts', JSON.stringify(list.slice(0, 8))); } catch (_) {}
+      location.replace(safeNext);
+    } catch (e) {
+      if (e.data && e.data.gone) { localStorage.removeItem(LOCK_KEY); toLogin(); return; }
+      $('msg').textContent = e.message; $('go').disabled = false; $('pw').select();
+    }
+  }
+  $('go').onclick = unlock;
+  $('pw').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) unlock(); });
+})();
+</script></body></html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="MixAll, MiXaLl, MIXALL, mixall, Mix All, Mix-All, mix all, ミックスオール, ミクスオール, みっくすおーる, ﾐｯｸｽｵｰﾙ, ミックス・オール, mixalls, Wiki, wiki, ウィキ, みんなのWiki, ナレッジ, 百科事典, 情報源, 攻略, まとめ, MixAll, ミックスオール, Wiki, みんなのWiki, 無料Wiki, 百科事典">
+  <link rel="canonical" href="https://mixalls.edgeone.dev/Wiki/">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+
+<meta name="description" content="MixAllのみんなのWiki。ページの閲覧・検索・編集。">
+<meta property="og:title" content="みんなのWiki - MixAll"><meta property="og:type" content="website"><meta property="og:url" content="https://mixalls.edgeone.dev/Wiki/">
+<meta property="og:image" content="https://mixalls.edgeone.dev/ogp/17-tools.jpg?v=20261019-2"><meta name="twitter:card" content="summary_large_image">
+<title>みんなのWiki - MixAll</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script><script src="/js/auth.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/mixall-nav.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js" defer></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32"><link rel="manifest" href="/manifest.webmanifest">
+<style>
+.wiki-wrap{display:grid;grid-template-columns:320px 1fr;gap:14px;align-items:start}
+@media(max-width:800px){.wiki-wrap{grid-template-columns:1fr}}
+.wiki-item{padding:10px;border-bottom:1px solid var(--border,#ddd);cursor:pointer}.wiki-item:hover,.wiki-item.on{background:rgba(127,127,127,.14)}
+.wiki-item b{display:block}.wiki-item small{color:var(--text-dim,#777)}
+.wiki-view{overflow-wrap:anywhere}.wiki-view img{max-width:100%}
+.wiki-edit input,.wiki-edit textarea{width:100%;box-sizing:border-box;margin-bottom:8px}.wiki-edit textarea{min-height:50vh;font-family:inherit}
+</style></head>
+<body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div><nav class="services"><a href="/Tools">ツール</a><a href="/Wiki" class="active">Wiki</a><a href="/">トップへ</a></nav></header>
+<main>
+<div class="wiki-wrap">
+  <div class="card">
+    <h2>みんなのWiki</h2>
+    <input type="search" id="wikiSearch" placeholder="🔍 タップして検索（from: on: before: など）" readonly style="cursor:pointer;width:100%;box-sizing:border-box">
+    <div class="row" style="margin:8px 0"><button id="wikiNewBtn">＋ 新規ページ</button><button class="secondary" id="wikiReload">更新</button></div>
+    <div id="wikiList"></div>
+  </div>
+  <div class="card">
+    <div id="wikiView" class="wiki-view"><p class="muted">左の一覧からページを選ぶか、新規ページを作成してください。</p></div>
+    <div id="wikiEdit" class="wiki-edit" style="display:none">
+      <input id="wTitle" maxlength="120" placeholder="ページタイトル">
+      <textarea id="wBody" placeholder="Markdown風の本文"></textarea>
+      <div class="row"><button id="wSave">保存</button><button class="ghost" id="wCancel">キャンセル</button></div>
+    </div>
+    <div class="error" id="wErr"></div>
+  </div>
+</div>
+</main>
+<script src="/js/filter-search.js"></script>
+<script>
+(function(){
+const $=(id)=>document.getElementById(id);
+const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const session=(()=>{try{return Netrify.getSession();}catch(_){return null;}})();
+let pages=[],currentId='',editingId='';
+const api=async(action,data={},method='POST')=>{const payload={action,...data};if(session&&session.token)payload.token=session.token;
+  const r=await fetch('/api/tools'+(method==='GET'?'?'+new URLSearchParams(payload):''),method==='GET'?{cache:'no-store'}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('通信エラー ('+r.status+')'));return j;};
+const err=(m)=>{$('wErr').textContent=m||'';};
+const md=(t)=>{try{return DOMPurify.sanitize(marked.parse(String(t||'')));}catch(_){return esc(t).replace(/\n/g,'<br>');}};
+function renderList(){
+  $('wikiList').innerHTML=pages.map(p=>'<div class="wiki-item'+(p.id===currentId?' on':'')+'" data-id="'+esc(p.id)+'"><b>'+esc(p.title)+'</b><small>'+esc(p.authorName||'')+' ・ '+new Date(p.updatedAt).toLocaleDateString()+'</small></div>').join('')||'<p class="muted">Wikiはまだありません。</p>';
+  $('wikiList').querySelectorAll('.wiki-item').forEach(el=>el.onclick=()=>open(el.dataset.id));
+}
+async function load(){try{const r=await api('wikiList',{},'GET');pages=r.pages||[];renderList();const h=location.hash.slice(1);if(h&&!currentId)open(h);}catch(e){err(e.message);}}
+async function open(id){
+  err('');try{const r=await api('wikiGet',{id},'GET');const p=r.page;currentId=id;history.replaceState({},'','#'+id);renderList();$('wikiEdit').style.display='none';$('wikiView').style.display='block';
+    $('wikiView').innerHTML='<h1>'+esc(p.title)+'</h1><p class="muted">'+esc(p.authorName||'')+' ・ 更新 '+new Date(p.updatedAt).toLocaleString()+'</p><div>'+md(p.body)+'</div>'+(p.mine?'<div class="row" style="margin-top:14px"><button class="secondary" id="wEditBtn">編集</button><button class="danger-text" id="wDelBtn">削除</button></div>':'');
+    if(p.mine){$('wEditBtn').onclick=()=>edit(p);$('wDelBtn').onclick=async()=>{if(!confirm('このWikiページを削除しますか？'))return;try{await api('wikiDelete',{id});currentId='';$('wikiView').innerHTML='<p class="muted">削除しました。</p>';history.replaceState({},'','/Wiki');load();}catch(e){err(e.message);}};}
+    window.scrollTo({top:0,behavior:'smooth'});
+  }catch(e){err(e.message);}
+}
+function edit(p){
+  if(!session){location.href='/login/?next='+encodeURIComponent(location.pathname+location.hash);return;}
+  editingId=p?p.id:'';$('wTitle').value=p?p.title:'';$('wBody').value=p?p.body:'';$('wikiView').style.display='none';$('wikiEdit').style.display='block';
+}
+$('wikiNewBtn').onclick=()=>edit(null);
+$('wikiReload').onclick=load;
+$('wCancel').onclick=()=>{$('wikiEdit').style.display='none';$('wikiView').style.display='block';};
+$('wSave').onclick=async()=>{err('');try{const r=await api(editingId?'wikiUpdate':'wikiCreate',{id:editingId,title:$('wTitle').value,body:$('wBody').value});await load();open(r.page.id);}catch(e){err(e.message);}};
+// 検索（Uch/ぽけっとと同じ複数条件チップ検索）
+const box=$('wikiSearch');
+const openSearch=()=>{box.blur();if(!window.FilterSearch)return;
+  window.FilterSearch.open({
+    labels:{messages:'ページ',links:'リンク付き',empty:'条件に一致するWikiページが見つかりませんでした。'},
+    people:()=>{const m=new Map();pages.forEach(p=>{if(p.authorId&&!m.has(p.authorId))m.set(p.authorId,{id:p.authorId,name:p.authorName||'?'});});return [...m.values()];},
+    loadItems:async()=>{const r=await api('wikiList',{},'GET');pages=r.pages||pages;return pages.map(p=>{const text=(p.title+'\n'+(p.body||p.summary||'')).trim();return{id:p.id,authorId:p.authorId||p.authorName,authorName:p.authorName||'?',text,ts:Date.parse(p.updatedAt)||0,mentions:[],types:window.FilterSearch.typesOf(text,null),isBot:false};});},
+    onPick:(item)=>open(item.id)
+  });};
+box.addEventListener('focus',openSearch);box.addEventListener('click',openSearch);
+load();
+})();
+</script></body></html>

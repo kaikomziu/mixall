@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HTMLゲーム - Custom - MixAll</title>
+<meta name="description" content="HTMLファイルをアップロードして、ブラウザで遊べるゲームを公開できます。">
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/mixall-nav.js" defer></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+main{max-width:900px;margin:0 auto;padding-bottom:120px}
+.hg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.hg-card{border:1px solid var(--border);border-radius:14px;padding:12px;background:var(--panel);display:flex;flex-direction:column;gap:6px}
+.hg-card h3{margin:0;font-size:1.05rem;overflow-wrap:anywhere}
+.hg-card .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.hg-files{font-size:.82rem;max-height:140px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin:6px 0}
+.hg-drop{border:2px dashed var(--border);border-radius:12px;padding:16px;text-align:center}
+.hg-drop.on{border-color:var(--accent)}
+.hg-tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:999px;background:#dbeafe;color:#1e40af}
+.hg-tag.priv{background:#fee2e2;color:#991b1b}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Custom">カスタム</a><a href="/Custom/games.html" class="active">HTMLゲーム</a><a href="/">トップへ</a></nav></header>
+<main>
+<h1>🎮 HTMLゲーム</h1>
+<p class="muted" style="margin-top:-6px">HTMLファイル(またはzip・フォルダ)をアップロードすると、MixAllの中で遊べます。ゲーム内からデータを保存するしくみ(<code>MixAllCustom</code>)も使えます。</p>
+
+<div class="card" id="upCard">
+  <h2 id="upHead">ゲームをアップロード</h2>
+  <div class="hg-drop" id="drop">
+    <p style="margin:0 0 8px">ここに <b>.html</b> / <b>.zip</b> / フォルダ をドロップ、または選択</p>
+    <input type="file" id="fFiles" multiple accept=".html,.htm,.zip,.css,.js,.mjs,.json,.svg,.png,.jpg,.jpeg,.gif,.webp,.mp3,.ogg,.wav,.m4a,.woff,.woff2,.ttf,.otf,.txt,.glsl" style="display:none">
+    <input type="file" id="fDir" webkitdirectory style="display:none">
+    <button type="button" class="secondary" id="pickFiles">ファイルを選ぶ</button> <button type="button" class="secondary" id="pickDir">フォルダを選ぶ</button>
+  </div>
+  <div id="fileInfo" class="muted" style="margin-top:8px"></div>
+  <div id="metaBox" hidden>
+    <label>最初に開くHTML <select id="entrySel"></select></label>
+    <input type="text" id="gName" maxlength="80" placeholder="ゲームの名前" style="width:100%;box-sizing:border-box;margin-top:6px">
+    <textarea id="gDesc" rows="2" maxlength="400" placeholder="説明・遊び方(任意)" style="width:100%;box-sizing:border-box;margin-top:6px"></textarea>
+    <div class="row" style="margin:8px 0"><label class="muted"><input type="radio" name="vis" value="public" checked style="width:auto"> 公開(みんなが遊べる)</label> <label class="muted"><input type="radio" name="vis" value="private" style="width:auto"> 非公開(自分だけ)</label></div>
+    <div class="error" id="upErr"></div>
+    <div class="row"><button type="button" id="upGo">アップロード</button><button type="button" class="ghost" id="upCancel">やめる</button></div>
+    <p class="muted" style="font-size:.8rem">公開すると、年齢や安全性の確認(自動・運営)が行われることがあり、確認が済むまで他の人には表示されない場合があります。1ファイル1.5MBまで・合計4MBまで。外部サイトへの通信はできません(安全のため)。</p>
+  </div>
+</div>
+
+<h2>みんなのゲーム</h2>
+<div id="list" class="hg-grid"><p class="muted">読み込み中…</p></div>
+
+<div class="card" style="margin-top:18px">
+  <h3>ゲームからデータを保存したいとき</h3>
+  <p class="muted">ゲームのJavaScriptの中で、次のように書くと保存・読み込みができます(ログインしている人ごとの保存と、みんなで共有する保存を選べます)。</p>
+<pre style="overflow:auto;font-size:.82rem">// 自分だけのセーブ(既定)
+await MixAllCustom.save('score', { best: 120 });
+const d = await MixAllCustom.load('score');   // 未保存なら null
+
+// みんなで共有する保存(オンライン用)
+await MixAllCustom.save('room:1', { turn: 3 }, { scope: 'game' });
+const all = await MixAllCustom.list('room:');  // [{key, value, updatedAt}]
+await MixAllCustom.remove('room:1');
+
+MixAllCustom.user // { name, id }</pre>
+</div>
+</main>
+<script src="/js/auth.js"></script>
+<script src="/js/custom-html-game.js"></script>
+<script src="/js/custom-games.js"></script>
+</body>
+</html>

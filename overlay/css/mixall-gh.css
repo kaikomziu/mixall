@@ -1,0 +1,18 @@
+/* css/mixall-gh.css（GitHub Pages 版だけで使う）: ロゴの横に「二世代」の小さなバッジを出す */
+header.top .brand::after {
+  content: "+ 二世代";
+  display: inline-block;
+  margin-left: .4em;
+  padding: .12em .5em;
+  border-radius: 999px;
+  font-size: .62em;
+  font-weight: 700;
+  line-height: 1.4;
+  vertical-align: .35em;
+  color: #fff;
+  background: linear-gradient(100deg, #4fdcff, #8b6bff 55%, #ff5c9a);
+  white-space: nowrap;
+}
+/* チャット画面ではロゴの位置に部屋名が出るので付けない */
+body:has(#messageList) header.top .brand::after,
+body:has(#roomList) header.top .brand::after { content: none; }

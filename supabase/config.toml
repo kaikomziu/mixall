@@ -1,6 +1,6 @@
 project_id = "kifnzvktwbomxthzvvgy"
 
 [functions.mixall-api]
-# scripts/build-edge.mjs が生成するバンドル
+# scripts/build-edge.mjs が組み立てる（server/edge-router.js ＋ cloud/）
 entrypoint = "./functions/mixall-api/index.js"
 verify_jwt = false

@@ -1,0 +1,69 @@
+<!doctype html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="MixAll Ghostの音源ページ。この音源を使った動画・投稿を見たり、自分の投稿で使えます。">
+  
+  
+  
+  <title>音源 - MixAll Ghost</title><link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script><meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+.snd-head{display:flex;gap:14px;align-items:center}
+.snd-cover{width:92px;height:128px;border-radius:10px;background:var(--panel-2,#222);flex:0 0 auto;overflow:hidden;display:grid;place-items:center;font-size:2rem}
+.snd-cover video,.snd-cover img{width:100%;height:100%;object-fit:cover}
+.snd-title{margin:0 0 4px;font-size:1.25rem;overflow-wrap:anywhere}
+.snd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:12px}
+.snd-tile{position:relative;display:block;aspect-ratio:9/14;background:#000;overflow:hidden;color:#fff;text-decoration:none}
+.snd-tile video,.snd-tile img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.snd-tile span{position:absolute;left:6px;bottom:5px;right:6px;font-size:.78rem;text-shadow:0 1px 3px #000;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.snd-use{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom));z-index:30;display:inline-flex;align-items:center;gap:10px;padding:14px 26px;border-radius:999px;background:#e0002e;color:#fff;font-weight:700;font-size:1.02rem;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+main{padding-bottom:150px}
+</style></head><body><header class="top"><div class="brand"><a href="/Ghost" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Ghost/videos.html">動画</a><a href="/">トップへ</a></nav></header><main>
+<div id="sound" class="card"><p class="muted">読み込み中...</p></div>
+<div class="card"><h3 style="margin-top:0">この音源を使った投稿 <span class="muted" id="useCount"></span></h3><div id="uses" class="snd-grid"></div><p class="muted" id="usesEmpty" style="display:none">まだこの音源を使った投稿はありません。最初の1本になりませんか？</p></div>
+</main><a class="snd-use" id="useBtn" href="#" style="display:none">📷 このサウンドを使用する</a>
+<script src="/js/auth.js"></script><script src="/js/ghost-sound.js"></script>
+<script>
+const id=(new URLSearchParams(location.search).get('id')||'').replace(/[^A-Za-z0-9_-]/g,'');
+const esc=GhostSound&&((s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
+function tile(p){
+  const media=p.media||[];
+  const img=media.find(m=>m.kind==='image'||m.kind==='imageBlob'||m.kind==='imageUrl');
+  const vid=media.find(m=>m.kind==='videoBlob'||m.kind==='videoFile'||m.kind==='videoUrl');
+  let inner='';
+  if(img)inner='<img loading="lazy" src="'+esc(img.mediaUrl||img.dataUrl||img.url||'')+'" alt="">';
+  else if(vid&&vid.kind!=='videoUrl')inner='<video muted playsinline preload="metadata" src="'+esc((vid.mediaUrl||vid.dataUrl||'')+'#t=0.1')+'"></video>';
+  else inner='<div style="display:grid;place-items:center;height:100%">🎬</div>';
+  const likes=(p.likes||[]).length;
+  return '<a class="snd-tile" href="/Ghost/post.html?id='+encodeURIComponent(p.id)+'">'+inner+'<span>♥ '+likes+' · '+esc(p.authorProfile?.displayName||p.authorName||'')+'</span></a>';
+}
+async function load(){
+  const s=Netrify.requireLogin(); if(!s)return;
+  const box=document.getElementById('sound');
+  if(!id){box.innerHTML='<p class="error">音源が指定されていません。</p>';return;}
+  const tk='&token='+encodeURIComponent(s.token);
+  const [r1,r2]=await Promise.all([fetch('/api/ghost?post='+encodeURIComponent(id)+tk),fetch('/api/ghost?sound='+encodeURIComponent(id)+'&limit=100'+tk)]);
+  const d1=await r1.json().catch(()=>({})); const d2=await r2.json().catch(()=>({}));
+  if(!r1.ok||!d1.post||d1.post.deleted){box.innerHTML='<p class="error">この音源は元の投稿が削除されたため、現在は使用できません。</p>';}
+  else{
+    const p=d1.post; const url=GhostSound.sourceUrl(p);
+    const name=p.authorProfile?.displayName||p.authorName||'';
+    document.title='音源 - '+(p.title||name)+' - MixAll Ghost';
+    box.innerHTML='<div class="snd-head"><div class="snd-cover">'+(url?'<video muted playsinline preload="metadata" src="'+esc(url+'#t=0.1')+'"></video>':'♪')+'</div><div style="min-width:0"><h2 class="snd-title">'+esc(p.title||'オリジナル音源')+'</h2><div class="muted">♪ オリジナル音源 · <a href="/Ghost/profile.html?handle='+encodeURIComponent(p.authorProfile?.handle||'')+'">'+esc(name)+'</a></div><div class="muted" style="margin-top:4px">'+(d2.posts||[]).length+' 件の投稿で使用</div><div class="row" style="margin-top:10px"><button type="button" class="ghost" id="play">▶ 試聴</button><a class="ghost" href="/Ghost/post.html?id='+encodeURIComponent(p.id)+'" style="padding:7px 11px;border:1px solid var(--border);border-radius:8px">元の投稿</a></div></div></div>';
+    let audio=null;
+    document.getElementById('play').onclick=function(){ if(!url)return; if(!audio){audio=new Audio(url);audio.onended=()=>{this.textContent='▶ 試聴'};} if(audio.paused){audio.play().catch(()=>{});this.textContent='■ 停止';}else{audio.pause();this.textContent='▶ 試聴';} };
+    const use=document.getElementById('useBtn'); use.href='/Ghost/?compose=1&sound='+encodeURIComponent(id); use.style.display=url?'inline-flex':'none';
+    const all=[p,...((d2.posts||[]).filter(x=>x.id!==p.id))];
+    document.getElementById('uses').innerHTML=(d2.posts||[]).map(tile).join('');
+    document.getElementById('useCount').textContent=(d2.posts||[]).length?('('+(d2.posts||[]).length+')'):'';
+    document.getElementById('usesEmpty').style.display=(d2.posts||[]).length?'none':'block';
+  }
+}
+load();
+</script><script src="/js/ghost-nav.js"></script>
+</body></html>

@@ -61,16 +61,21 @@
       const response = await fetch(link.href, { cache: 'no-store' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const html = await response.text();
-      if (!/MixAll + 緊急通信/.test(html) || !/<html[\s>]/i.test(html)) throw new Error('緊急通信HTMLの内容を確認できません');
-      const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
-      setStatus('この端末用のBlob URLで緊急通信を開きます。', 'local');
-      window.location.assign(blobUrl);
+      if (!/MixAll 緊急通信/.test(html) || !/<html[\s>]/i.test(html)) throw new Error('緊急通信HTMLの内容を確認できません');
+      // 緊急モードのURLは data URL(ページの中身そのものをURLにしたもの)。サーバーに頼らず、サイトが落ちていても開ける。
+      const bytes = new TextEncoder().encode(html); let bin = ''; for (let k = 0; k < bytes.length; k += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(k, k + 0x8000));
+      const dataUrl = 'data:text/html;charset=utf-8;base64,' + btoa(bin);
+      const box = $('dataUrlBox'), ta = $('dataUrlText'); if (ta) ta.value = dataUrl; if (box) box.hidden = false;
+      setStatus('緊急モードのデータURLを作りました(下のURLをコピーして、ブラウザのアドレス欄に貼り付けるか、ブックマークしてください)', 'local');
+      link.textContent = label; link.removeAttribute('aria-busy');
+      try { window.location.assign(dataUrl); } catch (_) {} // ブラウザによっては、ページからのdata:移動は禁止される(その場合は上のURLをコピーして使う)
     } catch (error) {
       link.textContent = label;
       link.removeAttribute('aria-busy');
       setStatus(`緊急通信HTMLを開けませんでした: ${error.message}`, 'error');
     }
   });
+  $('copyDataUrl')?.addEventListener('click', async () => { const ta = $('dataUrlText'); if (!ta || !ta.value) return; try { await navigator.clipboard.writeText(ta.value); } catch (_) { ta.select(); document.execCommand && document.execCommand('copy'); } $('copyDataUrl').textContent = '✓ コピーしました'; setTimeout(() => { $('copyDataUrl').textContent = 'データURLをコピー'; }, 1500); });
   function connectionIsWeak() {
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (!connection) return false;
@@ -105,7 +110,7 @@
   });
   $('exportButton').addEventListener('click', async () => { const payload = {format:'mixall-emergency-local', version:1, exportedAt:new Date().toISOString(), messages:await allMessages()}; download(`mixall-emergency-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(payload, null, 2), 'application/json'); });
   $('importFile').addEventListener('change', async (event) => { const file = event.target.files?.[0]; if (!file) return; try { const data=JSON.parse(await file.text()); if(data.format !== 'mixall-emergency-local' || !Array.isArray(data.messages)) throw new Error('緊急メモ形式ではありません'); await replaceMessages(data.messages.slice(-500)); await renderMessages(); setStatus('緊急メモを端末へ復元しました。', 'local'); } catch(error) { setStatus(`復元失敗: ${error.message}`, 'error'); } event.target.value=''; });
-  $('clearButton').addEventListener('click', async () => { if (!(await MixAllDialog.confirm('この端末の緊急メモをすべて削除しますか？'))) return; await replaceMessages([]); await renderMessages(); });
+  $('clearButton').addEventListener('click', async () => { if (!confirm('この端末の緊急メモをすべて削除しますか？')) return; await replaceMessages([]); await renderMessages(); });
   $('cacheButton').addEventListener('click', async () => { try { await cacheCore(); setStatus('緊急モードの起動ファイルを更新しました。', 'online'); } catch(error) { setStatus(`キャッシュ更新失敗: ${error.message}`, 'error'); } });
   $('apkDownloadButton').addEventListener('click', () => downloadApk('手動操作'));
   $('enableMonitorButton').addEventListener('click', () => { window.MixAllEmergencyMonitor?.enable(); $('monitorStatus').textContent = '危険監視を有効化しました。位置情報の許可を確認してください。'; });

@@ -1,165 +1,742 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ghost - MixAll +（二世代）</title>
-  <meta name="description" content="MixAll +（二世代） Ghostのフィード。テキスト、画像、作品、動画を投稿して楽しめます。">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="keywords" content="MixAll, MiXaLl, MIXALL, mixall, Mix All, Mix-All, mix all, ミックスオール, ミクスオール, みっくすおーる, ﾐｯｸｽｵｰﾙ, ミックス・オール, mixalls, Ghost, ゴースト, ごーすと, SNS, 投稿, タイムライン, 動画, ショート動画, ライブ, フォロー, ハッシュタグ, ブックマーク, MixAll, ミックスオール, Ghost, SNS, 匿名SNS, 投稿, 無料SNS, MixAll SNS">
+  <link rel="canonical" href="https://mixalls.edgeone.dev/Ghost/">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+
+  <meta name="description" content="テキスト、画像、作品を投稿して楽しめるMixAll Ghostのフィード。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Ghost - MixAll +（二世代）">
-  <meta property="og:description" content="MixAll +（二世代） Ghostのフィード。テキスト、画像、作品、動画を投稿して楽しめます。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/ghost/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="Ghostのフィード">
+  <meta property="og:title" content="Ghost - MixAll">
+  <meta property="og:description" content="テキスト、画像、作品を投稿して楽しめるMixAll Ghostのフィード。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Ghost/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/01-ghost-feed.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/01-ghost-feed.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="Ghost - フィード">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ghost - MixAll +（二世代）">
-  <meta name="twitter:description" content="MixAll +（二世代） Ghostのフィード。テキスト、画像、作品、動画を投稿して楽しめます。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/01-ghost-feed.jpg?v=20261020-plus">
-  <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
-  <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
-  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <script>
-    // 旧URL（/Ghost/?@handle や ?handle=）はプロフィールへ
-    (function () {
-      const params = new URLSearchParams(location.search);
-      const handle = params.get('handle') || (/^\?@/.test(location.search) ? location.search.slice(2) : '');
-      if (handle) location.replace('/Ghost/profile.html?handle=' + encodeURIComponent(handle));
-    })();
-  </script>
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="/js/settings.js"></script>
-  <script src="/js/site-lock.js" defer></script>
-  <script src="/js/mixall-nav.js" defer></script>
-  <style>
-    .gf-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 12px; }
-    .gf-tabs::-webkit-scrollbar { display: none; }
-    .gf-tabs button { flex: 0 0 auto; border-radius: 999px !important; }
-    .gf-tabs button[aria-pressed="true"] { color: #fff !important; background: var(--mx-grad) !important; border-color: transparent !important; }
-    .gf-compose { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text-dim); }
-    .gf-compose .fake { flex: 1; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel-2); }
-    .gf-post { padding: 14px 16px; }
-    .gf-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .gf-avatar { width: 42px; height: 42px; flex: 0 0 42px; border-radius: 50%; background: var(--mx-grad) center/cover no-repeat; display: grid; place-items: center; color: #fff; font-weight: 800; }
-    .gf-name { font-weight: 800; color: var(--text); }
-    .gf-handle, .gf-time { color: var(--text-dim); font-size: .82rem; }
-    .gf-title { margin: 4px 0 6px; font-size: 1.05rem; font-weight: 800; }
-    .gf-text { margin: 0 0 8px; line-height: 1.65; }
-    .gf-media { display: grid; gap: 6px; margin: 8px 0; }
-    .gf-media.n2 { grid-template-columns: 1fr 1fr; }
-    .gf-media img, .gf-media video { width: 100%; max-height: 520px; object-fit: cover; border-radius: 14px; background: #000; }
-    .gf-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
-    .gf-tags a { font-size: .82rem; font-weight: 700; }
-    .gf-actions { display: flex; gap: 6px; margin-top: 6px; }
-    .gf-actions button, .gf-actions a { display: inline-flex; align-items: center; gap: 6px; min-height: 36px !important; padding: 6px 12px !important; border-radius: 999px !important; font-size: .88rem; font-weight: 700; color: var(--text-dim) !important; background: transparent !important; border: 1px solid transparent !important; box-shadow: none !important; text-decoration: none; }
-    .gf-actions button:hover, .gf-actions a:hover { background: color-mix(in srgb, var(--text) 7%, transparent) !important; color: var(--text) !important; }
-    .gf-actions .liked { color: #ff4f8b !important; }
-    .gf-actions .liked svg { fill: currentColor; }
-    .gf-more { display: block; margin: 8px auto 20px; }
-    .gf-more[hidden] { display: none; }
-  </style>
+  <meta name="twitter:title" content="Ghost - MixAll">
+  <meta name="twitter:description" content="テキスト、画像、作品を投稿して楽しめるMixAll Ghostのフィード。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/01-ghost-feed.jpg?v=20261019-2">
+<title>Ghost - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<style>
+.ghost-post { margin-bottom: 16px; }
+.ghost-post img, .ghost-post video { width: 100%; border-radius: 8px; margin: 6px 0; display:block; }
+.media-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(min(100%,220px),1fr)); gap:6px; margin: 8px 0; align-items:start; }
+.media-grid img, .media-grid video { width:100%; height:auto; border-radius:8px; margin:0; max-height:none; object-fit:contain; background:rgba(127,127,127,.08); }
+.ghost-post .head { display:flex; justify-content:space-between; align-items:center; }
+.ghost-post .actions { display:flex; gap:12px; margin-top:10px; }
+.ghost-post .actions button { padding: 4px 10px; font-size: 0.85rem; }
+.attach-row { display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0; }
+.attach-chip { position:relative; width:70px; height:70px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+.attach-chip img, .attach-chip video { width:100%; height:100%; object-fit:cover; }
+.attach-chip .rm { position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.6); color:#fff; border:0; border-radius:50%; width:18px; height:18px; font-size:0.7rem; line-height:1; cursor:pointer; }
+.comments { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+.comment-item { display:flex; justify-content:space-between; padding: 6px 0; font-size:0.9rem; }
+  .comment-item .del { font-size:0.75rem; }
+  .ghost-post .text { white-space:pre-wrap; overflow-wrap:anywhere; }
+
+  .vwrap{position:relative}
+  .vwrap .vdur{position:absolute;left:8px;bottom:44px;background:rgba(0,0,0,.72);color:#fff;font-size:.75rem;padding:1px 7px;border-radius:5px;pointer-events:none}
+  .vwrap.playing .vdur{display:none}
+  .gh-sched{background:#fef3c7;color:#78350f;border-radius:8px;padding:5px 10px;font-size:.82rem;margin-bottom:8px}
+  .gh-pin{font-size:.75rem;color:var(--accent);font-weight:700}
+  .gh-badge{display:inline-block;font-size:.72rem;padding:1px 9px;border-radius:999px;background:#0096fa22;color:#0096fa;font-weight:700;margin-bottom:6px}
+  /* X風(テキスト): 区切り線だけの軽いタイムライン */
+  .ghost-post.text{border-radius:0;border-width:0 0 1px 0;border-top:0 !important;box-shadow:none;background:transparent;padding:12px 2px}
+  .ghost-post.text h3.text{font-size:1rem;margin:2px 0}
+  .ghost-post.text .ghost-text-content{font-size:1.02rem;line-height:1.55}
+  .ghost-post.text .media-grid{max-width:520px}
+  .ghost-post.text .actions{gap:4px;justify-content:space-between;max-width:420px}
+  .ghost-post.text .actions button{border:0;background:transparent;padding:4px 8px}
+  /* Instagram風(画像): 正方形の大きな画像→いいね→キャプション */
+  .ghost-post.photo{padding:0 0 10px;overflow:hidden;border-radius:14px}
+  .ghost-post.photo .head{padding:10px 12px}
+  .ghost-post.photo .media-grid{display:block;margin:0}
+  .ghost-post.photo .media-grid img{border-radius:0;aspect-ratio:1/1;object-fit:cover;max-height:620px}
+  .ghost-post.photo .actions,.ghost-post.photo .ghost-tags,.ghost-post.photo .text,.ghost-post.photo .comments{padding-left:12px;padding-right:12px}
+  /* Pixiv風(作品): 作品ページのように、画像を大きく・タイトル・タグをチップで */
+  .ghost-post.illustration{background:var(--panel-2,#1a1f2b);border-radius:10px}
+  .ghost-post.illustration .media-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));background:#0003;border-radius:8px;padding:6px}
+  .ghost-post.illustration .media-grid img{object-fit:contain;max-height:720px;background:transparent}
+  .ghost-post.illustration h3.text{font-size:1.25rem;margin:8px 0 2px}
+  .ghost-post.illustration .head{font-size:.85rem;opacity:.9}
+  .ghost-post.illustration .ghost-tags span{background:#0096fa1f;border-radius:999px;padding:1px 10px;color:#0096fa}
+  .ghost-post.short .media-grid { max-width: 420px; margin-left:auto; margin-right:auto; }
+  .ghost-post.short .media-grid img, .ghost-post.short .media-grid video { aspect-ratio: 9 / 16; max-height: 520px; object-fit: cover; }
+  .ghost-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .ghost-tags span { color:var(--accent); font-size:0.82rem; }
+  body { padding-bottom: 78px; }
+  .ghost-bottom-nav { position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; justify-content:center; gap:8px; padding:10px max(12px, env(safe-area-inset-left)) calc(10px + env(safe-area-inset-bottom)); background:color-mix(in srgb, var(--panel) 96%, transparent); border-top:1px solid var(--border); backdrop-filter:blur(12px); }
+  .ghost-bottom-nav a, .ghost-bottom-nav button { flex:1; max-width:150px; text-align:center; padding:9px 7px; border-radius:999px; border:1px solid transparent; color:var(--text); text-decoration:none; background:transparent; font:inherit; cursor:pointer; }
+  .ghost-bottom-nav a:hover, .ghost-bottom-nav button:hover { background:var(--panel-2); color:var(--accent); }
+  @media (min-width:700px) { .ghost-bottom-nav { left:50%; right:auto; width:min(620px, calc(100% - 32px)); transform:translateX(-50%); border:1px solid var(--border); border-bottom:0; border-radius:16px 16px 0 0; } }
+ .message-context-menu{position:fixed;max-height:calc(100dvh - 16px);max-width:calc(100vw - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:3000;display:none;min-width:170px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:0 8px 28px rgba(0,0,0,.22)}.message-context-menu button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--text);padding:10px 12px;border-radius:8px} .message-context-menu button:hover{background:var(--panel-2)}
+</style>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
+
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
-<header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div>
-  <nav class="services"><a href="/Ghost">ホーム</a><a href="/Ghost/watch.html">動画</a><a href="/Ghost/videos.html">ショート</a><a href="/Ghost/live.html">ライブ</a><a href="/Ghost/search.html">検索</a><a href="/Ghost/notifications.html">通知</a><a href="/Ghost/bookmarks.html">保存済み</a><a href="/">トップへ</a></nav></header>
-<main>
-  <a class="card gf-compose" href="/Ghost/compose.html"><span class="gf-avatar" id="gfMe">＋</span><span class="fake">いまどうしてる？</span><span class="button">投稿</span></a>
-  <div class="gf-tabs" role="tablist" aria-label="表示する投稿">
-    <button type="button" class="secondary" data-channel="timeline" aria-pressed="true">タイムライン</button>
-    <button type="button" class="secondary" data-channel="" aria-pressed="false">すべて</button>
-    <button type="button" class="secondary" data-channel="video" aria-pressed="false">動画</button>
-    <button type="button" class="secondary" data-channel="short" aria-pressed="false">ショート</button>
-  </div>
-  <div id="feed"><p class="muted">読み込み中...</p></div>
-  <button type="button" class="secondary gf-more" id="gfMore" hidden>もっと見る</button>
-</main>
-<script src="/js/auth.js"></script>
-<script>
-(function () {
-  const session = Netrify.requireLogin();
-  if (!session) return;
-  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const yt = (u) => { const m = String(u || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]+)/); return m ? 'https://www.youtube.com/embed/' + m[1] : ''; };
-  let channel = 'timeline'; let limit = 30; let loading = false;
-  const me = document.getElementById('gfMe');
-  // アイコンは Storage のURL（https）の場合もある。動画アイコンは背景にできないので除く
-  if (session.avatarUrl && (/^data:image/.test(session.avatarUrl) || (/^https:/.test(session.avatarUrl) && !String(session.avatarType || '').startsWith('video/')))) { me.style.backgroundImage = `url('${session.avatarUrl}')`; me.textContent = ''; }
+<header class="top">
+  <div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div>
+  <nav class="services">
+    <a href="/Uch">Uch</a>
+    <a href="/Pocket">ぽけっと</a>
+    <a href="/Ghost" class="active">Ghost</a>
+    <a href="/Ghost/live.html">ライブ</a>
+    <a href="/Ghost/chat.html">チャット</a>
+    <a href="/">トップへ</a>
+  </nav>
+</header>
 
-  function ago(iso) {
-    const s = (Date.now() - new Date(iso)) / 1000;
-    if (s < 60) return 'たった今'; if (s < 3600) return Math.floor(s / 60) + '分前'; if (s < 86400) return Math.floor(s / 3600) + '時間前';
-    if (s < 86400 * 7) return Math.floor(s / 86400) + '日前';
-    return new Date(iso).toLocaleDateString('ja-JP');
-  }
-  function mediaHtml(media) {
-    const items = (media || []).map((m) => (m.kind === 'image' || m.kind === 'imageBlob') ? `<img src="${esc(m.mediaUrl || m.dataUrl)}" alt="" loading="lazy">`
-      : m.kind === 'videoFile' ? `<video src="${esc(m.dataUrl)}" controls playsinline preload="metadata"></video>`
-      : m.kind === 'videoBlob' ? `<video src="${esc(m.mediaUrl)}" controls playsinline preload="metadata"></video>`
-      : (yt(m.url) ? `<iframe src="${esc(yt(m.url))}" style="width:100%;aspect-ratio:16/9;border:0;border-radius:14px" allowfullscreen loading="lazy"></iframe>` : `<video src="${esc(m.url)}" controls playsinline preload="metadata"></video>`));
-    return items.length ? `<div class="gf-media${items.length > 1 ? ' n2' : ''}">${items.join('')}</div>` : '';
-  }
-  const heart = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z"/></svg>';
-  const bubble = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 3V5Z"/></svg>';
-  function postHtml(p) {
-    const a = p.authorProfile || {};
-    const name = a.displayName || p.authorName || 'ユーザー';
-    const likes = Array.isArray(p.likes) ? p.likes : [];
-    const liked = likes.includes(session.email);
-    const avatar = a.avatarUrl && /^data:image|^https?:/.test(a.avatarUrl) ? `style="background-image:url('${esc(a.avatarUrl)}')"` : '';
-    const profile = a.handle ? `/Ghost/profile.html?handle=${encodeURIComponent(a.handle)}` : '#';
-    const href = p.contentType === 'live' ? `/Ghost/live.html?id=${encodeURIComponent(p.id)}` : `/Ghost/post.html?id=${encodeURIComponent(p.id)}`;
-    return `<article class="card gf-post" data-id="${esc(p.id)}" data-handle="${esc(String(a.handle || "").toLowerCase())}">
-      <div class="gf-head"><a class="gf-avatar" href="${profile}" ${avatar}>${avatar ? '' : esc(name.slice(0, 1))}</a>
-        <div style="min-width:0"><a class="gf-name" href="${profile}">${esc(name)}</a>${a.handle ? ` <span class="gf-handle">@${esc(a.handle)}</span>` : ''}<div class="gf-time">${ago(p.createdAt)}${p.contentType === 'live' && p.isLive ? ' · 🔴 ライブ配信中' : ''}</div></div></div>
-      ${p.title ? `<h3 class="gf-title">${esc(p.title)}</h3>` : ''}
-      ${p.text ? `<p class="gf-text ghost-text-content">${esc(p.text)}</p>` : ''}
-      ${mediaHtml(p.media)}
-      ${(p.tags || []).length ? `<div class="gf-tags">${p.tags.map((t) => `<a href="/Ghost/search.html?q=${encodeURIComponent('#' + t)}">#${esc(t)}</a>`).join('')}</div>` : ''}
-      <div class="gf-actions"><button type="button" class="${liked ? 'liked' : ''}" data-like="${esc(p.id)}" aria-pressed="${liked}">${heart}<span>${likes.length || ''}</span></button>
-        <a href="${href}">${bubble}<span>${(p.comments || []).length || ''}</span></a></div>
-    </article>`;
-  }
-  async function load() {
-    if (loading) return; loading = true;
-    const feed = document.getElementById('feed');
-    try {
-      const q = new URLSearchParams({ token: session.token, limit: String(limit) });
-      if (channel) q.set('channel', channel);
-      const res = await fetch('/.netlify/functions/ghost?' + q);
-      const data = await res.json();
-      if (!res.ok) { feed.innerHTML = `<div class="card"><p>${esc(data.error || '読み込めませんでした')}</p>${data.ageRequired ? '<a class="button" href="/age.html">年齢を設定する</a>' : ''}</div>`; return; }
-      const posts = data.posts || [];
-      feed.innerHTML = posts.map(postHtml).join('') || '<div class="card"><p class="muted">まだ投稿がありません。最初の投稿をしてみましょう。</p></div>';
-      document.getElementById('gfMore').hidden = posts.length < limit || limit >= 100;
-      feed.querySelectorAll('[data-like]').forEach((b) => { b.onclick = async () => {
-        try {
-          const r = await Netrify.api('/.netlify/functions/ghost', { action: 'likePost', token: session.token, postId: b.dataset.like });
-          b.classList.toggle('liked', r.liked); b.setAttribute('aria-pressed', String(r.liked)); b.querySelector('span').textContent = r.likes || '';
-        } catch (e) { alert(e.message); }
-      }; });
-    } catch (e) { feed.innerHTML = '<div class="card"><p>読み込めませんでした。通信状態を確認してください。</p></div>'; }
-    finally { loading = false; }
-  }
-  document.querySelectorAll('[data-channel]').forEach((b) => { b.onclick = () => {
-    channel = b.dataset.channel; limit = 30;
-    document.querySelectorAll('[data-channel]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-    document.getElementById('feed').innerHTML = '<p class="muted">読み込み中...</p>';
-    load();
-  }; });
-  document.getElementById('gfMore').onclick = () => { limit = Math.min(100, limit + 30); load(); };
-  load();
-  // 1分ごとに更新（画面上部を見ていて、動画を再生していないときだけ）
-  setInterval(() => { if (!document.hidden && window.scrollY < 300 && ![...document.querySelectorAll('video')].some((v) => !v.paused)) load(); }, 60000);
+<main>
+  <div class="card" id="ghostSetup" style="display:none;"><h2>Ghostプロフィール設定</h2><p class="muted">Ghostでは通常アカウントのメールアドレスを公開せず、専用の表示名と@IDを使います。</p><div id="ghostImgBox" style="margin:10px 0"><div id="ghostCoverPrev" style="height:110px;border-radius:12px;background:var(--panel-2) center/cover no-repeat;position:relative;border:1px solid var(--border)"><span class="muted" id="ghostCoverHint" style="position:absolute;left:12px;top:8px">カバー（横長 3:1）</span><div id="ghostAvatarPrev" style="position:absolute;left:14px;bottom:-26px;width:72px;height:72px;border-radius:50%;background:var(--panel-2) center/cover no-repeat;border:3px solid var(--bg,#111);display:grid;place-items:center;font-size:1.6rem">👤</div></div><div class="row" style="margin-top:34px;flex-wrap:wrap"><button type="button" class="ghost" id="ghostCoverBtn">🖼 カバーを変更</button><button type="button" class="ghost" id="ghostCoverDel">カバーを削除</button><button type="button" class="ghost" id="ghostAvatarBtn">👤 アイコンを変更</button><button type="button" class="ghost" id="ghostAvatarDel">アイコンを削除</button></div><input type="file" id="ghostCoverFile" accept="image/*" style="display:none"><input type="file" id="ghostAvatarFile" accept="image/*" style="display:none"><div class="muted" id="ghostImgStatus" role="status"></div></div><div class="row"><input id="ghostDisplayName" placeholder="Ghost専用の名前" style="flex:1;"><input id="ghostHandle" placeholder="@ID (英小文字・数字・_)" style="flex:1;"></div><textarea id="ghostBio" placeholder="自己紹介（任意）"></textarea><div id="ghostSetupError" class="error"></div><button id="saveGhostProfile">Ghostプロフィールを保存</button></div>
+  <div class="card">
+    <h2>投稿する</h2>
+    <p class="muted">このサイトでは淫夢・エロい投稿自体は禁止していません。申告された生年月日から算出した年齢に応じて表示を調整します。悪口・誹謗中傷は禁止です（個人チャット内など、双方がネタとして了解している場合を除きます）。</p>
+    <div id="soundChip" style="display:none;align-items:center;gap:8px;margin-bottom:8px;padding:8px 12px;border:1px solid var(--accent);border-radius:999px;"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="soundChipText">♪ 音源</span><button type="button" class="ghost" id="soundChipClear" style="padding:2px 10px;">✕</button></div>
+    <textarea id="postText" placeholder="いま何してる？ 作品・動画・短尺クリップも投稿できます"></textarea>
+    <div class="row">
+      <select id="postType" style="flex:1;">
+        <option value="text">テキスト / X風ポスト</option>
+        <option value="photo">画像 / Instagram風</option>
+        <option value="illustration">作品 / Pixiv風</option>
+        <option value="video">動画 / YouTube風</option>
+        <option value="live">ライブ配信 / リアルタイム</option>
+        <option value="short">短尺動画 / TikTok風</option>
+      </select>
+      <span class="muted" id="hashtagHint" style="flex:2;">本文中に #タグ を入力すると自動でタグになります</span>
+    </div>
+
+    <input type="file" id="postFiles" accept="image/*,video/*" multiple style="display:none;" />
+    <div class="row">
+      <button type="button" class="secondary" id="attachBtn">📎 画像・動画を追加(複数可)</button>
+    </div>
+    <div class="row">
+      <input type="text" id="postVideoUrl" placeholder="または画像・動画・ページのURLを追加 (種類は自動判別)" style="flex:1;" />
+      <button type="button" class="ghost" id="addVideoUrlBtn">URLを追加</button>
+    </div>
+    <div class="attach-row" id="attachPreview"></div>
+    <div class="row"><label class="muted">⏰ 予約投稿 <input type="datetime-local" id="postSchedule"></label><button type="button" class="ghost" id="clearSchedule">予約をやめる</button><span class="muted" id="scheduleHint">空欄なら今すぐ投稿</span></div>
+    <div class="error" id="postError"></div>
+    <button id="postSubmit">投稿する</button>
+  </div>
+
+  <div class="card">
+    <h2>探索</h2>
+    <div class="row">
+      <input type="search" id="ghostSearch" placeholder="検索: 猫 投稿者:@user タグ:写真 type:video" style="flex:1;" />
+      <button type="button" class="secondary" id="ghostSearchBtn">検索</button>
+      <button type="button" class="ghost" id="ghostAccountsBtn">アカウント一覧</button>
+    </div>
+    <div id="ghostAccounts" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;flex-wrap:wrap;"><h2 style="margin:0;">フィード</h2><span class="muted">短文・画像・作品のフィード（動画は「動画」タブ）</span></div>
+    <div class="row" style="margin:10px 0;flex-wrap:wrap;"><label class="muted" style="display:none">保存先 <select id="bookmarkListSelect" aria-label="ブックマーク保存先"><option value="saved">保存済み</option></select></label><button type="button" class="secondary" id="createBookmarkList">＋ リスト作成</button><a class="button secondary" href="/Ghost/bookmarks.html">ブックマークを管理</a></div>
+    <div id="feed"><p class="muted">読み込み中...</p></div>
+  </div>
+</main>
+
+
+<script src="/js/auth.js"></script>
+<script src="/js/ghost-comments.js"></script>
+<script src="/js/ghost-ogp.js"></script>
+<script src="/js/ghost-sound.js"></script>
+<script src="/js/ghost-profile-img.js"></script>
+<script>
+const session = Netrify.requireLogin();
+let soundPostId = (new URLSearchParams(location.search).get('sound') || '').replace(/[^A-Za-z0-9_-]/g, '');
+const queryParams = new URLSearchParams(location.search); const composeMode = queryParams.get('compose') === '1' || queryParams.has('txt') || queryParams.has('text'); /* URL投稿リンク(?txt=)は投稿画面を開く */ const profileSettings = queryParams.get('profileSettings') === '1';
+const ghostCards = document.querySelectorAll('main > .card');
+if (composeMode) { if (ghostCards[2]) ghostCards[2].style.display='none'; if (ghostCards[3]) ghostCards[3].style.display='none'; } else if (ghostCards[1]) ghostCards[1].style.display='none';
+if (profileSettings) { document.getElementById('ghostSetup').style.display='block'; }
+function showGhostRegistrationOnly() { document.querySelectorAll('main > .card').forEach((card) => { if (card.id !== 'ghostSetup') card.style.display = 'none'; }); const setup=document.getElementById('ghostSetup'); setup.style.display='block'; setup.querySelector('h2').textContent='アカウント登録が必要です'; }
+const shareText = new URLSearchParams(location.search).get('text') || new URLSearchParams(location.search).get('txt');
+if (shareText) { document.getElementById('postText').value = shareText; document.getElementById('postText').focus(); }
+let currentQuery = ''; let initialGhostHandle = '';
+let activeBookmarkListId = 'saved';
+let bookmarkLists = [{ id:'saved', name:'保存済み', count:0 }];
+function paintGhostImages(profile) {
+  const cover = document.getElementById('ghostCoverPrev'), ava = document.getElementById('ghostAvatarPrev');
+  cover.style.backgroundImage = profile.coverUrl ? `url("${profile.coverUrl}")` : 'none';
+  document.getElementById('ghostCoverHint').style.display = profile.coverUrl ? 'none' : '';
+  ava.style.backgroundImage = profile.avatarUrl ? `url("${profile.avatarUrl}")` : 'none';
+  ava.textContent = profile.avatarUrl ? '' : '👤';
+}
+(function setupGhostImagePickers() {
+  const status = document.getElementById('ghostImgStatus');
+  const wire = (kind, fileId, btnId, delId) => {
+    const file = document.getElementById(fileId);
+    document.getElementById(btnId).onclick = () => file.click();
+    file.onchange = async () => {
+      const f = file.files && file.files[0]; file.value = ''; if (!f) return;
+      status.textContent = '画像を保存しています...';
+      try { const r = await GhostProfileImg.upload(f, kind, session.token); paintGhostImages(r); status.textContent = (kind === 'cover' ? 'カバー' : 'アイコン') + 'を保存しました。'; }
+      catch (e) { status.textContent = '保存できませんでした: ' + e.message; }
+    };
+    document.getElementById(delId).onclick = async () => {
+      if (!confirm((kind === 'cover' ? 'カバー' : 'アイコン') + 'を削除しますか？')) return;
+      try { const r = await GhostProfileImg.remove(kind, session.token); paintGhostImages(r); status.textContent = '削除しました。'; }
+      catch (e) { status.textContent = '削除できませんでした: ' + e.message; }
+    };
+  };
+  wire('cover', 'ghostCoverFile', 'ghostCoverBtn', 'ghostCoverDel');
+  wire('avatar', 'ghostAvatarFile', 'ghostAvatarBtn', 'ghostAvatarDel');
 })();
+async function loadGhostProfileSetup() {
+  if (!session) return;
+  try { const response = await fetch('/api/ghost?profile=me&token='+encodeURIComponent(session.token)); if (!response.ok) { showGhostRegistrationOnly(); return; } const data = await response.json(); if (!data.profile?.handle) { showGhostRegistrationOnly(); return; } document.getElementById('ghostDisplayName').value=data.profile.displayName||''; document.getElementById('ghostHandle').value=data.profile.handle||''; initialGhostHandle=data.profile.handle||''; document.getElementById('ghostBio').value=data.profile.bio||''; paintGhostImages(data.profile); } catch (_) { showGhostRegistrationOnly(); }
+}
+document.getElementById('saveGhostProfile').onclick = async () => { const error=document.getElementById('ghostSetupError'); error.textContent=''; try { const nextHandle=document.getElementById('ghostHandle').value.trim(); let handleRequest=null; if(initialGhostHandle && nextHandle.toLowerCase()!==initialGhostHandle.toLowerCase()) handleRequest=await Netrify.api('/api/ghost',{action:'requestGhostHandleChange',token:session.token,handle:nextHandle}); const result = await Netrify.api('/api/ghost',{action:'saveGhostProfile',token:session.token,displayName:document.getElementById('ghostDisplayName').value,handle:initialGhostHandle || nextHandle,bio:document.getElementById('ghostBio').value}); document.getElementById('ghostSetup').style.display='none'; alert(handleRequest?.pending ? '表示名を更新しました。Ghost ID変更申請を送信しました。承認されるまで現在のIDを使用します。' : (result.message || 'Ghostプロフィールを保存しました。')); } catch(e) { error.textContent=e.message; } };
+loadGhostProfileSetup();
+let ghostStamps = [];
+const postTypeControl=document.getElementById('postType');
+function syncVideoTitleField(){let field=document.getElementById('videoTitle');if(['video','live'].includes(postTypeControl.value)){if(!field){field=document.createElement('input');field.id='videoTitle';field.style='flex:1';postTypeControl.parentNode.insertBefore(field,postTypeControl.nextSibling);}}else if(field)field.remove();field=document.getElementById('videoTitle');if(field)field.placeholder=postTypeControl.value==='live'?'ライブ配信タイトル':'動画タイトル';}
+function syncPostMode(){ const type=postTypeControl.value; const input=document.getElementById('postText'); const hint=document.getElementById('hashtagHint'); const attachmentControls=[document.getElementById('attachBtn').parentNode,document.getElementById('postVideoUrl').parentNode]; attachmentControls.forEach(el=>el.style.display=type==='live'?'none':''); if(type==='short'){ input.placeholder='縦長動画の説明を入力。動画を添付してください'; hint.textContent='縦長動画モード: 9:16表示・スクロールフィードに掲載されます'; } else if(type==='video'){ input.placeholder='動画の説明を入力'; hint.textContent='動画モード: タイトルと動画URL/ファイルを設定します'; } else if(type==='live'){input.placeholder='配信内容・視聴者への案内を入力';hint.textContent='ライブ配信: 公開配信ページを作成し、カメラ映像とリアルタイムチャットを開始します。終了後はアーカイブ動画とコメント履歴を残します';} else { input.placeholder='いま何してる？ 作品・動画・短尺クリップも投稿できます'; hint.textContent='本文中に #タグ を入力すると自動でタグになります'; } }
+postTypeControl.addEventListener('change',()=>{syncVideoTitleField();syncPostMode()});syncVideoTitleField();syncPostMode();
+const openCommentIds = new Set();
+const commentDrafts = new Map();
+const replyTargets = new Map(); // 投稿ID → 返信先コメントID
+function applyReplyUi(root, postId) {
+  const box = root.querySelector(`#comments-${postId}`); if (!box) return;
+  box.querySelectorAll('.gc-node.gc-target').forEach((node) => node.classList.remove('gc-target'));
+  const host = box.querySelector('[data-reply-chip-host]'); if (!host) return;
+  const cid = replyTargets.get(postId);
+  const node = cid ? box.querySelector(`.gc-node[data-cid="${cid}"]`) : null;
+  if (!node) { replyTargets.delete(postId); host.innerHTML = ''; return; }
+  node.classList.add('gc-target');
+  const name = node.querySelector('[data-reply-comment]')?.dataset.replyName || 'コメント';
+  host.innerHTML = `<div class="gc-chip">↳ ${escapeHtml(name)} への返信 <button type="button" class="ghost" data-reply-cancel="${postId}">✕ 解除</button></div>`;
+  host.querySelector('[data-reply-cancel]').onclick = () => { replyTargets.delete(postId); applyReplyUi(root, postId); };
+}
+let feedLoading = false;
+  const isVid = (m) => /^video/.test(String(m.kind || '')) || m.kind === 'videoBlob';
+  const videoLimitMsg = '動画は1つの投稿に1本までです';
+  const maxMediaNow = () => ['video', 'short'].includes(document.getElementById('postType')?.value) ? 1 : 6; // 横長動画/短尺は1本だけ
+  let pendingMedia = []; // { kind: 'image'|'videoFile'|'videoUrl', dataUrl?, url?, name? }
+  let managedTags = [];
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function syncBookmarkButtons() {
+  document.querySelectorAll('[data-bookmark]').forEach((button)=>{
+    let ids=[]; try { ids=JSON.parse(button.dataset.bookmarkedLists||'[]'); } catch (_) {}
+    const saved=ids.includes('saved');
+    const other=ids.filter((id)=>id!=='saved').length;
+    button.dataset.saved=saved?'1':'0';
+    button.textContent=(saved?'✓ 保存済み':'🔖 保存')+(other?` +${other}`:'');
+    button.className=saved?'':'ghost';
+    button.title='クリックで「保存済み」に保存 / 長押しで保存先を選択';
+  });
+}
+async function loadBookmarkLists(selectId=activeBookmarkListId) {
+  if(!session)return;
+  try {
+    const response=await fetch('/api/ghost?bookmarks=1&listsOnly=1&token='+encodeURIComponent(session.token));
+    const data=await response.json(); if(!response.ok)throw new Error(data.error||'ブックマークリストを取得できません');
+    bookmarkLists=Array.isArray(data.lists)&&data.lists.length?data.lists:[{id:'saved',name:'保存済み',count:0}];
+    activeBookmarkListId=bookmarkLists.some((list)=>list.id===selectId)?selectId:(data.selectedListId||'saved');
+    const select=document.getElementById('bookmarkListSelect');
+    select.innerHTML=bookmarkLists.map((list)=>`<option value="${escapeHtml(list.id)}">${escapeHtml(list.name)} (${Number(list.count)||0})</option>`).join('');
+    select.value=activeBookmarkListId; syncBookmarkButtons();
+  } catch(error) { console.warn('bookmark lists could not be loaded:',error); }
+}
+document.getElementById('bookmarkListSelect').addEventListener('change',(event)=>{activeBookmarkListId=event.target.value;syncBookmarkButtons();});
+document.getElementById('createBookmarkList').onclick=async()=>{
+  const name=prompt('新しいブックマークリスト名を入力してください（40文字以内）'); if(!name?.trim())return;
+  try { const result=await Netrify.api('/api/ghost',{action:'createBookmarkList',token:session.token,name:name.trim()}); await loadBookmarkLists(result.list.id); }
+  catch(error){alert('リストを作成できませんでした: '+error.message);}
+};
+function extractHashtags(text) {
+  const tags = []; const re = /#([\p{L}\p{N}_-]{1,40})/gu; let match;
+  while ((match = re.exec(String(text || '')))) { const tag = match[1].toLowerCase(); if (!tags.includes(tag)) tags.push(tag); }
+  return tags.slice(0, 12);
+}
+
+
+function identityHtml(profile, fallback) {
+  const p = profile || {};
+  const name = p.displayName || fallback || p.email || '不明';
+  const official = p.isOfficial ? '<span class="official-badge">公認</span>' : '';
+  const presence = p.online ? '<span class="presence-dot online" title="オンライン"></span>' : '<span class="presence-dot" title="オフライン"></span>';
+  const inner = `<span class="identity ${p.isOfficial ? 'official-name' : ''}">${presence}${p.avatarUrl ? GhostProfileImg.avatarHtml(p.avatarUrl, 24, name) : ''}<span>${escapeHtml(name)}</span>${official}</span>`;
+  return p.handle ? `<a href="/Ghost/profile.html?handle=${encodeURIComponent(p.handle)}" style="color:inherit;text-decoration:none">${inner}</a>` : inner;
+}
+
+async function reportGhost(targetType, postId, commentId) {
+  const s = Netrify.requireLogin();
+  if (!s) return;
+  const reason = prompt('通報理由を入力してください', '迷惑行為・規約違反');
+  if (!reason) return;
+  const result = await Netrify.api('/api/ghost', { action: 'report', token: s.token, targetType, postId, commentId, reason });
+  alert(result.duplicate ? 'この内容はすでに通報済みです。' : '通報を受け付けました。');
+}
+
+document.getElementById('postType').addEventListener('change', () => { const m = maxMediaNow(); if (pendingMedia.length > m) { pendingMedia = pendingMedia.slice(0, m); renderAttachPreview(); alert('動画・短尺動画の投稿は添付1件までのため、先頭の1件だけ残しました'); } });
+document.getElementById('clearSchedule').onclick = () => { document.getElementById('postSchedule').value = ''; };
+document.getElementById('attachBtn').onclick = () => document.getElementById('postFiles').click();
+let cancelLargeUpload=false;
+function ghostFileMime(file) {
+  if (file.type && /^(image|video)\//i.test(file.type)) return file.type;
+  const ext=String(file.name||'').split('.').pop().toLowerCase();
+  const byExt={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',avif:'image/avif',heic:'image/heic',heif:'image/heif',bmp:'image/bmp',mp4:'video/mp4',m4v:'video/mp4',mov:'video/quicktime',webm:'video/webm',ogv:'video/ogg','3gp':'video/3gpp'};
+  return byExt[ext] || '';
+}
+async function uploadGhostMedia(file) {
+  const s=Netrify.requireLogin(); if(!s) throw new Error('ログインが必要です');
+  const mimeType=ghostFileMime(file); if(!mimeType) throw new Error('画像・動画の種類を判別できません。JPG/PNG/MP4などのファイルを選んでください');
+  if(!file.size) throw new Error('ファイルが空です');
+  const storageKey='ghost-upload:'+String(s.email||'').toLowerCase()+':'+file.name+':'+file.size+':'+file.lastModified;
+  let fileId=localStorage.getItem(storageKey); if(!fileId){fileId=crypto.randomUUID();localStorage.setItem(storageKey,fileId);}
+  const chunkBytes=256*1024; const totalChunks=Math.ceil(file.size/chunkBytes); let received=new Set();
+  const statusLine=document.createElement('p'); statusLine.className='muted'; statusLine.textContent=`${file.name}: アップロード中 0%`;
+  const attachRow=document.getElementById('attachPreview'); attachRow.before(statusLine);
+  const cancelButton=document.createElement('button'); cancelButton.type='button'; cancelButton.className='secondary'; cancelButton.textContent='アップロードを中断'; cancelButton.onclick=()=>{cancelLargeUpload=true;cancelButton.textContent='中断しました';}; document.getElementById('attachBtn').parentNode.appendChild(cancelButton); cancelLargeUpload=false;
+  try {
+    const status=await fetch('/api/ghost?mediaStatus='+encodeURIComponent(fileId)+'&token='+encodeURIComponent(s.token));
+    if(status.ok){const data=await status.json();if(data.totalChunks===totalChunks&&data.fileId===fileId)received=new Set(data.received||[]);}
+    for(let index=0;index<totalChunks;index+=1){
+      if(cancelLargeUpload)throw new Error('アップロードを中断しました。ファイルを再選択すると続きから送信できます');
+      if(received.has(index)){statusLine.textContent=`${file.name}: アップロード中 ${Math.round((index+1)/totalChunks*100)}%`;continue;}
+      const chunk=file.slice(index*chunkBytes,Math.min(file.size,(index+1)*chunkBytes));
+      const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(new Error('ファイルを読み込めませんでした'));reader.readAsDataURL(chunk);});
+      let sent=false;
+      for(let attempt=1;attempt<=3&&!sent;attempt+=1){
+        if(cancelLargeUpload)throw new Error('アップロードを中断しました。ファイルを再選択すると続きから送信できます');
+        try{await Netrify.api('/api/ghost',{action:'uploadGhostMediaChunk',token:s.token,fileId,index,totalChunks,data,mimeType,sizeBytes:file.size,chunkBytes});sent=true;}
+        catch(error){if(attempt===3)throw new Error(error.message||'チャンク送信に失敗しました');await new Promise(resolve=>setTimeout(resolve,300*attempt));}
+      }
+      statusLine.textContent=`${file.name}: アップロード中 ${Math.round((index+1)/totalChunks*100)}%`;
+    }
+    const verify=await fetch('/api/ghost?mediaStatus='+encodeURIComponent(fileId)+'&token='+encodeURIComponent(s.token));
+    const verification=verify.ok?await verify.json():null;
+    if(!verification?.complete||verification.received?.length!==totalChunks) throw new Error('アップロード完了を確認できませんでした。再選択して再試行してください');
+    localStorage.removeItem(storageKey);statusLine.remove();
+    return {kind:mimeType.startsWith('image/')?'imageBlob':'videoBlob',fileId,size:file.size,name:file.name,mimeType};
+  } finally {if(cancelButton.isConnected)cancelButton.remove();cancelLargeUpload=false;}
+}
+
+document.getElementById('postFiles').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  for (const file of files) {
+    if (pendingMedia.length >= maxMediaNow()) { alert(maxMediaNow() === 1 ? '動画・短尺動画の投稿は添付1件までです' : '添付は最大6件までです'); break; }
+    const mimeType=ghostFileMime(file);
+    if (mimeType && mimeType.startsWith('video/') && pendingMedia.some(isVid)) { alert(videoLimitMsg); continue; }
+    if (!mimeType) { document.getElementById('postError').textContent=`${file.name}: 画像・動画の種類を判別できません。`; continue; }
+    if (mimeType.startsWith('image/') && file.size > 15 * 1024 * 1024) { document.getElementById('postError').textContent=`${file.name}: 画像は15MBまでです。`; continue; }
+    try { const uploaded=await uploadGhostMedia(file); pendingMedia.push({...uploaded,previewUrl:file.type.startsWith('image/')?URL.createObjectURL(file):''}); }
+    catch (error) { document.getElementById('postError').textContent=`${file.name} のアップロードに失敗しました: ${error.message}`; }
+  }
+  e.target.value = '';
+  renderAttachPreview();
+});
+
+document.getElementById('addVideoUrlBtn').onclick = () => {
+  const input = document.getElementById('postVideoUrl');
+  const url = input.value.trim();
+  if (!url) return;
+  if (pendingMedia.length >= maxMediaNow()) { alert(maxMediaNow() === 1 ? '動画・短尺動画の投稿は添付1件までです' : '添付は最大6件までです'); return; }
+  if (!/^https?:\/\/\S+$/i.test(url)) { alert('http(s):// から始まるURLを入力してください'); return; }
+  if (classifyMediaUrl(url) === 'videoUrl' && pendingMedia.some(isVid)) { alert(videoLimitMsg); return; }
+  pendingMedia.push({ kind: classifyMediaUrl(url), url });
+  input.value = '';
+  renderAttachPreview();
+};
+
+function renderAttachPreview() {
+  const el = document.getElementById('attachPreview');
+  el.innerHTML = pendingMedia.map((m, i) => {
+    let inner;
+    if (m.kind === 'image') inner = `<img src="${m.mediaUrl || m.dataUrl}" />`;
+    else if (m.kind === 'imageBlob') inner = `<img src="${m.previewUrl || ''}" alt="${escapeHtml(m.name || '選択画像')}" />`;
+    else if (m.kind === 'videoFile') inner = `<video src="${m.dataUrl}" muted></video>`;
+    else if (m.kind === 'videoBlob') inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;padding:4px;text-align:center;">大容量動画</div>`;
+    else if (m.kind === 'imageUrl') inner = `<img src="${escapeHtml(m.url)}" alt="" />`;
+    else if (m.kind === 'embedUrl') inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;padding:4px;text-align:center;">🌐埋め込み</div>`;
+    else inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.7rem;padding:4px;text-align:center;">🔗動画URL</div>`;
+    return `<div class="attach-chip">${inner}<button type="button" class="rm" data-i="${i}">×</button></div>`;
+  }).join('');
+  el.querySelectorAll('.rm').forEach(btn => {
+    btn.onclick = () => { pendingMedia.splice(Number(btn.dataset.i), 1); renderAttachPreview(); };
+  });
+}
+
+function classifyMediaUrl(url) {
+  const path = url.split(/[?#]/)[0].toLowerCase();
+  if (/\.(png|jpe?g|gif|webp|avif|bmp|svg)$/.test(path)) return 'imageUrl';
+  if (/\.(mp4|m4v|mov|webm|ogv|3gp)$/.test(path) || /youtube\.com|youtu\.be/.test(url)) return 'videoUrl';
+  return 'embedUrl';
+}
+function isEmbeddableVideo(url) {
+  return /youtube\.com|youtu\.be/.test(url);
+}
+function toEmbedUrl(url) {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=)([\w-]+)/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : url;
+}
+
+function renderMediaGrid(media) {
+  if (!media || media.length === 0) return '';
+  const items = media.map(m => {
+    if (m.kind === 'image' || m.kind === 'imageBlob') return `<img src="${m.mediaUrl || m.dataUrl}" alt="" />`;
+    if (m.kind === 'videoFile') return `<div class="vwrap"><video src="${m.dataUrl}" controls preload="metadata" playsinline></video><span class="vdur"></span></div>`;
+    if (m.kind === 'videoBlob') return `<div class="vwrap"><video src="${m.mediaUrl}" controls preload="metadata" playsinline></video><span class="vdur">…</span></div>`;
+    if (m.kind === 'videoUrl') {
+      return isEmbeddableVideo(m.url)
+        ? `<iframe src="${toEmbedUrl(m.url)}" style="width:100%;aspect-ratio:16/9;border:0;border-radius:8px;" allowfullscreen></iframe>`
+        : `<video src="${m.url}" controls></video>`;
+    }
+    if (m.kind === 'imageUrl') return `<img src="${escapeHtml(m.url)}" alt="" />`;
+    if (m.kind === 'embedUrl') return `<iframe src="${escapeHtml(m.url)}" sandbox="allow-scripts allow-popups" referrerpolicy="no-referrer" loading="lazy" style="width:100%;aspect-ratio:16/9;border:1px solid var(--border);border-radius:8px;"></iframe>`;
+    return '';
+  }).join('');
+  return `<div class="media-grid">${items}</div>`;
+}
+
+async function editGhostPost(postId) {
+  const card = document.querySelector(`[data-post="${CSS.escape(postId)}"]`); if (!card) return;
+  const current = card.querySelector('.ghost-text-content')?.textContent || '';
+  const title = card.querySelector('h3')?.textContent || '';
+  const text = prompt('投稿本文を編集', current); if (text === null) return;
+  const nextTitle = title ? prompt('タイトルを編集', title) : '';
+  try { const s = Netrify.requireLogin(); if (!s) return; await Netrify.api('/api/ghost', { action:'editPost', token:s.token, postId, text, title:nextTitle === null ? title : nextTitle }); await loadFeed(); } catch (error) { alert('編集できませんでした: ' + error.message); }
+}
+function showGhostHistory(postId) {
+  const card = document.querySelector(`[data-post="${CSS.escape(postId)}"]`); if (!card) return;
+  const history = Array.from(card.querySelectorAll('[data-edit-history-item]')).map((item) => item.textContent);
+  if (history.length) alert('編集履歴（古い順）\n\n' + history.join('\n\n'));
+}
+function setupGhostLongPress() {
+  let timer = null; let menu = document.getElementById('ghostEditMenu');
+  if (!menu) { menu = document.createElement('div'); menu.id = 'ghostEditMenu'; menu.className = 'message-context-menu'; document.body.appendChild(menu); }
+  const close = () => { menu.style.display = 'none'; };
+  const open = (card, x, y) => { const edit = card.querySelector('[data-edit-post]'); const history = card.querySelector('[data-history-post]'); if (!edit && !history) return; menu.innerHTML = ''; if (edit) { const b=document.createElement('button'); b.textContent='編集'; b.onclick=()=>{close();editGhostPost(card.dataset.post);}; menu.appendChild(b); } if (history) { const b=document.createElement('button'); b.textContent='編集履歴'; b.onclick=()=>{close();showGhostHistory(card.dataset.post);}; menu.appendChild(b); } menu.style.left=`${Math.max(8,Math.min(x,innerWidth-190))}px`; menu.style.top=`${Math.max(8,Math.min(y,innerHeight-160))}px`; menu.style.display='block'; };
+  document.addEventListener('pointerdown', (event) => { const card=event.target.closest?.('[data-post]'); if (!card) return; clearTimeout(timer); timer=setTimeout(()=>open(card,event.clientX,event.clientY),550); });
+  document.addEventListener('pointerup',()=>clearTimeout(timer)); document.addEventListener('pointercancel',()=>clearTimeout(timer)); document.addEventListener('pointermove',()=>clearTimeout(timer),{passive:true}); document.addEventListener('contextmenu',(event)=>{const card=event.target.closest?.('[data-post]');if(!card)return;event.preventDefault();open(card,event.clientX,event.clientY);}); document.addEventListener('pointerdown',(event)=>{if(!event.target.closest?.('#ghostEditMenu'))close();},true);
+}
+function pinFirst(list, id) { if (!id) return list; const a = list.filter((c) => c.id === id && !c.parentCommentId), b = list.filter((c) => !(c.id === id && !c.parentCommentId)); return a.concat(b); }
+let feedPosts = [], feedHasMore = false, feedMoreBusy = false;
+async function loadFeed(query = currentQuery, append = false) {
+  currentQuery = query;
+  if (feedLoading) return;
+  feedLoading = true;
+  const existingFeed = document.getElementById('feed');
+  existingFeed.querySelectorAll('[data-comment-input]').forEach(input => {
+    if (input.value) commentDrafts.set(input.dataset.commentInput, input.value);
+  });
+  try {
+    // まず最新の15件だけ取得して描画し、下までスクロールしたら続きを少しずつ読み込む
+    const cursor = append && feedPosts.length ? '&before=' + encodeURIComponent(feedPosts[feedPosts.length - 1].createdAt) : '';
+    const want = append ? 15 : Math.min(100, Math.max(15, feedPosts.length));
+    const res = await fetch('/api/ghost?channel=main&limit=' + want + cursor + '&q=' + encodeURIComponent(currentQuery) + (session ? '&token=' + encodeURIComponent(session.token) : ''));
+  const data = await res.json();
+  if (append) { const ids = new Set(feedPosts.map((x) => x.id)); feedPosts = feedPosts.concat((data.posts || []).filter((x) => !ids.has(x.id))); } else feedPosts = data.posts || [];
+  feedHasMore = !!data.hasMore; data.posts = feedPosts;
+  const el = document.getElementById('feed');
+  if (!data.posts || data.posts.length === 0) {
+    el.innerHTML = '<p class="muted">まだ投稿がありません。</p>';
+    return;
+  }
+  el.innerHTML = data.posts.map(p => {
+    const likes = Array.isArray(p.likes) ? p.likes : [];
+    const liked = session && likes.includes(session.email);
+    const comments = Array.isArray(p.comments) ? p.comments : [];
+    const tags = Array.isArray(p.tags) ? p.tags : [];
+    const bookmarkedListIds = Array.isArray(p.bookmarkedListIds) ? p.bookmarkedListIds : (p.isBookmarked ? ['saved'] : []);
+    const isBookmarked = bookmarkedListIds.includes(activeBookmarkListId);
+    const headHtml = `<div class="head">
+          <span class="author">${identityHtml(p.authorProfile, p.authorName)}</span>
+          <span class="time muted">${new Date(p.createdAt).toLocaleString('ja-JP')}</span>
+        </div>`;
+    const titleHtml = `${p.title ? `<h3 class="text">${escapeHtml(p.title)}</h3>` : ''}${p.description || p.text ? `<div class="text ghost-text-content">${escapeHtml(p.description || p.text)}</div>` : ''}`;
+    const mediaHtml = `${renderMediaGrid(p.media)}${GhostSound.chipHtml(p)}`;
+    const tagsHtml = `${tags.length ? `<div class="ghost-tags">${tags.map(tag => `<span>#${escapeHtml(tag)}</span>`).join('')}</div>` : ''}`;
+    const histHtml = `${(p.editHistory || []).map((item, index) => `<span data-edit-history-item hidden>${escapeHtml(item.text || item.title || '')}</span>`).join('')}`;
+    const actionsHtml = `<div class="actions">
+          <button type="button" class="${liked ? '' : 'ghost'}" data-like="${p.id}">♥ ${likes.length}</button>
+          <button type="button" class="${isBookmarked ? '' : 'ghost'}" data-bookmark="${p.id}" data-saved="${isBookmarked ? '1' : '0'}" data-bookmarked-lists="${escapeHtml(JSON.stringify(bookmarkedListIds))}">${isBookmarked ? '✓ 保存済み' : '🔖 保存'}</button>
+          <button type="button" class="ghost" data-toggle-comments="${p.id}">💬 ${comments.length}</button>
+          <button type="button" class="ghost" data-copy-post="${p.id}">🔗 リンクをコピー</button>
+          <button type="button" class="ghost" data-report-post="${p.id}">通報</button>
+          ${session && (session.email === p.authorEmail || session.isAdmin === true) ? `<button type="button" class="ghost" data-edit-post="${p.id}">編集</button>${(p.editHistory || []).length ? `<button type="button" class="ghost" data-history-post="${p.id}">編集履歴(${p.editHistory.length})</button>` : ''}<button type="button" class="ghost" data-del="${p.id}">${session.isAdmin === true && session.email !== p.authorEmail ? '運営削除' : '削除'}</button>` : ''}
+        </div>`;
+    const ct = p.contentType || 'text';
+    const sched = p.scheduled ? `<div class="gh-sched">⏰ 予約中: ${new Date(p.scheduledAt).toLocaleString('ja-JP')} に公開されます(ほかの人には見えません)</div>` : '';
+    const textOnly = titleHtml;
+    let inner;
+    if (ct === 'photo') inner = headHtml + mediaHtml + actionsHtml + titleHtml + tagsHtml;
+    else if (ct === 'illustration') inner = `<div class="gh-badge">🎨 作品</div>` + mediaHtml + titleHtml + headHtml + tagsHtml + actionsHtml;
+    else inner = headHtml + titleHtml + mediaHtml + tagsHtml + actionsHtml;
+    return `
+      <div class="card ghost-post ${escapeHtml(ct)}" data-post="${p.id}">
+        ${sched}${inner}${histHtml}
+        <div class="comments" id="comments-${p.id}" style="display:${openCommentIds.has(p.id) ? 'block' : 'none'};">
+          ${GhostComments.tree(pinFirst(comments, p.pinnedCommentId), (c, parent) => `
+            <div class="comment-item">
+              ${parent ? `<span class="gc-to muted">↳ ${escapeHtml(GhostComments.nameOf(parent))}</span>` : ''}<span class="ghost-text-content">${p.pinnedCommentId === c.id ? '<span class="gh-pin">📌 ピン留め</span> ' : ''}${identityHtml(c.authorProfile, c.authorName)}: ${NetrifyLanguage.renderText(c.text)}</span>
+              <span class="row"> ${session && (session.email === p.authorEmail || session.isAdmin === true) ? `<button type="button" class="ghost del" data-pin-comment="${c.id}" data-pinned="${p.pinnedCommentId === c.id ? '1' : '0'}" data-post-for-comment="${p.id}">${p.pinnedCommentId === c.id ? 'ピン解除' : '📌ピン留め'}</button>` : ''} ${session ? `<button type="button" class="ghost del" data-reply-comment="${c.id}" data-reply-name="${escapeHtml(GhostComments.nameOf(c))}" data-post-for-comment="${p.id}">返信</button>` : ''} <button type="button" class="ghost del" data-report-comment="${c.id}" data-post-for-comment="${p.id}">通報</button> ${session && (session.isAdmin === true || session.email === c.authorEmail || session.email === p.authorEmail) ? `<button type="button" class="ghost del" data-del-comment="${c.id}" data-post-for-comment="${p.id}">${session.isAdmin === true && session.email !== c.authorEmail && session.email !== p.authorEmail ? '運営削除' : '削除'}</button>` : ''}</span>
+            </div>
+          `) || '<p class="muted">まだコメントがありません。</p>'}
+          <div data-reply-chip-host></div>
+          <div class="row" style="margin-top:8px;">
+            <textarea rows="2" placeholder="コメントする（改行できます）" data-comment-input="${p.id}" style="flex:1;">${escapeHtml(commentDrafts.get(p.id) || '')}</textarea>
+            <button type="button" class="secondary" data-comment-submit="${p.id}">送信</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  commentDrafts.clear();
+  NetrifyLanguage.refresh();
+  data.posts.forEach(p => { if (p.soundPostId) GhostSound.bind(el.querySelector(`[data-post="${CSS.escape(p.id)}"] .media-grid`), p); });
+
+  el.querySelectorAll('[data-report-post]').forEach(btn => { btn.onclick = () => reportGhost('post', btn.dataset.reportPost); });
+  el.querySelectorAll('[data-edit-post]').forEach(btn => { btn.onclick = (event) => { event.stopPropagation(); editGhostPost(btn.dataset.editPost); }; });
+  el.querySelectorAll('[data-history-post]').forEach(btn => { btn.onclick = (event) => { event.stopPropagation(); showGhostHistory(btn.dataset.historyPost); }; });
+  el.querySelectorAll('[data-report-comment]').forEach(btn => { btn.onclick = () => reportGhost('comment', btn.dataset.postForComment, btn.dataset.reportComment); });
+  el.querySelectorAll('[data-copy-post]').forEach(btn => { btn.onclick = async (event) => { event.stopPropagation(); const url=location.origin+'/Ghost/post/'+encodeURIComponent(btn.dataset.copyPost); try { await navigator.clipboard.writeText(url); btn.textContent='✓ コピーしました'; } catch (_) { btn.textContent='コピー失敗'; } }; });
+  el.querySelectorAll('[data-post]').forEach(card => { card.onclick = (event) => { if (event.target.closest('button, input, textarea, a, iframe, video, [contenteditable], .language-input-wrap')) return; location.href='/Ghost/post/'+encodeURIComponent(card.dataset.post); }; });
+  el.querySelectorAll('[data-like]').forEach(btn => {
+    btn.onclick = async () => {
+      const s = Netrify.requireLogin();
+      if (!s) return;
+      await Netrify.api('/api/ghost', { action: 'likePost', token: s.token, postId: btn.dataset.like });
+      loadFeed();
+    };
+  });
+  el.querySelectorAll('[data-bookmark]').forEach(btn => {
+    let timer = null, longPressed = false;
+    const toggleIn = async (listId) => {
+      const s = Netrify.requireLogin(); if (!s) return;
+      let ids=[]; try { ids=JSON.parse(btn.dataset.bookmarkedLists||'[]'); } catch (_) {}
+      const save = !ids.includes(listId);
+      const result = await Netrify.api('/api/ghost', { action:'bookmarkPost', token:s.token, postId:btn.dataset.bookmark, listId, save });
+      ids = save ? [...new Set([...ids, listId])] : ids.filter((id)=>id!==listId);
+      btn.dataset.bookmarkedLists = JSON.stringify(ids);
+      syncBookmarkButtons();
+      loadBookmarkLists('saved');
+      return ids;
+    };
+    const openPicker = async () => {
+      if (!Netrify.requireLogin()) return;
+      await loadBookmarkLists('saved');
+      document.getElementById('bmPicker')?.remove();
+      const box = document.createElement('div'); box.id = 'bmPicker';
+      box.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;';
+      const sheet = document.createElement('div'); sheet.className = 'card';
+      sheet.style.cssText = 'width:min(480px,100%);max-height:70vh;overflow:auto;margin:0;border-radius:16px 16px 0 0;';
+      const render = () => {
+        let ids=[]; try { ids=JSON.parse(btn.dataset.bookmarkedLists||'[]'); } catch (_) {}
+        sheet.innerHTML = '<h3 style="margin-top:0">保存先を選択</h3>' + bookmarkLists.map((l)=>`<button type="button" class="${ids.includes(l.id)?'':'ghost'}" data-l="${escapeHtml(l.id)}" style="display:block;width:100%;margin:6px 0;text-align:left">${ids.includes(l.id)?'✓ ':''}${escapeHtml(l.name)} (${Number(l.count)||0})</button>`).join('') + '<div class="row" style="margin-top:10px"><button type="button" class="secondary" id="bmNew">＋ 新しいリスト</button><button type="button" class="ghost" id="bmClose">閉じる</button></div>';
+        sheet.querySelectorAll('[data-l]').forEach((b)=>b.onclick=async()=>{ try { await toggleIn(b.dataset.l); render(); } catch(e){ alert('ブックマークできませんでした: '+e.message); } });
+        sheet.querySelector('#bmClose').onclick=()=>box.remove();
+        sheet.querySelector('#bmNew').onclick=async()=>{ const name=prompt('リスト名'); if(!name||!name.trim()) return; try { const r=await Netrify.api('/api/ghost',{action:'createBookmarkList',token:Netrify.requireLogin().token,name:name.trim()}); await loadBookmarkLists('saved'); render(); } catch(e){ alert(e.message); } };
+      };
+      box.onclick=(e)=>{ if(e.target===box) box.remove(); };
+      render(); box.appendChild(sheet); document.body.appendChild(box);
+    };
+    const start = () => { longPressed = false; clearTimeout(timer); timer = setTimeout(() => { longPressed = true; openPicker(); }, 500); };
+    const cancel = () => clearTimeout(timer);
+    btn.addEventListener('pointerdown', start);
+    ['pointerup','pointerleave','pointercancel'].forEach(ev => btn.addEventListener(ev, cancel));
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+    btn.style.webkitTouchCallout = 'none'; btn.style.userSelect = 'none';
+    btn.onclick = async () => {
+      if (longPressed) { longPressed = false; return; }
+      btn.disabled = true;
+      try { await toggleIn('saved'); }
+      catch (error) { alert('ブックマークできませんでした: ' + error.message); }
+      finally { btn.disabled = false; }
+    };
+  });
+  el.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = async () => {
+      const s = Netrify.requireLogin();
+      if (!s) return;
+      if (!confirm('この投稿を削除しますか?')) return;
+      try {
+        await Netrify.api('/api/ghost', { action: 'deletePost', token: s.token, postId: btn.dataset.del });
+        const card = btn.closest('[data-post]');
+        if (card) card.remove();
+        if (!document.querySelector('[data-post]')) loadFeed();
+      } catch (error) {
+        alert('投稿を削除できませんでした: ' + error.message);
+      }
+    };
+  });
+  el.querySelectorAll('[data-toggle-comments]').forEach(btn => {
+    btn.onclick = () => {
+      const postId = btn.dataset.toggleComments;
+      const box = document.getElementById('comments-' + postId);
+      const shouldOpen = box.style.display === 'none';
+      box.style.display = shouldOpen ? 'block' : 'none';
+      if (shouldOpen) openCommentIds.add(postId);
+      else openCommentIds.delete(postId);
+    };
+  });
+  el.querySelectorAll('[data-reply-comment]').forEach(btn => {
+    btn.onclick = () => {
+      const postId = btn.dataset.postForComment;
+      replyTargets.set(postId, btn.dataset.replyComment);
+      applyReplyUi(el, postId);
+      el.querySelector(`[data-comment-input="${postId}"]`)?.focus();
+    };
+  });
+  replyTargets.forEach((cid, postId) => applyReplyUi(el, postId));
+  el.querySelectorAll('[data-comment-submit]').forEach(btn => {
+    btn.onclick = async () => {
+      const s = Netrify.requireLogin();
+      if (!s) return;
+      const postId = btn.dataset.commentSubmit;
+      const input = el.querySelector(`[data-comment-input="${postId}"]`);
+      const text = input.value.trim();
+      if (!text) return;
+      const parentCommentId = replyTargets.get(postId) || undefined;
+      await Netrify.api('/api/ghost', { action: 'addComment', token: s.token, postId, text, displayName: s.displayName, parentCommentId });
+      replyTargets.delete(postId);
+      loadFeed();
+    };
+  });
+  el.querySelectorAll('[data-pin-comment]').forEach(btn => {
+    btn.onclick = async () => {
+      const s = Netrify.requireLogin(); if (!s) return;
+      try { await Netrify.api('/api/ghost', { action: 'pinComment', token: s.token, postId: btn.dataset.postForComment, commentId: btn.dataset.pinComment, pinned: btn.dataset.pinned !== '1' }); loadFeed(); } catch (e) { alert(e.message); }
+    };
+  });
+  el.querySelectorAll('[data-del-comment]').forEach(btn => {
+    btn.onclick = async () => {
+      const s = Netrify.requireLogin();
+      if (!s) return;
+      await Netrify.api('/api/ghost', {
+        action: 'deleteComment', token: s.token, postId: btn.dataset.postForComment, commentId: btn.dataset.delComment
+      });
+      loadFeed();
+    };
+  });
+  if (feedHasMore) { el.insertAdjacentHTML('beforeend', '<div id="feedMore" class="muted" style="text-align:center;padding:14px">下にスクロールすると続きを読み込みます…</div>'); }
+  } finally {
+    feedLoading = false;
+    if (feedHasMore && document.getElementById('feedMore')) setTimeout(watchFeedMore, 0);
+  }
+}
+
+const urlPostButton=document.createElement('button'); urlPostButton.type='button'; urlPostButton.className='ghost'; urlPostButton.textContent='URL投稿リンクをコピー'; urlPostButton.onclick=()=>{const value=document.getElementById('postText').value; const url=location.origin+'/Ghost/?txt='+encodeURIComponent(value); navigator.clipboard.writeText(url).then(()=>{urlPostButton.textContent='URLをコピーしました';});}; document.getElementById('postSubmit').parentNode.appendChild(urlPostButton);
+(async function initSoundChip() {
+  if (!soundPostId) return;
+  const chip = document.getElementById('soundChip'), text = document.getElementById('soundChipText');
+  chip.style.display = 'flex';
+  const typeSel = document.getElementById('postType'); if (typeSel) typeSel.value = 'short';
+  document.getElementById('soundChipClear').onclick = () => { soundPostId = ''; chip.style.display = 'none'; };
+  try {
+    const s = Netrify.getSession();
+    const r = await fetch('/api/ghost?post=' + encodeURIComponent(soundPostId) + (s ? '&token=' + encodeURIComponent(s.token) : ''));
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || '');
+    const src = d.post || {};
+    text.textContent = '♪ ' + (src.title || '音源') + ' · ' + (src.authorProfile?.displayName || src.authorName || '') + ' の音源を使用';
+  } catch (_) { text.textContent = '♪ 音源を使用して投稿'; }
+})();
+document.getElementById('postSubmit').onclick = async () => {
+  const s = Netrify.requireLogin();
+  if (!s) return;
+  const errEl = document.getElementById('postError');
+  errEl.textContent = '';
+
+  const text = document.getElementById('postText').value.trim();
+  if (pendingMedia.some(item => ['imageBlob','videoBlob'].includes(item.kind)) && !pendingMedia.every(item => ['imageBlob','videoBlob','videoUrl','imageUrl','embedUrl'].includes(item.kind))) { errEl.textContent='添付の準備が完了していません。失敗したファイルを再選択してください。'; return; }
+  if (!text && pendingMedia.length === 0) { errEl.textContent = '本文か添付のどちらかを入力してください'; return; }
+
+  try {
+    const submitButton=document.getElementById('postSubmit'); submitButton.disabled=true; submitButton.textContent='投稿中...';
+    const created=await Netrify.api('/api/ghost', {
+      action: 'createPost', token: s.token, displayName: s.displayName, title: document.getElementById('videoTitle')?.value || '', text, media: pendingMedia,
+      contentType: document.getElementById('postType').value, tags: extractHashtags(text), soundPostId: soundPostId || undefined,
+      scheduledAt: (() => { const v = document.getElementById('postSchedule').value; if (!v) return undefined; const d = new Date(v); return d.getTime() > Date.now() + 60000 ? d.toISOString() : undefined; })()
+    });
+    if (created.post) GhostOgp.ensure(created.post, s);
+    if(created.post?.contentType==='live'){location.href='/Ghost/live.html?id='+encodeURIComponent(created.post.id);return;}
+    const wasScheduled = Boolean(created.post && created.post.scheduledAt);
+    document.getElementById('postSchedule').value = '';
+    if (wasScheduled) alert('予約しました。' + new Date(created.post.scheduledAt).toLocaleString('ja-JP') + ' に公開されます(それまでは自分にだけ表示されます)。');
+    document.getElementById('postText').value = '';
+    pendingMedia = [];
+    renderAttachPreview();
+    if (composeMode) {
+      // 投稿専用画面ではフィードを隠しているため、投稿後は通常画面へ復帰する。
+      if (ghostCards[2]) ghostCards[2].style.display = '';
+      if (ghostCards[3]) ghostCards[3].style.display = '';
+      const nextUrl = new URL(location.href);
+      nextUrl.searchParams.delete('compose');
+      history.replaceState(null, '', nextUrl.pathname + nextUrl.search + nextUrl.hash);
+    }
+    await loadFeed();
+    document.getElementById('feed').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    errEl.textContent = '投稿できませんでした: ' + e.message;
+  } finally {
+    const submitButton=document.getElementById('postSubmit'); submitButton.disabled=false; submitButton.textContent='投稿する';
+  }
+};
+
+async function loadAccounts() {
+  const query = document.getElementById('ghostSearch').value.trim();
+  const el = document.getElementById('ghostAccounts');
+  try {
+    const res = await fetch('/api/ghost?accounts=1&q=' + encodeURIComponent(query));
+    const data = await res.json();
+    el.innerHTML = (data.accounts || []).map((account) => `<div class="bot-item"><span>${identityHtml(account, account.email)} <span class="muted">${escapeHtml(account.email)}</span></span>${session && session.email !== account.email ? `<button type="button" class="ghost" data-follow="${escapeHtml(account.email)}">フォロー</button>` : ''}</div>`).join('') || '<p class="muted">アカウントが見つかりません。</p>';
+    el.querySelectorAll('[data-follow]').forEach((button) => {
+      button.onclick = async () => {
+        const result = await Netrify.api('/api/ghost', { action: 'followAccount', token: session.token, targetEmail: button.dataset.follow, follow: true });
+        button.textContent = result.following ? 'フォロー中' : 'フォロー';
+      };
+    });
+  } catch (e) { el.innerHTML = `<p class="error">${escapeHtml(e.message)}</p>`; }
+}
+
+document.getElementById('ghostSearchBtn').onclick = async () => { const value=document.getElementById('ghostSearch').value.trim(); if(session&&value) await Netrify.api('/api/pocket',{action:'saveSearchHistory',token:session.token,query:value}).catch(()=>{}); loadFeed(value); };
+document.getElementById('ghostSearch').addEventListener('keydown', (event) => { if (event.key === 'Enter') loadFeed(event.target.value.trim()); });
+document.getElementById('ghostAccountsBtn').onclick = loadAccounts;
+loadFeed(); (window.mxIdle||((f)=>f()))(()=>loadBookmarkLists());
+setupGhostLongPress();
+let feedIo = null;
+function watchFeedMore() {
+  const t = document.getElementById('feedMore'); if (!t) return;
+  if (!('IntersectionObserver' in window)) { t.innerHTML = '<button type="button" class="secondary" id="feedMoreBtn">もっと見る</button>'; document.getElementById('feedMoreBtn').onclick = moreFeed; return; }
+  if (feedIo) feedIo.disconnect();
+  feedIo = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) moreFeed(); }, { rootMargin: '600px' });
+  feedIo.observe(t);
+}
+async function moreFeed() { if (feedMoreBusy || feedLoading || !feedHasMore) return; feedMoreBusy = true; try { await loadFeed(currentQuery, true); } finally { feedMoreBusy = false; } }
+setInterval(() => { if (!document.hidden && !document.activeElement?.matches?.('textarea,input')) loadFeed(); }, 60000);
 </script>
-<script src="/js/ghost-stories.js" defer></script>
+<script>
+// 動画の長さ(左下)を、動画の先頭情報を読み込んだ時点で表示する。動画本体は再生しながら読み込まれる
+document.addEventListener('loadedmetadata', (e) => { const v = e.target; if (!v || v.tagName !== 'VIDEO') return; const b = v.parentElement && v.parentElement.querySelector('.vdur'); if (!b || !isFinite(v.duration)) return; const t = Math.round(v.duration), h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), sec = String(t % 60).padStart(2, '0'); b.textContent = h ? h + ':' + String(m).padStart(2, '0') + ':' + sec : m + ':' + sec; }, true);
+document.addEventListener('play', (e) => { const w = e.target && e.target.parentElement; if (w && w.classList.contains('vwrap')) w.classList.add('playing'); }, true);
+document.addEventListener('pause', (e) => { const w = e.target && e.target.parentElement; if (w && w.classList.contains('vwrap') && e.target.currentTime < 0.1) w.classList.remove('playing'); }, true);
+</script>
 <script src="/js/ghost-nav.js"></script>
-<script src="/js/ghost-plus.js" defer></script>
+<script src="/js/filter-search.js"></script><script src="/js/search-adapters.js"></script>
 </body>
 </html>

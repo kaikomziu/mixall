@@ -3,32 +3,32 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ログイン - MixAll +（二世代）</title>
-<link rel="stylesheet" href="/css/style.css" />
-<script src="/js/settings.js"></script>
-<script src="/js/site-lock.js" defer></script>
-<script src="/js/calls.js" defer></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
-<script src="/js/mixall-nav.js" defer></script>
-<script src="/js/language-input.js"></script>
-
-  <meta name="description" content="MixAll +（二世代）アカウントへログインします。">
+  <meta name="description" content="MixAllアカウントへログインします。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="ログイン - MixAll +（二世代）">
-  <meta property="og:description" content="MixAll +（二世代）アカウントへログインします。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/login/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="MixAll +ログイン">
+  <meta property="og:title" content="ログイン - MixAll">
+  <meta property="og:description" content="MixAllアカウントへログインします。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/login/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/10-login.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/10-login.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="ログイン">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ログイン - MixAll +（二世代）">
-  <meta name="twitter:description" content="MixAll +（二世代）アカウントへログインします。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/10-login.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="ログイン - MixAll">
+  <meta name="twitter:description" content="MixAllアカウントへログインします。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/10-login.jpg?v=20261019-2">
+<title>ログイン - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -37,7 +37,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></div>
+  <div class="brand">Mix<span>All</span></div>
   <nav class="services">
     <a href="/Uch" class="active">Uch (掲示板)</a>
     <a href="/Pocket">ぽけっと</a>
@@ -53,7 +53,7 @@
     <h2 id="authHeading">ログイン</h2>
     <p class="muted">
       実際の電話番号やメールアドレスは不要です。<code>@bix.3erver</code> 形式の疑似メールアドレスとパスワードだけでご利用いただけます。
-      パスワードを忘れた場合は、本人確認後に運営へリセットを依頼できます。
+      パスワードを忘れた場合は、下の「パスワードを忘れた方はこちら」から、登録済みの回復メールへ再設定リンクを送れます。回復メール未登録の場合は運営へ依頼してください。
     </p>
 
     <div class="row" style="margin-bottom: 14px;">
@@ -66,9 +66,18 @@
       <input type="password" id="loginPassword" placeholder="パスワード" />
       <div class="error" id="loginError"></div>
       <button id="loginSubmit">ログインする</button>
+      <p style="margin:12px 0 0;"><button type="button" id="forgotToggle" class="secondary" style="width:100%">🔑 パスワードを忘れた方はこちら</button></p>
+      <div id="passwordResetRequest" style="display:none;margin-top:10px;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--panel-2);">
+        <p class="muted" style="margin-top:0;">ログインID（例: taro01@bix.3erver）を入力してください。本人確認済みの回復用メールが登録されている場合、再設定の案内を送信します。</p>
+        <input type="text" id="resetLoginId" autocomplete="username" placeholder="ログインID">
+        <div id="resetRequestStatus" class="muted" role="status" aria-live="polite"></div>
+        <button type="button" id="requestPasswordReset">再設定メールを依頼</button>
+      </div>
     </div>
 
     <div id="registerForm" style="display:none;">
+      <label for="regLang">表示言語（あとから変更できます）</label>
+      <select id="regLang"></select>
       <div class="row">
         <input type="text" id="regEmail" placeholder="例: taro01@bix.3erver" style="flex:1;" />
         <button type="button" id="regSuggest" class="ghost">自動生成</button>
@@ -178,7 +187,7 @@ async function loadDevices() {
       </div>`).join('') : '<p class="muted">有効なセッションはありません。</p>';
     el.querySelectorAll('[data-revoke-session]').forEach((button) => {
       button.onclick = async () => {
-        if (!(await MixAllDialog.confirm('この端末をログアウトしますか？'))) return;
+        if (!confirm('この端末をログアウトしますか？')) return;
         await Netrify.revokeSession(button.dataset.revokeSession);
         if (!Netrify.getSession()) { renderSession(); return; }
         loadDevices();
@@ -195,7 +204,9 @@ function escapeHtml(s) {
 
 function renderSession() {
   const s = Netrify.getSession();
-  document.getElementById('loggedOutView').style.display = s ? 'none' : 'block';
+  document.getElementById('loggedOutView').style.display = 'block'; // ログイン中でも表示（アカウント追加・掛け持ち用）
+  const hd = document.getElementById('authHeading'); if (hd) hd.textContent = (s ? '別のアカウントを追加: ' : '') + (authMode === 'register' ? '新規登録' : 'ログイン');
+  (function(){ let box = document.getElementById('switchAccounts'); if (!s) { if (box) box.remove(); return; } const list = Netrify.listAccounts ? Netrify.listAccounts().filter((a) => a.email !== s.email) : []; if (!box) { box = document.createElement('div'); box.id = 'switchAccounts'; const lv = document.getElementById('loggedInView'); lv.appendChild(box); } box.innerHTML = list.length ? '<p class="muted" style="margin:12px 0 6px">保存済みのアカウントに切り替え</p><div class="row">' + list.map((a) => '<button type="button" class="secondary" data-sw="' + escapeHtml(a.email) + '">' + escapeHtml(a.displayName || a.email) + '</button>').join('') + '</div>' : ''; box.querySelectorAll('[data-sw]').forEach((b) => b.onclick = () => Netrify.switchAccount(b.dataset.sw)); })();
   document.getElementById('loggedInView').style.display = s ? 'block' : 'none';
   document.getElementById('passwordCard').style.display = s ? 'block' : 'none';
   document.getElementById('deleteAccountCard').style.display = s && !s.isAdmin ? 'block' : 'none';
@@ -207,6 +218,28 @@ function renderSession() {
     document.getElementById('adminLink').style.display = s.isAdmin ? 'inline-block' : 'none';
   }
 }
+
+document.getElementById('forgotToggle').onclick = () => {
+  const box = document.getElementById('passwordResetRequest');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  const id = document.getElementById('resetLoginId');
+  if (!id.value) id.value = document.getElementById('loginEmail').value;
+  if (box.style.display === 'block') id.focus();
+};
+document.getElementById('requestPasswordReset').onclick = async () => {
+  const button = document.getElementById('requestPasswordReset');
+  const status = document.getElementById('resetRequestStatus');
+  status.textContent = '';
+  button.disabled = true;
+  try {
+    const result = await Netrify.api('/api/auth', { action: 'requestPasswordReset', accountEmail: document.getElementById('resetLoginId').value });
+    status.textContent = result.maskedEmail ? result.maskedEmail + ' に再設定メールを送信しました。届かない場合は迷惑メールも確認してください。' : (result.message || '該当アカウントに確認済みの回復メールが登録されている場合、案内を送信しました。');
+  } catch (error) {
+    status.textContent = error.message || '送信できませんでした。しばらくしてからもう一度お試しください。';
+  } finally {
+    button.disabled = false;
+  }
+};
 
 document.getElementById('loginSubmit').onclick = async () => {
   const email = document.getElementById('loginEmail').value;
@@ -271,8 +304,8 @@ document.getElementById('deleteAccountSubmit').onclick = async () => {
   const error = document.getElementById('deleteAccountError'); error.textContent='';
   const s = Netrify.getSession(); if (!s || s.isAdmin) return;
   if (document.getElementById('deleteAccountConfirm').value.trim() !== 'DELETE') { error.textContent='DELETE と入力してください'; return; }
-  if (!(await MixAllDialog.confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。'))) return;
-  try { await Netrify.api('/.netlify/functions/auth',{action:'deleteAccount',token:s.token,password:document.getElementById('deleteAccountPassword').value,confirm:'DELETE'}); Netrify.clearSession(); alert('アカウントを削除しました。'); renderSession(); } catch(e) { error.textContent=e.message; }
+  if (!confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。')) return;
+  try { await Netrify.api('/api/auth',{action:'deleteAccount',token:s.token,password:document.getElementById('deleteAccountPassword').value,confirm:'DELETE'}); Netrify.clearSession(); alert('アカウントを削除しました。'); renderSession(); } catch(e) { error.textContent=e.message; }
 };
 
 document.getElementById('passwordSubmit').onclick = async () => {
@@ -293,6 +326,12 @@ document.getElementById('passwordSubmit').onclick = async () => {
 };
 
 renderSession();
+
+(function(){
+  const sel=document.getElementById('regLang'); if(!sel||!window.MixAllI18n) return;
+  sel.innerHTML=MixAllI18n.langs.map(l=>`<option value="${l[0]}"${l[0]===MixAllI18n.lang?' selected':''}>${l[1]}</option>`).join('');
+  sel.onchange=()=>MixAllI18n.set(sel.value);
+})();
 </script>
 </body>
 </html>

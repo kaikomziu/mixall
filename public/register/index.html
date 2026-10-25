@@ -3,32 +3,32 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>新規登録 - MixAll +（二世代）</title>
-<link rel="stylesheet" href="/css/style.css" />
-<script src="/js/settings.js"></script>
-<script src="/js/site-lock.js" defer></script>
-<script src="/js/calls.js" defer></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2642650058052578" crossorigin="anonymous"></script>
-<script src="/js/mixall-nav.js" defer></script>
-<script src="/js/language-input.js"></script>
-
-  <meta name="description" content="MixAll +（二世代）アカウントを新規登録します。">
+  <meta name="description" content="MixAllアカウントを新規登録します。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="新規登録 - MixAll +（二世代）">
-  <meta property="og:description" content="MixAll +（二世代）アカウントを新規登録します。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/register/">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/11-signup.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/11-signup.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="MixAll +新規登録">
+  <meta property="og:title" content="新規登録 - MixAll">
+  <meta property="og:description" content="MixAllアカウントを新規登録します。">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/register/">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/11-signup.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/11-signup.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="新規登録">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="新規登録 - MixAll +（二世代）">
-  <meta name="twitter:description" content="MixAll +（二世代）アカウントを新規登録します。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/11-signup.jpg?v=20261020-plus">
+  <meta name="twitter:title" content="新規登録 - MixAll">
+  <meta name="twitter:description" content="MixAllアカウントを新規登録します。">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/11-signup.jpg?v=20261019-2">
+<title>新規登録 - MixAll（ミックスオール）</title>
+<link rel="stylesheet" href="/css/style.css" />
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/site-lock.js" defer></script>
+<script src="/js/calls.js" defer></script>
+<meta name="google-site-verification" content="lg_Te2WpwpdzZsN3Yl1TOLu-Ip0bJMwdpmqx2ZeZJAc" />
+<script src="/js/mixall-nav.js" defer></script>
+<script src="/js/language-input.js"></script>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -37,7 +37,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></div>
+  <div class="brand">Mix<span>All</span></div>
   <nav class="services">
     <a href="/Uch" class="active">Uch (掲示板)</a>
     <a href="/Pocket">ぽけっと</a>
@@ -85,6 +85,7 @@
         私はロボットではありません (簡易人間判定)
       </label>
       <div class="error" id="regError"></div>
+      <p class="muted" style="font-size:.85rem;">アカウントを作成すると、<a href="/terms/" target="_blank" rel="noopener">利用規約</a>と<a href="/privacy/" target="_blank" rel="noopener">プライバシーポリシー</a>に同意したものとみなされます。</p>
       <button id="regSubmit">アカウント作成</button>
     </div>
   </div>
@@ -178,7 +179,7 @@ async function loadDevices() {
       </div>`).join('') : '<p class="muted">有効なセッションはありません。</p>';
     el.querySelectorAll('[data-revoke-session]').forEach((button) => {
       button.onclick = async () => {
-        if (!(await MixAllDialog.confirm('この端末をログアウトしますか？'))) return;
+        if (!confirm('この端末をログアウトしますか？')) return;
         await Netrify.revokeSession(button.dataset.revokeSession);
         if (!Netrify.getSession()) { renderSession(); return; }
         loadDevices();
@@ -195,7 +196,9 @@ function escapeHtml(s) {
 
 function renderSession() {
   const s = Netrify.getSession();
-  document.getElementById('loggedOutView').style.display = s ? 'none' : 'block';
+  document.getElementById('loggedOutView').style.display = 'block'; // ログイン中でも表示（アカウント追加・掛け持ち用）
+  const hd = document.getElementById('authHeading'); if (hd) hd.textContent = (s ? '別のアカウントを追加: ' : '') + (authMode === 'register' ? '新規登録' : 'ログイン');
+  (function(){ let box = document.getElementById('switchAccounts'); if (!s) { if (box) box.remove(); return; } const list = Netrify.listAccounts ? Netrify.listAccounts().filter((a) => a.email !== s.email) : []; if (!box) { box = document.createElement('div'); box.id = 'switchAccounts'; const lv = document.getElementById('loggedInView'); lv.appendChild(box); } box.innerHTML = list.length ? '<p class="muted" style="margin:12px 0 6px">保存済みのアカウントに切り替え</p><div class="row">' + list.map((a) => '<button type="button" class="secondary" data-sw="' + escapeHtml(a.email) + '">' + escapeHtml(a.displayName || a.email) + '</button>').join('') + '</div>' : ''; box.querySelectorAll('[data-sw]').forEach((b) => b.onclick = () => Netrify.switchAccount(b.dataset.sw)); })();
   document.getElementById('loggedInView').style.display = s ? 'block' : 'none';
   document.getElementById('passwordCard').style.display = s ? 'block' : 'none';
   document.getElementById('deleteAccountCard').style.display = s && !s.isAdmin ? 'block' : 'none';
@@ -271,8 +274,8 @@ document.getElementById('deleteAccountSubmit').onclick = async () => {
   const error = document.getElementById('deleteAccountError'); error.textContent='';
   const s = Netrify.getSession(); if (!s || s.isAdmin) return;
   if (document.getElementById('deleteAccountConfirm').value.trim() !== 'DELETE') { error.textContent='DELETE と入力してください'; return; }
-  if (!(await MixAllDialog.confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。'))) return;
-  try { await Netrify.api('/.netlify/functions/auth',{action:'deleteAccount',token:s.token,password:document.getElementById('deleteAccountPassword').value,confirm:'DELETE'}); Netrify.clearSession(); alert('アカウントを削除しました。'); renderSession(); } catch(e) { error.textContent=e.message; }
+  if (!confirm('本当にアカウントを完全に削除しますか？この操作は取り消せません。')) return;
+  try { await Netrify.api('/api/auth',{action:'deleteAccount',token:s.token,password:document.getElementById('deleteAccountPassword').value,confirm:'DELETE'}); Netrify.clearSession(); alert('アカウントを削除しました。'); renderSession(); } catch(e) { error.textContent=e.message; }
 };
 
 document.getElementById('passwordSubmit').onclick = async () => {

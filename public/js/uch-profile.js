@@ -12,7 +12,7 @@
     const idLabel = card.querySelector('#uchIdLabel');
     const error = card.querySelector('#uchProfileError');
     try {
-      const result = await fetch('/.netlify/functions/uch?profile=me&token=' + encodeURIComponent(session.token));
+      const result = await fetch('/api/uch?profile=me&token=' + encodeURIComponent(session.token));
       const data = await result.json();
       if (!result.ok) throw new Error(data.error || 'Uchプロフィールを取得できませんでした');
       input.value = data.profile?.name || session.displayName || '';
@@ -21,7 +21,7 @@
     card.querySelector('#uchNameSave').onclick = async () => {
       error.textContent = '';
       try {
-        const data = await Netrify.api('/.netlify/functions/uch', { action:'saveUchProfile', token:session.token, name:input.value });
+        const data = await Netrify.api('/api/uch', { action:'saveUchProfile', token:session.token, name:input.value });
         idLabel.textContent = 'ID: @' + data.profile.uchId;
         alert('Uchの名前を保存しました。');
       } catch (e) { error.textContent = e.message; }

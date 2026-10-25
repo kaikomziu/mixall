@@ -5,4 +5,6 @@ build/
 *.zip
 backup-input/
 supabase/.temp/
-supabase/functions/mixall-api/index.js
+supabase/functions/mixall-api/
+build-test/
+supabase/functions/mixall-api2/

@@ -1,6 +1,6 @@
 // public/js/auth.js
 // 疑似メールアカウントのログイン状態をブラウザ側で保持する共通モジュール。
-// セッショントークン自体はサーバー(Netlify Blobs)で検証されるため、
+// セッショントークン自体はサーバー(Supabase)で検証されるため、
 // ここではトークンの保存・付与のみを担当する。
 
 const Netrify = (() => {
@@ -12,7 +12,7 @@ const Netrify = (() => {
     if (!session || !session.token || checkedAgeTokens.has(session.token)) return;
     const token = session.token;
     checkedAgeTokens.add(token);
-    fetch('/.netlify/functions/auth', {
+    fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'getBirthDate', token })
@@ -68,9 +68,10 @@ const Netrify = (() => {
 
   function redirectToLogin() {
     const path = window.location.pathname.toLowerCase();
-    if (path === '/login/' || path === '/login/index.html' || path === '/register/' || path === '/register/index.html') return;
+    if (path === '/login/' || path === '/login/index.html' || path === '/register/' || path === '/register/index.html' || path === '/reset-password/' || path === '/reset-password/index.html' || path === '/unlock/' || path === '/unlock/index.html') return;
     const next = window.location.pathname + window.location.search + window.location.hash;
-    window.location.replace('/login/?next=' + encodeURIComponent(next));
+    let locked = false; try { locked = Boolean(JSON.parse(localStorage.getItem('mixall_device_lock') || 'null')?.d); } catch (_) {}
+    window.location.replace((locked ? '/unlock/?next=' : '/login/?next=') + encodeURIComponent(next));
   }
 
   function invalidateSession(message) {
@@ -101,7 +102,7 @@ const Netrify = (() => {
       const current = getSession();
       if (res.status === 401 && current && current.token && body && body.token) {
         try {
-          const noticeResponse = await fetch('/.netlify/functions/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'consumeLogoutNotice', token:current.token }) });
+          const noticeResponse = await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'consumeLogoutNotice', token:current.token }) });
           const notice = await noticeResponse.json();
           if (notice.notified) {
             invalidateSession(notice.message || '運営によりログアウトさせられました。');
@@ -124,13 +125,13 @@ const Netrify = (() => {
   }
 
   async function register({ email, password, displayName, humanCheck, birthDate }) {
-    const data = await api('/.netlify/functions/auth', { action: 'register', email, password, displayName, humanCheck, birthDate, device: deviceInfo() });
+    const data = await api('/api/auth', { action: 'register', email, password, displayName, humanCheck, birthDate, device: deviceInfo() });
     setSession({ email: data.email, token: data.token, age:data.age, hasBirthDate:data.hasBirthDate === true, displayName: displayName || data.email.split('@')[0], isAdmin: data.isAdmin === true, isDeputyAdmin: data.isDeputyAdmin === true, isOfficial: data.isOfficial === true });
     return data;
   }
 
   async function login({ email, password }) {
-    const data = await api('/.netlify/functions/auth', { action: 'login', email, password, device: deviceInfo() });
+    const data = await api('/api/auth', { action: 'login', email, password, device: deviceInfo() });
     setSession({ email: data.email, token: data.token, age:data.age, hasBirthDate:data.hasBirthDate === true, displayName: data.displayName, isAdmin: data.isAdmin === true, isDeputyAdmin: data.isDeputyAdmin === true, isOfficial: data.isOfficial === true });
     return data;
   }
@@ -138,29 +139,29 @@ const Netrify = (() => {
   async function changePassword({ currentPassword, newPassword }) {
     const s = getSession();
     if (!s) throw new Error('ログインが必要です');
-    return api('/.netlify/functions/auth', { action: 'changePassword', token: s.token, currentPassword, newPassword });
+    return api('/api/auth', { action: 'changePassword', token: s.token, currentPassword, newPassword });
   }
 
   async function suggestEmail() {
-    const data = await api('/.netlify/functions/auth', { action: 'suggest' });
+    const data = await api('/api/auth', { action: 'suggest' });
     return data.email;
   }
 
   async function checkEmail(email) {
-    const data = await api('/.netlify/functions/auth', { action: 'checkEmail', email });
+    const data = await api('/api/auth', { action: 'checkEmail', email });
     return data.available;
   }
 
   async function listSessions() {
     const s = getSession();
     if (!s) throw new Error('ログインが必要です');
-    return api('/.netlify/functions/auth', { action: 'listSessions', token: s.token });
+    return api('/api/auth', { action: 'listSessions', token: s.token });
   }
 
   async function revokeSession(sessionId) {
     const s = getSession();
     if (!s) throw new Error('ログインが必要です');
-    const data = await api('/.netlify/functions/auth', { action: 'revokeSession', token: s.token, sessionId });
+    const data = await api('/api/auth', { action: 'revokeSession', token: s.token, sessionId });
     if (data.revokedCurrent) invalidateSession('この端末のログインを解除しました。');
     return data;
   }
@@ -169,7 +170,7 @@ const Netrify = (() => {
     const s = getSession();
     if (!s) return { ok: true, alreadyLoggedOut: true };
     try {
-      return await api('/.netlify/functions/auth', { action: 'logout', token: s.token });
+      return await api('/api/auth', { action: 'logout', token: s.token });
     } finally {
       clearSession();
     }

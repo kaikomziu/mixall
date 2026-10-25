@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta name="description" content="MixAllアプリストアは、Chrome拡張・Androidアプリ・Windowsアプリなどをユーザー同士で無料共有できる場所です。" />
+<link rel="canonical" href="https://mixalls.edgeone.dev/Store/" />
+<meta property="og:type" content="website" /><meta property="og:site_name" content="MixAll" /><meta property="og:title" content="MixAllアプリストア｜Chrome・Android・Windowsアプリを無料共有" /><meta property="og:description" content="MixAllアプリストアは、Chrome拡張・Androidアプリ・Windowsアプリなどをユーザー同士で無料共有できる場所です。" /><meta property="og:url" content="https://mixalls.edgeone.dev/Store/" /><meta property="og:image" content="https://mixalls.edgeone.dev/icons/icon-512.png" /><meta name="twitter:card" content="summary" />
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex"><title>MixAllアプリストア</title>
+<link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script><script src="/js/auth.js"></script><script src="/js/files.js"></script><script src="/js/site-lock.js" defer></script><script src="/js/mixall-nav.js" defer></script>
+<style>
+.st-wrap{display:grid;gap:12px}.st-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.st-chips button{padding:5px 12px;border-radius:999px;min-height:0;font-size:.82rem}.st-chips button.on{border-color:var(--accent);color:var(--accent)}
+.st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.st-app{display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--panel)}
+.st-top{display:flex;gap:12px;align-items:center}.st-icon{width:56px;height:56px;border-radius:14px;object-fit:cover;background:var(--panel-2);flex:none;display:flex;align-items:center;justify-content:center;font-size:1.6rem}
+.st-name{font-weight:800;font-size:1.02rem;overflow-wrap:anywhere}.st-meta{font-size:.78rem;color:var(--text-dim)}
+.st-badges span{display:inline-block;font-size:.7rem;padding:1px 8px;border-radius:999px;border:1px solid var(--border);margin:0 4px 4px 0}
+.st-desc{font-size:.88rem;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.st-actions{display:flex;gap:6px;flex-wrap:wrap}.st-actions button,.st-actions a{padding:7px 12px;font-size:.82rem;min-height:0}
+.st-row{display:flex;gap:6px;align-items:center;margin:6px 0}.st-row select,.st-row input{min-width:0}.st-row input[type=text],.st-row input[type=url]{flex:1}
+.st-note{font-size:.8rem;color:var(--text-dim)}
+</style></head>
+<body>
+<header class="top"><div class="brand"><a href="/" style="color:inherit;">Mix<span>All</span></a></div><nav class="services"><a href="/Store" class="active">アプリストア</a><a href="/MAWS">MAWS</a><a href="/">トップへ</a></nav></header>
+<main><div class="st-wrap">
+  <div class="card">
+    <h2 style="margin-top:0">MixAllアプリストア</h2>
+    <p class="st-note" style="margin-top:0">MixAllの仲間が作ったアプリ(Chrome拡張・Android・iPhone・Windows・Macなど)を、無料で共有・配布できる場所です。配布されているファイルは投稿者のもので、MixAllは中身を審査していません。提供元を確認し、自己責任でインストールしてください。</p>
+    <input type="search" id="q" placeholder="アプリ名・説明で検索" style="width:100%;box-sizing:border-box">
+    <div class="st-chips" id="chips"></div>
+    <div class="row"><select id="sort"><option value="new">新着順</option><option value="popular">人気順(ダウンロード数)</option></select></div>
+  </div>
+  <div id="list" class="st-grid"><p class="muted">読み込み中...</p></div>
+  <div class="card">
+    <h3 style="margin-top:0">アプリを公開する</h3>
+    <div class="st-row"><input type="text" id="fName" maxlength="60" placeholder="アプリ名(必須)"><input type="text" id="fVer" maxlength="30" placeholder="バージョン" style="max-width:120px"></div>
+    <textarea id="fDesc" rows="4" maxlength="1500" placeholder="説明(何ができるか・使い方・注意点)" style="width:100%;box-sizing:border-box"></textarea>
+    <div class="st-row"><label class="muted">アイコン <input type="file" id="fIcon" accept="image/png,image/jpeg,image/webp"></label></div>
+    <h4 style="margin:10px 0 4px">配布ファイル(APK・ZIP・EXE・IPAなど / 複数OK)</h4>
+    <div id="fileRows"></div><button type="button" class="secondary small" id="addFile">＋ ファイルを追加</button>
+    <h4 style="margin:10px 0 4px">配布ページ・公式ストアのリンク(任意)</h4>
+    <div id="linkRows"></div><button type="button" class="secondary small" id="addLink">＋ リンクを追加</button>
+    <p class="st-note">iPhoneアプリは、IPAファイルをそのまま入れるのは難しいため、TestFlightなどの配布リンクを使うのがおすすめです。ChromeやFirefoxの拡張は、ZIPを配布して「パッケージ化されていない拡張機能を読み込む」で入れる形になります。</p>
+    <button type="button" id="publish">公開する</button> <span id="pubMsg" class="muted" role="status" aria-live="polite"></span>
+  </div>
+</div></main>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const session = Netrify.requireLogin();
+  if (!session) return;
+  const token = session.token;
+  const PLAT = { android: 'Android', ios: 'iPhone/iPad', windows: 'Windows', mac: 'Mac', linux: 'Linux', chrome: 'Chrome拡張', firefox: 'Firefox拡張', web: 'Web/PWA', other: 'その他' };
+  let platform = '';
+  let current = [];
+  const size = (n) => n > 1048576 ? (n / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB';
+  const api = async (body) => { const r = await fetch('/api/store', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, token }) }); const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || '失敗しました'); return d; };
+
+  function chips() {
+    $('chips').innerHTML = [['', 'すべて'], ...Object.entries(PLAT)].map(([k, l]) => `<button type="button" class="secondary ${k === platform ? 'on' : ''}" data-p="${k}">${l}</button>`).join('');
+    $('chips').querySelectorAll('button').forEach((b) => { b.onclick = () => { platform = b.dataset.p; chips(); load(); }; });
+  }
+  async function load() {
+    const params = new URLSearchParams({ token, q: $('q').value.trim(), sort: $('sort').value === 'popular' ? 'popular' : '' });
+    if (platform) params.set('platform', platform);
+    try {
+      const r = await fetch('/api/store?' + params); const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '読み込めませんでした');
+      current = d.apps;
+      $('list').innerHTML = d.apps.map(card).join('') || '<p class="muted">まだアプリがありません。下のフォームから最初のアプリを公開しましょう。</p>';
+      bind();
+    } catch (e) { $('list').innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
+  }
+  function card(a) {
+    const files = a.files.map((f, i) => `<button type="button" data-dl="${esc(a.id)}" data-i="${i}">⬇ ${esc(PLAT[f.platform] || f.platform)} · ${esc(f.fileName)} (${size(f.size)})</button>`).join('');
+    const links = a.links.map((l) => `<a class="button-link" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer nofollow">🔗 ${esc(PLAT[l.platform] || l.platform)}</a>`).join('');
+    return `<div class="st-app"><div class="st-top">${a.icon ? `<img class="st-icon" src="${esc(a.icon)}" alt="">` : '<div class="st-icon">📦</div>'}<div><div class="st-name">${esc(a.name)}</div><div class="st-meta">${a.version ? 'v' + esc(a.version) + ' · ' : ''}${esc(a.authorName)} · ⬇ ${a.downloads}</div></div></div>
+      <div class="st-badges">${a.platforms.map((p) => `<span>${esc(PLAT[p] || p)}</span>`).join('')}</div>
+      ${a.description ? `<p class="st-desc">${esc(a.description)}</p>` : ''}
+      <div class="st-actions">${files}${links}</div>
+      <div class="st-actions"><button type="button" class="ghost" data-report="${esc(a.id)}">通報</button>${a.canDelete ? `<button type="button" class="ghost" data-del="${esc(a.id)}">削除</button>` : ''}</div></div>`;
+  }
+  function bind() {
+    $('list').querySelectorAll('[data-dl]').forEach((b) => { b.onclick = async () => {
+      const idx = Number(b.dataset.i), id = b.dataset.dl; const old = b.textContent; b.disabled = true;
+      try {
+        const file = current.find((x) => x.id === id)?.files[idx]; if (!file) throw new Error('ファイルが見つかりません');
+        const out = await NetrifyFiles.downloadFile(file.fileId, token, (n, t) => { b.textContent = `ダウンロード中 ${n}/${t}`; });
+        const a = document.createElement('a'); a.href = out.url; a.download = file.fileName || 'app'; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(out.url), 120000);
+        api({ action: 'download', appId: id }).catch(() => {});
+      } catch (e) { alert(e.message); } finally { b.disabled = false; b.textContent = old; }
+    }; });
+    $('list').querySelectorAll('[data-del]').forEach((b) => { b.onclick = async () => { if (!confirm('このアプリを削除しますか？')) return; try { await api({ action: 'delete', appId: b.dataset.del }); load(); } catch (e) { alert(e.message); } }; });
+    $('list').querySelectorAll('[data-report]').forEach((b) => { b.onclick = async () => { if (!confirm('このアプリを問題があるものとして通報しますか？')) return; try { await api({ action: 'report', appId: b.dataset.report }); alert('通報しました'); } catch (e) { alert(e.message); } }; });
+  }
+
+  // ---- 公開フォーム ----
+  const platOptions = Object.entries(PLAT).map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
+  function addRow(kind) {
+    const row = document.createElement('div'); row.className = 'st-row';
+    row.innerHTML = kind === 'file' ? `<select>${platOptions}</select><input type="file"><button type="button" class="ghost small" aria-label="削除">✕</button>` : `<select>${platOptions}</select><input type="url" placeholder="https://…"><button type="button" class="ghost small" aria-label="削除">✕</button>`;
+    row.querySelector('button').onclick = () => row.remove();
+    $(kind === 'file' ? 'fileRows' : 'linkRows').appendChild(row);
+  }
+  $('addFile').onclick = () => addRow('file'); $('addLink').onclick = () => addRow('link');
+  async function iconData(file) {
+    if (!file) return '';
+    const url = URL.createObjectURL(file); const im = new Image();
+    await new Promise((res, rej) => { im.onload = res; im.onerror = rej; im.src = url; });
+    const cv = document.createElement('canvas'); cv.width = cv.height = 96; const ctx = cv.getContext('2d');
+    const s = Math.min(im.width, im.height); ctx.drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, 96, 96); URL.revokeObjectURL(url);
+    return cv.toDataURL('image/webp', 0.8).startsWith('data:image/webp') ? cv.toDataURL('image/webp', 0.8) : cv.toDataURL('image/jpeg', 0.8);
+  }
+  $('publish').onclick = async () => {
+    const msg = $('pubMsg'), btn = $('publish'); msg.textContent = ''; btn.disabled = true;
+    try {
+      const files = [];
+      for (const row of $('fileRows').querySelectorAll('.st-row')) {
+        const f = row.querySelector('input').files[0]; if (!f) continue;
+        msg.textContent = `アップロード中: ${f.name}`;
+        const m = await NetrifyFiles.uploadFile(f, token, (n, t) => { msg.textContent = `アップロード中: ${f.name} (${n}/${t})`; });
+        files.push({ platform: row.querySelector('select').value, fileId: m.fileId, fileName: m.fileName });
+      }
+      const links = [...$('linkRows').querySelectorAll('.st-row')].map((r) => ({ platform: r.querySelector('select').value, url: r.querySelector('input').value.trim() })).filter((l) => l.url);
+      msg.textContent = '公開しています…';
+      await api({ action: 'publish', name: $('fName').value, version: $('fVer').value, description: $('fDesc').value, icon: await iconData($('fIcon').files[0]), files, links });
+      msg.textContent = '公開しました！'; $('fName').value = ''; $('fVer').value = ''; $('fDesc').value = ''; $('fileRows').innerHTML = ''; $('linkRows').innerHTML = '';
+      load();
+    } catch (e) { msg.textContent = e.message || '公開できませんでした'; } finally { btn.disabled = false; }
+  };
+  $('q').addEventListener('input', () => { clearTimeout($('q')._t); $('q')._t = setTimeout(load, 300); });
+  $('sort').onchange = load;
+  addRow('file'); chips(); load();
+})();
+</script></body></html>

@@ -2,30 +2,30 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ghostブックマーク - MixAll +（二世代）</title>
-  <link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
-  <style>
-    body{padding-bottom:80px}.bookmark-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bookmark-head select{flex:1;min-width:170px}.bookmark-search{display:grid;grid-template-columns:minmax(180px,1fr) minmax(130px,220px);gap:10px;margin-top:12px}.saved-post{white-space:pre-wrap;overflow-wrap:anywhere}.saved-media img,.saved-media video{display:block;width:100%;max-height:70vh;object-fit:contain;border-radius:10px;margin:10px 0}.saved-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.saved-actions button{font:inherit}.saved-empty{padding:25px;text-align:center;color:var(--text-dim)}@media(max-width:520px){.bookmark-search{grid-template-columns:1fr}}
-  </style>
-  <script src="/js/mixall-nav.js" defer></script><script src="/js/language-input.js"></script>
-
   <meta name="description" content="保存したGhost投稿をリスト別に管理し、検索・絞り込みできます。">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="MixAll +（二世代）">
+  <meta property="og:site_name" content="MixAll">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:title" content="Ghostブックマーク - MixAll +（二世代）">
+  <meta property="og:title" content="Ghostブックマーク - MixAll">
   <meta property="og:description" content="保存したGhost投稿をリスト別に管理し、検索・絞り込みできます。">
-  <meta property="og:url" content="https://mix-alls.netlify.app/Ghost/bookmarks">
-  <meta property="og:image" content="https://mix-alls.netlify.app/ogp/05-ghost-bookmark.jpg?v=20261020-plus">
-  <meta property="og:image:secure_url" content="https://mix-alls.netlify.app/ogp/05-ghost-bookmark.jpg?v=20261020-plus">
-  <meta property="og:image:alt" content="Ghostのブックマーク">
+  <meta property="og:url" content="https://mixalls.edgeone.dev/Ghost/bookmarks">
+  <meta property="og:image" content="https://mixalls.edgeone.dev/ogp/05-ghost-bookmark.jpg?v=20261019-2">
+  <meta property="og:image:secure_url" content="https://mixalls.edgeone.dev/ogp/05-ghost-bookmark.jpg?v=20261019-2">
+  <meta property="og:image:alt" content="Ghost - ブックマーク">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Ghostブックマーク - MixAll +（二世代）">
+  <meta name="twitter:title" content="Ghostブックマーク - MixAll">
   <meta name="twitter:description" content="保存したGhost投稿をリスト別に管理し、検索・絞り込みできます。">
-  <meta name="twitter:image" content="https://mix-alls.netlify.app/ogp/05-ghost-bookmark.jpg?v=20261020-plus">
+  <meta name="twitter:image" content="https://mixalls.edgeone.dev/ogp/05-ghost-bookmark.jpg?v=20261019-2">
+  <title>Ghostブックマーク</title>
+  <link rel="stylesheet" href="/css/style.css"><script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+  <style>
+    body{padding-bottom:80px}.bookmark-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.bookmark-head select{flex:1;min-width:170px}.bookmark-search{display:grid;grid-template-columns:minmax(180px,1fr) minmax(130px,220px);gap:10px;margin-top:12px}.saved-post{white-space:pre-wrap;overflow-wrap:anywhere}.saved-media img,.saved-media video{display:block;width:100%;max-height:70vh;object-fit:contain;border-radius:10px;margin:10px 0}.saved-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.saved-actions button{font:inherit}.saved-empty{padding:25px;text-align:center;color:var(--text-dim)}@media(max-width:520px){.bookmark-search{grid-template-columns:1fr}}
+  </style>
+  <script src="/js/mixall-nav.js" defer></script><script src="/js/language-input.js"></script>
 
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="/icons/favicon-16.png" type="image/png" sizes="16x16">
@@ -33,7 +33,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
-<header class="top"><div class="brand"><a href="/Ghost" style="color:inherit"><span class="brand-logo"><i class="brand-mark" aria-hidden="true"></i><span class="brand-word">Mix<span>All</span><b class="brand-plus">+</b></span></span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Ghost/videos.html">ショート</a><a href="/Ghost/bookmarks.html" class="active">保存済み</a></nav></header>
+<header class="top"><div class="brand"><a href="/Ghost" style="color:inherit">Mix<span>All</span></a></div><nav class="services"><a href="/Ghost">Ghost</a><a href="/Ghost/videos.html">ショート</a><a href="/Ghost/bookmarks.html" class="active">保存済み</a></nav></header>
 <main>
   <section class="card">
     <h1>ブックマーク</h1>
@@ -50,7 +50,7 @@ const postsEl=document.getElementById('posts'),selectEl=document.getElementById(
 const searchEl=document.getElementById('bookmarkSearch'),typeEl=document.getElementById('typeFilter');
 let lists=[],allPosts=[],selectedList='saved';
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function mediaHtml(media){return (media||[]).map(m=>{if(m.kind==='image'||m.kind==='imageBlob')return `<img src="${esc(m.mediaUrl||m.dataUrl||'')}" alt="">`;if(m.kind==='videoBlob')return `<video src="${esc(m.mediaUrl||'')}" controls playsinline preload="metadata"></video>`;if(m.kind==='videoFile')return `<video src="${esc(m.dataUrl||'')}" controls playsinline preload="metadata"></video>`;if(m.kind==='videoUrl'){const id=String(m.url||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]+)/)?.[1];return id?`<iframe src="https://www.youtube.com/embed/${encodeURIComponent(id)}" style="width:100%;aspect-ratio:16/9;border:0" allowfullscreen></iframe>`:`<video src="${esc(m.url||'')}" controls playsinline preload="metadata"></video>`;}return '';}).join('');}
+function mediaHtml(media){return (media||[]).map(m=>{if(m.kind==='image'||m.kind==='imageBlob')return `<img src="${esc(m.mediaUrl||m.dataUrl||'')}" alt="">`;if(m.kind==='imageUrl')return `<img src="${esc(m.url||'')}" alt="">`;if(m.kind==='videoBlob')return `<video src="${esc(m.mediaUrl||'')}" controls playsinline preload="metadata"></video>`;if(m.kind==='videoFile')return `<video src="${esc(m.dataUrl||'')}" controls playsinline preload="metadata"></video>`;if(m.kind==='videoUrl'){const id=String(m.url||'').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]+)/)?.[1];return id?`<iframe src="https://www.youtube.com/embed/${encodeURIComponent(id)}" style="width:100%;aspect-ratio:16/9;border:0" allowfullscreen></iframe>`:`<video src="${esc(m.url||'')}" controls playsinline preload="metadata"></video>`;}return '';}).join('');}
 function renderPosts(){
   const query=searchEl.value.trim().toLocaleLowerCase('ja');
   const type=typeEl.value;
@@ -64,14 +64,14 @@ function renderPosts(){
   const listName=lists.find(l=>l.id===selectedList)?.name||'保存済み';
   statusEl.textContent=`「${listName}」: ${filtered.length}件 / ${allPosts.length}件`;
   document.getElementById('deleteList').disabled=selectedList==='saved';
-  postsEl.querySelectorAll('[data-remove]').forEach(button=>button.onclick=async()=>{try{await Netrify.api('/.netlify/functions/ghost',{action:'bookmarkPost',token:session.token,postId:button.dataset.remove,listId:selectedList,save:false});await load(selectedList);}catch(e){alert(e.message);}});
-  postsEl.querySelectorAll('[data-remove-all]').forEach(button=>button.onclick=async()=>{try{await Netrify.api('/.netlify/functions/ghost',{action:'bookmarkPost',token:session.token,postId:button.dataset.removeAll,listId:selectedList,save:false,allLists:true});await load(selectedList);}catch(e){alert(e.message);}});
+  postsEl.querySelectorAll('[data-remove]').forEach(button=>button.onclick=async()=>{try{await Netrify.api('/api/ghost',{action:'bookmarkPost',token:session.token,postId:button.dataset.remove,listId:selectedList,save:false});await load(selectedList);}catch(e){alert(e.message);}});
+  postsEl.querySelectorAll('[data-remove-all]').forEach(button=>button.onclick=async()=>{try{await Netrify.api('/api/ghost',{action:'bookmarkPost',token:session.token,postId:button.dataset.removeAll,listId:selectedList,save:false,allLists:true});await load(selectedList);}catch(e){alert(e.message);}});
 }
 async function load(listId){
   if(!session)return;
   statusEl.textContent='読み込み中...';
   try{
-    const url='/.netlify/functions/ghost?bookmarks=1&token='+encodeURIComponent(session.token)+(listId?'&listId='+encodeURIComponent(listId):'');
+    const url='/api/ghost?bookmarks=1&token='+encodeURIComponent(session.token)+(listId?'&listId='+encodeURIComponent(listId):'');
     const response=await fetch(url),data=await response.json();
     if(!response.ok)throw new Error(data.error||'ブックマークを読み込めません');
     lists=data.lists||[];if(!lists.length)lists=[{id:'saved',name:'保存済み',count:0}];
@@ -82,10 +82,10 @@ async function load(listId){
 }
 selectEl.onchange=()=>load(selectEl.value);
 searchEl.addEventListener('input',renderPosts);typeEl.addEventListener('change',renderPosts);
-document.getElementById('newList').onclick=async()=>{const name=(await MixAllDialog.prompt('新しいブックマークリスト名'));if(!name)return;try{const result=await Netrify.api('/.netlify/functions/ghost',{action:'createBookmarkList',token:session.token,name});await load(result.list.id);}catch(error){alert(error.message);}};
-document.getElementById('deleteList').onclick=async()=>{const list=lists.find(item=>item.id===selectedList);if(!list||selectedList==='saved')return;if(!(await MixAllDialog.confirm(`「${list.name}」を削除しますか？このリストに保存されたブックマークも解除されます。`)))return;try{await Netrify.api('/.netlify/functions/ghost',{action:'deleteBookmarkList',token:session.token,listId:selectedList});await load('saved');}catch(error){alert(error.message);}};
+document.getElementById('newList').onclick=async()=>{const name=prompt('新しいブックマークリスト名');if(!name)return;try{const result=await Netrify.api('/api/ghost',{action:'createBookmarkList',token:session.token,name});await load(result.list.id);}catch(error){alert(error.message);}};
+document.getElementById('deleteList').onclick=async()=>{const list=lists.find(item=>item.id===selectedList);if(!list||selectedList==='saved')return;if(!confirm(`「${list.name}」を削除しますか？このリストに保存されたブックマークも解除されます。`))return;try{await Netrify.api('/api/ghost',{action:'deleteBookmarkList',token:session.token,listId:selectedList});await load('saved');}catch(error){alert(error.message);}};
 load(new URLSearchParams(location.search).get('listId')||'saved');
 </script>
 <script src="/js/ghost-nav.js"></script>
-<script src="/js/ghost-plus.js" defer></script>
+<script src="/js/filter-search.js"></script><script src="/js/search-adapters.js"></script>
 </body></html>

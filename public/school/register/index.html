@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>学校モード 新規登録 | MixAll</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+.step{border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:12px}
+.step.off{opacity:.45;pointer-events:none}
+.step h3{margin:0 0 8px;font-size:1.02rem}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.82rem;font-weight:600;margin-right:6px}
+.badge.ok{background:#dcfce7;color:#166534}.badge.warn{background:#fef3c7;color:#92400e}.badge.ng{background:#fee2e2;color:#991b1b}.badge.info{background:#dbeafe;color:#1e40af}
+.reasons{margin:6px 0 0;padding-left:18px;color:var(--text-dim);font-size:.88rem}
+.code-input{letter-spacing:.5em;text-align:center;font-size:1.4rem}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><a href="/" style="color:inherit">Mix<span>All</span></a></div>
+  <nav class="services"><a href="/school/">学校モード</a><a href="/">トップへ</a></nav>
+</header>
+<main>
+  <div class="card">
+    <h2>🏫 学校モード 新規登録</h2>
+    <p class="muted">学校から配られたメールアドレスで、生徒か教員かを確認して登録します。生徒は先生の「学校コード」を入力すると、先生とつながります。</p>
+
+    <div class="step" id="s1">
+      <h3>① 学校のメールアドレス</h3>
+      <input type="email" id="schoolEmail" placeholder="例: 12345@abc.ed.jp" autocomplete="email" inputmode="email">
+      <div id="checkResult" style="margin-top:8px"></div>
+      <div class="error" id="e1"></div>
+      <button id="sendCode" disabled>確認コードを送る</button>
+    </div>
+
+    <div class="step off" id="s2">
+      <h3>② 確認コード</h3>
+      <p class="muted" style="margin-top:0">学校のメールに届いた6桁のコードを入力してください。</p>
+      <input type="text" id="otp" class="code-input" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="000000">
+      <div class="error" id="e2"></div>
+      <button id="verify">確認する</button>
+    </div>
+
+    <div class="step off" id="s3">
+      <h3>③ アカウント</h3>
+      <div id="loggedInBox" style="display:none">
+        <p><span id="whoami"></span> のアカウントを、学校モードに登録します。</p>
+      </div>
+      <div id="newAccountBox">
+        <p class="muted" style="margin-top:0">MixAllのアカウント(<code>@bix.3erver</code>)を新しく作ります。学校のメールアドレスは、先生や他の生徒には表示されません。</p>
+        <input type="text" id="regEmail" placeholder="ユーザー名 例: taro01">
+        <input type="text" id="regDisplayName" placeholder="表示名(先生に表示されます)">
+        <label for="regBirthDate">生年月日</label>
+        <input type="date" id="regBirthDate">
+        <input type="password" id="regPassword" placeholder="パスワード(6文字以上)">
+        <label class="row muted" style="margin-bottom:10px"><input type="checkbox" id="humanCheck" style="width:auto"> 私はロボットではありません</label>
+        <p class="muted" style="font-size:.85rem">登録すると、<a href="/terms/" target="_blank" rel="noopener">利用規約</a>と<a href="/privacy/" target="_blank" rel="noopener">プライバシーポリシー</a>(学校モードの項目を含む)に同意したものとみなされます。</p>
+        <p class="muted" style="font-size:.85rem">すでにアカウントがある方は、<a href="/login/?next=/school/register/">ログイン</a>してからこのページに戻ってください。</p>
+      </div>
+      <div class="error" id="e3"></div>
+      <button id="finish">学校モードに登録する</button>
+    </div>
+
+    <div class="step" id="done" style="display:none">
+      <h3>✅ 登録できました</h3>
+      <p id="doneText"></p>
+      <a class="button" href="/school/">学校モードを開く</a>
+    </div>
+  </div>
+</main>
+<script src="/js/auth.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const api = (body) => fetch('/api/school', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(async (r) => { const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || '通信に失敗しました（' + r.status + '）'); return d; });
+  const session = (() => { try { return Netrify.getSession(); } catch (_) { return null; } })();
+  let checked = null, proof = '', role = '';
+  const roleName = (r) => (r === 'teacher' ? '教員' : '生徒');
+
+  if (session) { $('loggedInBox').style.display = ''; $('newAccountBox').style.display = 'none'; $('whoami').textContent = session.displayName || session.email; }
+
+  async function check() {
+    const v = $('schoolEmail').value.trim();
+    if (checked && checked.email === v.toLowerCase()) return; // 同じ入力なら再チェックしない(ボタンの押し損ねを防ぐ)
+    $('e1').textContent = ''; $('sendCode').disabled = true; checked = null;
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(v)) { $('checkResult').innerHTML = ''; return; }
+    try {
+      const r = await api({ action: 'check', schoolEmail: v });
+      checked = r;
+      const dom = r.level === 'strong' ? '<span class="badge ok">学校のドメインを確認</span>' : r.level === 'probable' ? '<span class="badge warn">学校らしいドメイン</span>' : '<span class="badge ng">学校のドメインではありません</span>';
+      const rl = r.allowed ? '<span class="badge info">' + roleName(r.role) + 'として登録されます</span>' : '';
+      let note = '';
+      if (r.allowed) {
+        note = '<ul class="reasons">' + (r.reasons || []).map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>';
+        note += '<p class="muted" style="margin:6px 0 0;font-size:.88rem">学校メールで登録すると生徒になります。教員の方は、運営が発行する「教員ログインコード」を学校モード画面で入力してください。</p>';
+      } else note = '<p class="muted" style="margin:6px 0 0;font-size:.88rem">' + esc(r.message || '') + '</p>';
+      $('checkResult').innerHTML = dom + rl + note;
+      $('sendCode').disabled = !r.allowed;
+    } catch (e) { $('e1').textContent = e.message; }
+  }
+  let t = null; $('schoolEmail').addEventListener('input', () => { clearTimeout(t); t = setTimeout(check, 400); });
+  $('schoolEmail').addEventListener('blur', check);
+
+  $('sendCode').onclick = async () => {
+    $('e1').textContent = ''; $('sendCode').disabled = true;
+    try {
+      const r = await api({ action: 'start', schoolEmail: $('schoolEmail').value.trim() });
+      role = r.role; $('s2').classList.remove('off'); $('otp').focus();
+      $('e1').style.color = 'var(--text-dim)'; $('e1').textContent = '確認コードを送りました。メールを確認してください。';
+    } catch (e) { $('e1').style.color = ''; $('e1').textContent = e.message; setTimeout(() => { $('sendCode').disabled = !(checked && checked.allowed); }, 4000); }
+  };
+  $('verify').onclick = async () => {
+    $('e2').textContent = '';
+    try {
+      const r = await api({ action: 'verify', schoolEmail: $('schoolEmail').value.trim(), code: $('otp').value.trim() });
+      proof = r.proof; role = r.role; $('s1').classList.add('off'); $('s2').classList.add('off'); $('s3').classList.remove('off');
+    } catch (e) { $('e2').textContent = e.message; }
+  };
+  $('finish').onclick = async () => {
+    $('e3').textContent = ''; $('finish').disabled = true;
+    try {
+      if (!session) {
+        const email = $('regEmail').value.trim();
+        if (!email) throw new Error('ユーザー名を入力してください');
+        if (!$('regBirthDate').value) throw new Error('生年月日を入力してください');
+        await Netrify.register({ email, password: $('regPassword').value, displayName: $('regDisplayName').value.trim() || email, humanCheck: $('humanCheck').checked, birthDate: $('regBirthDate').value });
+      }
+      const s = Netrify.getSession();
+      const r = await api({ action: 'enroll', token: s.token, proof });
+      $('s3').style.display = 'none';
+      $('done').style.display = '';
+      $('doneText').textContent = roleName(r.profile.role) + 'として登録しました。' + (r.profile.role === 'teacher' ? '学校モードを開くと、生徒に伝える「学校コード」が表示されます。' : '学校モードを開いて、先生の「学校コード」を入力してください。');
+    } catch (e) { $('e3').textContent = e.message; $('finish').disabled = false; }
+  };
+})();
+</script>
+</body>
+</html>

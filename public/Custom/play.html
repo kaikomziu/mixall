@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HTMLゲーム - Custom - MixAll</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/settings.js"></script>
+<script src="/js/i18n.js"></script>
+<script src="/js/mixall-nav.js" defer></script>
+<link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+html,body{height:100%}
+.gp-wrap{display:flex;flex-direction:column;height:100dvh;padding-bottom:78px;box-sizing:border-box}
+.gp-bar{display:flex;gap:8px;align-items:center;padding:8px 12px;flex-wrap:wrap}
+.gp-bar h1{margin:0;font-size:1.05rem;flex:1;min-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gp-frame{flex:1;border:0;width:100%;background:#000;min-height:0}
+.gp-note{font-size:.75rem;padding:0 12px 6px}
+</style>
+</head>
+<body>
+<div class="gp-wrap">
+  <div class="gp-bar"><a class="button secondary" href="/Custom/games.html">← ゲーム一覧</a><h1 id="gpTitle">読み込み中…</h1><button type="button" class="secondary" id="gpReload">再読み込み</button><button type="button" id="gpFull">全画面</button></div>
+  <div class="gp-note muted" id="gpNote">ユーザーが作ったゲームです。パスワードなどの個人情報は入力しないでください。</div>
+  <iframe id="gpFrame" class="gp-frame" title="HTMLゲーム" sandbox="allow-scripts allow-pointer-lock allow-forms allow-modals" allow="fullscreen; gamepad; autoplay; accelerometer; gyroscope" hidden></iframe>
+</div>
+<script src="/js/auth.js"></script>
+<script src="/js/custom-html-game.js"></script>
+<script>
+(async function () {
+  const session = Netrify.requireLogin(); if (!session) return;
+  const id = new URLSearchParams(location.search).get('id');
+  const frame = document.getElementById('gpFrame'), title = document.getElementById('gpTitle'), note = document.getElementById('gpNote');
+  let project = null, stop = null;
+  async function sha(s) { try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('mxgame:' + s)); return Array.from(new Uint8Array(b)).slice(0, 5).map((x) => x.toString(16).padStart(2, '0')).join(''); } catch (_) { return String(Math.random()).slice(2, 12); } }
+  async function start() {
+    if (stop) stop();
+    const srcdoc = MixAllHtmlGame.build(project.programFiles || [], project.entry, { name: session.displayName || session.email.split('@')[0], id: await sha(session.email) });
+    frame.hidden = false; frame.srcdoc = srcdoc;
+    stop = MixAllHtmlGame.run(frame, { projectId: project.id, token: session.token });
+  }
+  try {
+    const r = await fetch('/api/custom?projectId=' + encodeURIComponent(id || '') + '&token=' + encodeURIComponent(session.token));
+    const d = await r.json(); if (!r.ok) throw new Error(d.error || '読み込めませんでした');
+    project = d.project; if (project.kind !== 'html') throw new Error('これはHTMLゲームではありません');
+    title.textContent = project.name; document.title = project.name + ' - Custom - MixAll';
+    await start();
+  } catch (e) { title.textContent = 'ゲームを開けません'; note.textContent = e.message; note.className = 'gp-note error'; }
+  document.getElementById('gpReload').onclick = () => project && start();
+  document.getElementById('gpFull').onclick = () => { const el = frame; (el.requestFullscreen || el.webkitRequestFullscreen || function () {}).call(el); };
+})();
+</script>
+</body>
+</html>
