@@ -319,3 +319,14 @@ textarea.mixall-dialog-input { min-height: 110px; line-height: 1.55; }
 .mx-shop-name { font-size: 1.3rem; font-weight: 900; -webkit-background-clip: text; background-clip: text; color: transparent; padding: 14px 0; }
 .mx-shop-title { padding: 6px 12px; border-radius: 999px; font-weight: 800; background: var(--mx-grad-soft); border: 1px solid color-mix(in srgb, #8b6bff 35%, transparent); margin: 12px 0; }
 .mx-shop-bg { width: 56px; height: 80px; border-radius: 12px; }
+/* ===== 使いやすさ その2（js/plus-qol.js） ===== */
+/* ページの先頭へ */
+.mx-totop { position: fixed; z-index: 900; left: 16px; bottom: calc(18px + env(safe-area-inset-bottom)); width: 42px; height: 42px; padding: 0; border-radius: 50%;
+  font-size: 1.2rem; font-weight: 700; line-height: 1; color: #fff; background: var(--mx-grad); border: 0; box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+  opacity: 0; transform: translateY(12px) scale(.9); pointer-events: none; transition: opacity .2s, transform .2s; }
+.mx-totop.on { opacity: .92; transform: none; pointer-events: auto; }
+.mx-totop:hover { opacity: 1; }
+/* 長い投稿の折りたたみ */
+.mx-folded { max-height: 260px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.mx-more { display: block; margin: 4px 0 8px; padding: 4px 10px; font-size: .85rem; }
+@media (prefers-reduced-motion: reduce) { .mx-totop { transition: none; } }
