@@ -8,3 +8,5 @@ supabase/.temp/
 supabase/functions/mixall-api/
 build-test/
 supabase/functions/mixall-api2/
+edgeone-build/
+.edgeone/

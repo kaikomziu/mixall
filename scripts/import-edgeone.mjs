@@ -32,6 +32,7 @@ emptyDir('supabase/edgeone');
 cpSync(join(SRC, 'supabase'), 'supabase/edgeone', { recursive: true });
 cpSync(join(SRC, 'README-EdgeOne.md'), 'README-EdgeOne.md');
 cpSync(join(SRC, 'edgeone.json'), 'supabase/edgeone/edgeone.json');
+cpSync(join(SRC, 'middleware.js'), 'supabase/edgeone/middleware.js');
 
 const env = (name, fallback = '""') => `((typeof process !== "undefined" && process.env && process.env.${name}) || ${fallback})`;
 
