@@ -29,14 +29,21 @@ function vapid(env) {
 }
 
 export async function withMixallConfig(context) {
-  const platform = { ...((typeof process !== 'undefined' && process.env) || {}), ...((context && context.env) || {}) };
-  const url = String(platform.SUPABASE_URL || '').replace(/\/+$/, '');
-  const key = String(platform.SUPABASE_SECRET_KEY || platform.SUPABASE_SERVICE_ROLE_KEY || '');
-  if (!platform.SUPABASE_SECRET_KEY && key) platform.SUPABASE_SECRET_KEY = key;
+  // EdgeOne の context.env は中身を列挙できないことがあるので、名前を指定して読む
+  const base = (context && context.env) || {};
+  const pe = (typeof process !== 'undefined' && process.env) || {};
+  const platform = (k) => { const v = base[k] ?? pe[k]; return v === undefined || v === null || v === '' ? undefined : String(v); };
+  const url = String(platform('SUPABASE_URL') || '').replace(/\/+$/, '');
+  const key = String(platform('SUPABASE_SECRET_KEY') || platform('SUPABASE_SERVICE_ROLE_KEY') || '');
   if (url && key) await load(url, key);
-  const env = { ...platform };
-  for (const [k, v] of Object.entries(values)) if ((env[k] === undefined || env[k] === '') && v !== null && v !== undefined && v !== '') env[k] = String(v);
-  vapid(env);
+  const extra = { SUPABASE_URL: url, SUPABASE_SECRET_KEY: key };
+  for (const [k, v] of Object.entries(values)) if (v !== null && v !== undefined && v !== '') extra[k] = String(v);
+  vapid(extra);
+  let names = [];
+  try { names = Object.keys(base); } catch (_) {}
+  const plain = {};
+  for (const k of new Set([...names, ...Object.keys(extra)])) { const v = platform(k) ?? extra[k]; if (v !== undefined && v !== '') plain[k] = v; }
+  const env = new Proxy(plain, { get: (t, k) => (typeof k === 'string' ? (t[k] ?? platform(k)) : undefined) });
   // context の他の値（request, params, waitUntil など）はそのまま、env だけ差し替える
   return new Proxy(context, {
     get(target, prop) {
