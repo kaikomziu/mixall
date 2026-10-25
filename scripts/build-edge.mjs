@@ -11,6 +11,7 @@ for (const name of readdirSync(OUT)) rmSync(join(OUT, name), { recursive: true, 
 cpSync('server/edge-router.js', join(OUT, 'index.js'));
 cpSync('server/archive-job.js', join(OUT, 'archive-job.js'));
 cpSync('server/vault-restore.js', join(OUT, 'vault-restore.js'));
+cpSync('server/plus.js', join(OUT, 'plus.js'));
 cpSync('cloud', join(OUT, 'cloud'), { recursive: true });
 
 let bytes = 0;

@@ -25,7 +25,8 @@ begin
     url := (cfg->>'MIXALL_API_BASE') || '/' || fn,
     headers := jsonb_build_object('Content-Type', 'application/json', 'x-cron-secret', cfg->>'CRON_SECRET'),
     body := '{}'::jsonb,
-    timeout_milliseconds := 5000
+    -- plus-cron（ぽけっとのルームを見て回る）は数十秒かかることがある
+    timeout_milliseconds := case when fn = 'plus-cron' then 60000 else 5000 end
   );
 end $$;
 revoke all on function public.mixall_cron_call2(text) from public, anon, authenticated;
@@ -38,6 +39,8 @@ select cron.schedule('mixall-ghost-moderation', '*/15 * * * *', $$select public.
 select cron.schedule('mixall-program-review',   '*/15 * * * *', $$select public.mixall_cron_call2('scheduled-program-review-background')$$);
 select cron.schedule('mixall-tools-cleanup',    '7 * * * *',    $$select public.mixall_cron_call2('scheduled-tools-cleanup')$$);
 select cron.schedule('mixall-auto-compact',     '37 * * * *',   $$select public.mixall_cron_call2('auto-compact')$$);
+-- MixAll + の機能（server/plus.js）: 期限切れのストーリー・QRログインの片付けと、返信リマインド
+select cron.schedule('mixall-plus-hourly',      '23 * * * *',   $$select public.mixall_cron_call2('plus-cron')$$);
 
 -- 毎日の掃除（pg_cron の実行履歴と pg_net の応答記録）
 create or replace function public.mixall_housekeeping() returns void language plpgsql security definer set search_path = public as $$

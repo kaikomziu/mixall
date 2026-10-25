@@ -96,6 +96,7 @@ function route(parts) {
   const name = head === 'api' ? a : head;
   if (name === 'vault-restore') return { builtin: vaultRestore };
   if (name === 'archive-job') return { builtin: archiveJob };
+  if (name === 'plus' || name === 'plus-cron') return { builtin: (request) => plus(request, name) };
   if (API[name]) return { load: API[name], params: {}, path: `/api/${name}` };
   return null;
 }
@@ -114,6 +115,14 @@ async function archiveJob(request) {
   setEnv(env);
   const mod = await import('./archive-job.js');
   return mod.archiveJob(request, env);
+}
+
+// MixAll + で足している機能（server/plus.js）
+async function plus(request, name) {
+  const { setEnv } = await import('./cloud/_lib/blobs.js');
+  setEnv(env);
+  const mod = await import('./plus.js');
+  return name === 'plus-cron' ? mod.plusCron(request, env) : mod.plusApi(request);
 }
 
 // mixall-config の env 行（運営・管理用の設定値）を process.env に読み込む。シークレット側が優先
