@@ -9,6 +9,7 @@ const OUT = 'supabase/functions/mixall-api';
 mkdirSync(OUT, { recursive: true });
 for (const name of readdirSync(OUT)) rmSync(join(OUT, name), { recursive: true, force: true });
 cpSync('server/edge-router.js', join(OUT, 'index.js'));
+cpSync('server/archive-job.js', join(OUT, 'archive-job.js'));
 cpSync('cloud', join(OUT, 'cloud'), { recursive: true });
 
 let bytes = 0;
