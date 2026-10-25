@@ -4,6 +4,7 @@
 //   お知らせバナー / 運営からの警告 / 運営向け統計 / QRで別の端末にログイン / ミュート / プロフィールの装飾・バッジ /
 //   ログインボーナス・デイリーミッション / Coinショップ / Ghostストーリー / Ghostの投票・リアクション /
 //   おすすめユーザー / ブックマークのメモ / 返信リマインド / 音声の文字起こし
+// MixAll + で新しく足したもの: サイト全体のブックマーク / ぽけっとのミニゲーム（サイコロ・おみくじ・じゃんけん…）
 // データは v27c と同じ kv テーブル（getStore）。v27c のデータ（アカウント・セッション・Coin・Ghost投稿・通知）は v27c と同じ形で読み書きする。
 // EdgeOne 版は cloud-functions/api/plus.js、Supabase 版は server/edge-router.js から呼ぶ。
 import crypto from 'node:crypto';
@@ -22,7 +23,7 @@ const V = {
 const S = {
   PROFILE: 'mixall-profile-extras', DAILY: 'mixall-daily', TRANSFER: 'mixall-transfers', MUTES: 'mixall-mutes',
   STORIES: 'mixall-stories', POLLS: 'mixall-polls', REACTIONS: 'mixall-reactions', NOTES: 'mixall-bookmark-notes',
-  REMIND: 'mixall-reply-reminders', WARNINGS: 'mixall-warnings'
+  REMIND: 'mixall-reply-reminders', WARNINGS: 'mixall-warnings', BOOKMARKS: 'mixall-bookmarks'
 };
 
 // ---- 保存（v27c の getJSON / setJSON と同じ使い方） ----
@@ -422,6 +423,75 @@ async function replyReminders() {
   return sent;
 }
 
+// ---- サイト全体のブックマーク（アカウントごとに1行。URLはサイト内のパスだけ） ----
+const BOOKMARK_MAX = 300;
+function cleanBookmark(input) {
+  const url = String((input && input.url) || '').trim();
+  if (!/^\/(?!\/)[^\s<>"]{0,499}$/.test(url)) return null;
+  const title = String((input && input.title) || '').replace(/\s+/g, ' ').trim().slice(0, 120) || url;
+  return { url, title, at: Date.now() };
+}
+async function getBookmarks(email) {
+  const d = await getJSON(S.BOOKMARKS, email);
+  return Array.isArray(d && d.items) ? d.items : [];
+}
+
+// ---- ぽけっとのミニゲーム ----
+// 結果はサーバーで決めて署名を付ける（末尾の「（#…）」）。画面側は verifyGames で本物か確かめて印を付ける
+const gameSecret = () => process.env.MIXALL_GAME_SECRET || process.env.CRON_SECRET || 'mixall-plus-game';
+const GAME_CODE_RE = /（#([0-9a-f]{4})([0-9a-f]{8})）$/;
+function signGame(body) {
+  const nonce = crypto.randomBytes(2).toString('hex');
+  const sig = crypto.createHmac('sha256', gameSecret()).update(`${nonce}|${body}`).digest('hex').slice(0, 8);
+  return `${body}\n（#${nonce}${sig}）`;
+}
+function verifyGame(text) {
+  const t = String(text || '').trim();
+  const m = GAME_CODE_RE.exec(t);
+  if (!m) return false;
+  const body = t.slice(0, m.index).replace(/\n$/, '');
+  const sig = crypto.createHmac('sha256', gameSecret()).update(`${m[1]}|${body}`).digest('hex').slice(0, 8);
+  return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(m[2]));
+}
+const pick = (list) => list[crypto.randomInt(list.length)];
+const OMIKUJI = [
+  ['大吉', 6, 'なにをやってもうまくいく日。思いきって動いてみよう'], ['中吉', 10, '人に話しかけると良いことがありそう'],
+  ['小吉', 14, '小さな幸せを見のがさないで'], ['吉', 16, 'いつも通りがいちばん'], ['末吉', 10, 'あとから運が向いてくる'],
+  ['凶', 5, '今日は無理せずゆっくり休もう'], ['大凶', 2, 'ここまで来たらあとは上がるだけ！']
+];
+const HANDS = { グー: '✊', チョキ: '✌️', パー: '🖐️' };
+function playGame(kind, arg) {
+  const a = String(arg || '').trim().slice(0, 300);
+  if (kind === 'dice') {
+    const m = /^(\d{1,2})?\s*[dDｄ]\s*(\d{1,4})$/.exec(a) || (/^(\d{1,4})$/.exec(a) ? [null, '1', a] : null);
+    const n = Math.min(10, Math.max(1, Number(m ? m[1] || 1 : 1)));
+    const faces = Math.min(1000, Math.max(2, Number(m ? m[2] : 6)));
+    const rolls = Array.from({ length: n }, () => 1 + crypto.randomInt(faces));
+    const sum = rolls.reduce((x, y) => x + y, 0);
+    return `🎲 サイコロ（${n}d${faces}）→ ${n > 1 ? `${rolls.join(' + ')} = ${sum}` : sum}`;
+  }
+  if (kind === 'omikuji') {
+    let r = crypto.randomInt(OMIKUJI.reduce((x, o) => x + o[1], 0));
+    const [luck, , words] = OMIKUJI.find((o) => (r -= o[1]) < 0);
+    return `🔮 おみくじ → 【${luck}】${words}`;
+  }
+  if (kind === 'janken') {
+    const mine = { g: 'グー', c: 'チョキ', p: 'パー', ぐー: 'グー', ちょき: 'チョキ', ぱー: 'パー', グー: 'グー', チョキ: 'チョキ', パー: 'パー' }[a.toLowerCase()] || '';
+    if (!mine) throw Object.assign(new Error('グー・チョキ・パーのどれかを選んでください'), { status: 400 });
+    const cpu = pick(Object.keys(HANDS));
+    const win = { グー: 'チョキ', チョキ: 'パー', パー: 'グー' };
+    const result = mine === cpu ? 'あいこ' : win[mine] === cpu ? '勝ち！🎉' : '負け…';
+    return `✊ じゃんけん：${HANDS[mine]}${mine} vs MixAll ${HANDS[cpu]}${cpu} → ${result}`;
+  }
+  if (kind === 'coin') return `🪙 コイントス → ${crypto.randomInt(2) ? '表' : '裏'}`;
+  if (kind === 'choose') {
+    const items = [...new Set(a.split(/[\s,、，・/|]+/).map((x) => x.trim()).filter(Boolean))].slice(0, 20).map((x) => x.slice(0, 40));
+    if (items.length < 2) throw Object.assign(new Error('2つ以上の候補を空白か「、」で区切って入れてください'), { status: 400 });
+    return `🎯 えらぶ（${items.join('・')}）→ ${pick(items)}`;
+  }
+  throw Object.assign(new Error('不明なゲームです'), { status: 400 });
+}
+
 export async function plusCron(request, env) {
   if (!env.CRON_SECRET || request.headers.get('x-cron-secret') !== env.CRON_SECRET) return reply(403, { error: 'forbidden' });
   await cleanup();
@@ -723,6 +793,25 @@ async function handle(action, p) {
     if (text) notes[id] = { text, at: Date.now() }; else delete notes[id];
     await setJSON(S.NOTES, email, notes);
     return reply(200, { notes });
+  }
+
+  // ---- サイト全体のブックマーク（本人だけ） ----
+  if (action === 'bookmarks') return reply(200, { items: await getBookmarks(email) });
+  if (action === 'toggleBookmark') {
+    const b = cleanBookmark(p);
+    if (!b) return reply(400, { error: '保存できないページです' });
+    const items = await getBookmarks(email);
+    const had = items.some((x) => x.url === b.url);
+    const next = had ? items.filter((x) => x.url !== b.url) : [b, ...items].slice(0, BOOKMARK_MAX);
+    await setJSON(S.BOOKMARKS, email, { items: next });
+    return reply(200, { saved: !had, items: next });
+  }
+
+  // ---- ぽけっとのミニゲーム ----
+  if (action === 'game') return reply(200, { text: signGame(playGame(String(p.kind || ''), p.arg)) });
+  if (action === 'verifyGames') {
+    const texts = Array.isArray(p.texts) ? p.texts.slice(0, 60) : [];
+    return reply(200, { ok: texts.map((t) => verifyGame(t)) });
   }
 
   // ---- 音声の文字起こし ----

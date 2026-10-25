@@ -35,7 +35,7 @@ for (const name of ['manus-routes.json']) rmSync(join(OUT, name), { force: true 
 if (readdirSync(OUT).includes('ghost')) { renameSync(join(OUT, 'ghost'), join(OUT, 'ghost.tmp')); renameSync(join(OUT, 'ghost.tmp'), join(OUT, 'Ghost')); }
 cpSync('supabase/edgeone/edgeone.json', join(OUT, 'edgeone.json'));
 // 元の middleware.js（Ghost投稿のリンクプレビュー用）は、入れると公開に失敗するか全ページが 545 になるので入れない（2026-10 時点）
-for (const rel of ['js/vault-restore.js', 'css/mixall-gh.css', 'css/plus.css', 'js/plus-ux.js', 'js/plus.js', 'js/plus-ghost.js', 'js/plus-coin.js', 'js/plus-account.js', 'js/plus-admin.js', 'js/plus-pocket.js', 'js/plus-qol.js']) cpSync(join('overlay', rel), join(OUT, rel));
+for (const rel of ['js/vault-restore.js', 'css/mixall-gh.css', 'css/plus.css', 'js/plus-ux.js', 'js/plus.js', 'js/plus-ghost.js', 'js/plus-coin.js', 'js/plus-account.js', 'js/plus-admin.js', 'js/plus-pocket.js', 'js/plus-qol.js', 'js/plus-bookmarks.js']) cpSync(join('overlay', rel), join(OUT, rel));
 // MixAll + で足している機能（overlay/js/plus*.js）。plus-ux.js と plus.js は fetch を包むので、ページのスクリプトより先に読む
 const PLUS_PAGES = [[/^ghost\//i, 'plus-ghost.js'], [/^coin\//i, 'plus-coin.js'], [/^account\//i, 'plus-account.js'], [/^admin\/index\.html$/i, 'plus-admin.js'], [/^pocket\/(room|thread)\.html$/i, 'plus-pocket.js']];
 
@@ -48,7 +48,7 @@ function page(html, rel) {
   if (STANDALONE.has(rel)) return html;
   let out = rename(html);
   const extra = PLUS_PAGES.filter(([re]) => re.test(rel)).map(([, f]) => `<script src="/js/${f}" defer></script>`).join('');
-  const head = '<link rel="stylesheet" href="/css/mixall-gh.css"><link rel="stylesheet" href="/css/plus.css"><script src="/js/plus-ux.js"></script><script src="/js/plus.js"></script><script src="/js/vault-restore.js" defer></script><script src="/js/plus-qol.js" defer></script>' + extra;
+  const head = '<link rel="stylesheet" href="/css/mixall-gh.css"><link rel="stylesheet" href="/css/plus.css"><script src="/js/plus-ux.js"></script><script src="/js/plus.js"></script><script src="/js/vault-restore.js" defer></script><script src="/js/plus-qol.js" defer></script><script src="/js/plus-bookmarks.js" defer></script>' + extra;
   out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, (m) => head + m) : head + out;
   // サービスワーカーが古いJS/CSSを先に返すため、公開のたびにURLを変えて最新を読ませる
   out = out.replace(/((?:src|href)="\/(?:js|css)\/[^"?#]+\.(?:js|css))(?=")/g, `$1?v=${BUILD_ID}`);

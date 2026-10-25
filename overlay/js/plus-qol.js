@@ -4,6 +4,7 @@
 // - 戻るボタンで前のページに戻ったとき、スクロール位置を元に戻す
 // - Ghost・Uch の長い投稿を折りたたみ、「続きを読む」で開く
 // - キーボードショートカット: g→h ホーム / g→g Ghost / g→p ぽけっと / g→u Uch / g→m Mail / g→c Coin / g→n 通知 / g→a アカウント、「?」で一覧
+// - 文字数カウンター: 入力欄に文字を入れている間、右下に文字数を出す（上限がある欄は「残り」も）
 (function () {
   'use strict';
   if (window.MixAllQoL) return;
@@ -111,6 +112,40 @@
     fold(feed);
   }
 
+
+  // =================================================================
+  // 文字数カウンター（入力欄の右下に重ねて出す。欄の並びは変えない）
+  // =================================================================
+  const countOf = (v) => [...v].length;
+  function setupCounter() {
+    const tip = document.createElement('div');
+    tip.className = 'mx-count'; tip.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tip);
+    let field = null;
+    const target = (el) => el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.maxLength > 0 && /^(text|search|)$/.test(el.type))) && !el.readOnly && !el.disabled;
+    function update() {
+      if (!field || document.activeElement !== field || !field.value) { tip.classList.remove('on'); return; }
+      const n = countOf(field.value);
+      const max = field.maxLength > 0 ? field.maxLength : 0;
+      const lines = field.tagName === 'TEXTAREA' ? field.value.split('\n').length : 1;
+      tip.textContent = max ? `${n} / ${max}` : `${n}文字${lines > 1 ? `・${lines}行` : ''}`;
+      tip.classList.toggle('warn', Boolean(max) && n >= max * 0.9 && n < max);
+      tip.classList.toggle('full', Boolean(max) && n >= max);
+      const r = field.getBoundingClientRect();
+      if (r.width < 80 || r.bottom < 0 || r.top > window.innerHeight) { tip.classList.remove('on'); return; }
+      tip.style.left = `${Math.round(r.right - 6)}px`;
+      tip.style.top = `${Math.round(Math.min(r.bottom, window.innerHeight) - 4)}px`;
+      tip.classList.add('on');
+    }
+    document.addEventListener('focusin', (e) => { field = target(e.target) ? e.target : null; update(); });
+    document.addEventListener('focusout', () => setTimeout(update, 0));
+    document.addEventListener('input', (e) => { if (target(e.target)) { field = e.target; update(); } });
+    window.addEventListener('scroll', update, { passive: true, capture: true });
+    window.addEventListener('resize', update);
+    // 送信後にページ側が中身を消したとき（input が起きない）にも消す
+    setInterval(() => { if (field && tip.classList.contains('on') && !field.value) update(); }, 800);
+  }
+
   // =================================================================
   // キーボードショートカット
   // =================================================================
@@ -120,6 +155,7 @@
       'キーボードショートカット',
       ...Object.entries(GO).map(([k, [label]]) => `g → ${k}　${label}を開く`),
       'Ctrl＋K または /　サイト内検索',
+      'b　ブックマーク',
       'Ctrl＋Enter　入力欄の内容を送信',
       'Esc　ダイアログを閉じる',
       '?　この一覧'
@@ -140,5 +176,6 @@
     try { setupToTop(); } catch (_) { /* ignore */ }
     try { setupScrollRestore(); } catch (_) { /* ignore */ }
     try { setupFold(); } catch (_) { /* ignore */ }
+    try { setupCounter(); } catch (_) { /* ignore */ }
   });
 })();

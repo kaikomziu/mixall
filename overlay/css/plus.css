@@ -330,3 +330,46 @@ textarea.mixall-dialog-input { min-height: 110px; line-height: 1.55; }
 .mx-folded { max-height: 260px; overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
 .mx-more { display: block; margin: 4px 0 8px; padding: 4px 10px; font-size: .85rem; }
 @media (prefers-reduced-motion: reduce) { .mx-totop { transition: none; } }
+/* ===== ブックマーク（js/plus-bookmarks.js） ===== */
+.mx-bm-open { display: inline-grid; place-items: center; width: 36px; height: 36px; min-height: 0 !important; padding: 0 !important; border-radius: 50%; color: inherit;
+  background: transparent !important; border: 0 !important; box-shadow: none !important; cursor: pointer; }
+.mx-bm-open:hover { background: color-mix(in srgb, currentColor 10%, transparent) !important; }
+.mx-bm-open.on { color: #8b6bff; }
+.mx-bm-layer { position: fixed; inset: 0; z-index: 1200; display: flex; justify-content: center; align-items: flex-start; padding: 8vh 16px 16px; background: rgba(0, 0, 0, .45); }
+.mx-bm-panel { display: grid; gap: 10px; width: min(520px, 100%); max-height: 80vh; padding: 16px; border-radius: 18px; overflow: hidden;
+  grid-template-rows: auto auto auto 1fr auto; color: var(--text); background: var(--panel); border: 1px solid var(--border); box-shadow: 0 18px 50px rgba(0, 0, 0, .35); }
+.mx-bm-head { display: flex; align-items: center; justify-content: space-between; font-size: 1.05rem; }
+.mx-bm-close, .mx-bm-del { min-height: 0 !important; width: 32px; height: 32px; padding: 0 !important; border-radius: 50%; font-size: 1.1rem; line-height: 1; }
+.mx-bm-toggle { width: 100%; font-weight: 700; }
+.mx-bm-toggle.on { color: #fff; background: var(--mx-grad) !important; }
+.mx-bm-search { width: 100%; margin: 0 !important; }
+.mx-bm-list { overflow-y: auto; display: grid; gap: 4px; align-content: start; min-height: 60px; }
+.mx-bm-item { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 8px; border-radius: 12px; }
+.mx-bm-item:hover, .mx-bm-item.here { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.mx-bm-item a { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+.mx-bm-icon { font-size: 1.2rem; }
+.mx-bm-text { display: grid; min-width: 0; }
+.mx-bm-text b, .mx-bm-text small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mx-bm-text small { color: var(--text-dim); font-size: .76rem; }
+.mx-bm-empty { margin: 12px 4px; }
+.mx-bm-ghost { font-size: .85rem; text-align: center; }
+/* ===== 文字数カウンター（js/plus-qol.js） ===== */
+.mx-count { position: fixed; z-index: 950; transform: translate(-100%, -100%); padding: 1px 7px; border-radius: 999px; font-size: .72rem; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: var(--text-dim); background: color-mix(in srgb, var(--panel) 88%, transparent); border: 1px solid var(--border);
+  pointer-events: none; opacity: 0; transition: opacity .15s; }
+.mx-count.on { opacity: .95; }
+.mx-count.warn { color: #c77700; border-color: #c77700; }
+.mx-count.full { color: #fff; background: #d6345a; border-color: #d6345a; }
+/* ===== ぽけっとのミニゲーム（js/plus-pocket.js） ===== */
+.mx-game-btn { min-width: 40px; padding: 0 10px !important; font-size: 1.1rem; }
+.mx-game-menu { position: fixed; z-index: 1100; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 260px; padding: 12px; border-radius: 16px;
+  color: var(--text); background: var(--panel); border: 1px solid var(--border); box-shadow: 0 14px 40px rgba(0, 0, 0, .3); }
+.mx-game-menu button { min-height: 38px !important; padding: 6px 8px !important; font-size: .88rem; }
+.mx-game-head { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: baseline; font-weight: 800; }
+.mx-game-head small, .mx-game-tip { font-weight: 400; font-size: .72rem; color: var(--text-dim); }
+.mx-game-row { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 6px; align-items: center; font-size: .85rem; }
+.mx-game-tip { grid-column: 1 / -1; margin: 2px 0 0; line-height: 1.5; }
+.mx-game { display: inline-block; padding: 8px 12px; border-radius: 12px; font-weight: 700; background: var(--mx-grad-soft); border: 1px solid color-mix(in srgb, #8b6bff 35%, transparent); }
+.mx-game-badge { display: inline-block; margin-left: 4px; padding: 0 7px; border-radius: 999px; font-size: .7rem; font-weight: 800; color: #fff; background: #0daa93; vertical-align: middle; }
+.mx-game-badge.ng { background: #c77700; }
+@media (prefers-reduced-motion: reduce) { .mx-count { transition: none; } }
