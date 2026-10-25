@@ -39,5 +39,13 @@ select cron.schedule('mixall-program-review',   '*/15 * * * *', $$select public.
 select cron.schedule('mixall-tools-cleanup',    '7 * * * *',    $$select public.mixall_cron_call2('scheduled-tools-cleanup')$$);
 select cron.schedule('mixall-auto-compact',     '37 * * * *',   $$select public.mixall_cron_call2('auto-compact')$$);
 
--- 旧版（mixall_kv）からの移行で使った関数: mixall_copy_to_kv()（丸ごと写す）、mixall_restore_vault_into_kv()
--- （端末保存チャットの本文のうち、サーバーの受け渡し箱に残っていた分を戻す）。
+-- 毎日の掃除（pg_cron の実行履歴と pg_net の応答記録）
+create or replace function public.mixall_housekeeping() returns void language plpgsql security definer set search_path = public as $$
+begin
+  delete from cron.job_run_details where end_time < now() - interval '2 days';
+  delete from net._http_response where created < now() - interval '1 hour';
+end $$;
+select cron.schedule('mixall-housekeeping', '17 3 * * *', $$select public.mixall_housekeeping()$$);
+
+-- 旧版のテーブル mixall_kv は 2026-10-25 に kv へ写し終えて削除した（mixall_copy_to_kv() も削除）。
+-- mixall_restore_vault_into_kv() は端末保存チャットの本文のうち、受け渡し箱 mixall_chat_inbox に残っていた分を戻した関数。
