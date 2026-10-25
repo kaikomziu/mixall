@@ -46,6 +46,9 @@ begin
   delete from net._http_response where created < now() - interval '1 hour';
 end $$;
 select cron.schedule('mixall-housekeeping', '17 3 * * *', $$select public.mixall_housekeeping()$$);
+-- 毎日 03:30（日本時間）に kaikomziu/mixall-data が古い行を GitHub へ移して Supabase から消す（server/archive-job.js）。
+-- 消しただけではファイルが縮まないので、05:00（日本時間）に kv を詰め直す（数秒だけ kv がロックされる）
+select cron.schedule('mixall-kv-vacuum', '0 20 * * *', 'vacuum full public.kv');
 
 -- 旧版のテーブル mixall_kv は 2026-10-25 に kv へ写し終えて削除した（mixall_copy_to_kv() も削除）。
 -- mixall_restore_vault_into_kv() は端末保存チャットの本文のうち、受け渡し箱 mixall_chat_inbox に残っていた分を戻した関数。
