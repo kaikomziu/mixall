@@ -9,6 +9,7 @@
 |---|---|
 | 公開 | `scripts/build-edgeone.mjs` で `edgeone-build/`（画面 `public/` + 関数 `cloud/` → `cloud-functions/`）→ EdgeOne Pages プロジェクト **mixall-plus**。EdgeOne の環境変数は SUPABASE_URL と SUPABASE_SECRET_KEY だけ（ほかは下の設定値を各関数が読む） |
 | 軽量化 | `build-edgeone.mjs` が画面の JS・CSS・ページ内 `<script>` を esbuild で圧縮（トップレベルの名前は残す）、＋のファイルを `plus-core.js`・`plus-late.js` にまとめ、`?v=` をファイルの中身から作る。`sw.js` は `?v=` 付きのファイルを裏で読み直さず、古い版は消す |
+| Supabase 節約 | `build-edgeone.mjs` が友人のコードを置き換える（形が変わったらビルド時に⚠を出す）: GitHub に移した行の読み込みを関数ごとに60秒覚える / Uch スレッドの8秒更新とぽけっとの接続確認はタブが裏にある間止める / 未読バッジの更新を60秒ごとに。設定値（mixall-config）は5分覚える。cron の実行記録は毎時掃除（成功分は3時間） |
 | 旧URL | GitHub Pages `/mixall/` は `scripts/build-redirect.mjs` の案内ページ（端末だけにある以前のチャット本文を戻してから移る・通知だけ受け取るサービスワーカー） |
 | 予備のAPI | Supabase Edge Function **mixall-api**（`server/edge-router.js` が `cloud/` を呼ぶ）。旧URLの案内ページが本文を戻すときに使う。`scripts/build-pages.mjs` を使えば GitHub Pages 版にも戻せる |
 | ＋の機能 | 以前の GitHub 版から移した機能（ストーリー・投票・リアクション・おすすめユーザー・保存済みのメモ・ログインボーナス/ミッション・Coinショップ・プロフィール装飾・ミュート・QRでログイン・お知らせバナー・運営からの警告・統計・サイト内検索・画像の拡大・トースト/確認ダイアログ・下書き保存・返信リマインド・音声の文字起こし・Ctrl+Enterで送信・「↑」ボタン・戻ったときのスクロール位置・長い投稿の折りたたみ・ショートカット（?で一覧）・サイト全体のブックマーク（ヘッダーの🔖・b）・文字数カウンター・ぽけっとのミニゲーム（🎲・/dice /omikuji /janken /coin /choose、結果はサーバーが署名））。API は `server/plus.js`（`/api/plus`、毎時 `/api/plus-cron`）、画面は `overlay/js/plus*.js`・`overlay/css/plus.css` を `build-edgeone.mjs` が各ページに入れる。データは kv の `mixall-*` ストア |

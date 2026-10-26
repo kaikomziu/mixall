@@ -67,6 +67,17 @@ function page(html, rel) {
   // Uch のスレッド: 8秒ごとの読み込みを、タブが裏にある間は止める（表に戻ったらすぐ読む）
   if (rel === 'Uch/thread.html') out = patch(out, 'Uchの裏タブ停止', 'setInterval(loadThread, 8000);',
     "setInterval(() => { if (!document.hidden) loadThread(); }, 8000); document.addEventListener('visibilitychange', () => { if (!document.hidden) loadThread(); });");
+  return pageTail(out, rel);
+}
+// 画面の JS の置き換え（2026-10-26 に確認してもらったもの）
+function script(code, rel) {
+  // ぽけっと: 直接つなぐための接続確認（6〜9秒ごと）を、タブが裏にある間は止める（表に戻ると chat-rt.js 自身がすぐ再開する）
+  if (rel === 'js/chat-rt.js') code = patch(code, 'ぽけっとの裏タブ停止', 'function schedule(ms) { if (timer) clearTimeout(timer); if (!cfg) return;', 'function schedule(ms) { if (timer) clearTimeout(timer); if (!cfg || document.hidden) return;');
+  // 未読バッジの定期更新を30秒→60秒に（表に戻ったときはすぐ更新する）
+  if (rel === 'js/mixall-nav.js') code = patch(code, 'バッジ更新の間引き', 'setInterval(() => { if (!document.hidden) refreshBadges(); }, 30000);', 'setInterval(() => { if (!document.hidden) refreshBadges(); }, 60000);');
+  return code;
+}
+function pageTail(out, rel) {
   const extra = PLUS_PAGES.filter(([re]) => re.test(rel)).map(([, f]) => `<script src="/js/${f}" defer></script>`).join('');
   const head = '<link rel="stylesheet" href="/css/mixall-gh.css"><link rel="stylesheet" href="/css/plus.css"><script src="/js/plus-core.js"></script><script src="/js/plus-late.js" defer></script>' + extra;
   out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, (m) => head + m) : head + out;
@@ -83,6 +94,7 @@ function page(html, rel) {
     if (!TEXT.has(ext) || rel.startsWith('js/vendor/') || rel === 'edgeone.json') continue;
     let text = site(readFileSync(full, 'utf8'));
     if (ext === '.html') text = page(text, rel);
+    if (ext === '.js') text = script(text, rel);
     if (ext === '.webmanifest') {
       const manifest = JSON.parse(text);
       manifest.name = NAME;
@@ -221,5 +233,5 @@ writeFileSync(join(FN, 'api', 'plus.js'), extraApi('plus', 'plusApi', 'plusApi(c
 writeFileSync(join(FN, 'api', 'plus-cron.js'), extraApi('plus', 'plusCron', 'plusCron(ctx.request, ctx.env)'));
 
 console.log(`built ${OUT}/ (site=${SITE}, ${wrapped} functions)`);
-for (const label of ['Uchの裏タブ停止', 'アーカイブの記憶', 'アーカイブの記憶(削除)']) if (!patched[label]) console.warn(`⚠ 置き換えられませんでした: ${label}（友人のコードの形が変わった可能性）`);
+for (const label of ['Uchの裏タブ停止', 'ぽけっとの裏タブ停止', 'バッジ更新の間引き','アーカイブの記憶', 'アーカイブの記憶(削除)']) if (!patched[label]) console.warn(`⚠ 置き換えられませんでした: ${label}（友人のコードの形が変わった可能性）`);
 console.log('patched:', JSON.stringify(patched));
