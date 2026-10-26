@@ -6,7 +6,8 @@ let loadedAt = 0;
 let values = {};
 
 async function load(url, key) {
-  if (Date.now() - loadedAt < 60_000) return;
+  // 設定はめったに変わらないので5分覚えておく（Supabase への問い合わせを減らす）
+  if (Date.now() - loadedAt < 300_000) return;
   loadedAt = Date.now();
   try {
     const headers = { apikey: key };

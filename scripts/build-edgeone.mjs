@@ -54,9 +54,19 @@ const STANDALONE = new Set(['downloads/mixall-emergency.html']);
 function site(text) {
   return text.split(`https://${FRIEND_SITE}`).join(SITE).split(FRIEND_SITE).join(SITE.replace(/^https:\/\//, ''));
 }
+// Supabase の節約: 友人のコードの決まった箇所を置き換える（形が変わっていたら置き換えずに知らせる）
+const patched = {};
+function patch(text, label, from, to) {
+  if (!text.includes(from)) return text;
+  patched[label] = (patched[label] || 0) + 1;
+  return text.split(from).join(to);
+}
 function page(html, rel) {
   if (STANDALONE.has(rel)) return html;
   let out = rename(html);
+  // Uch のスレッド: 8秒ごとの読み込みを、タブが裏にある間は止める（表に戻ったらすぐ読む）
+  if (rel === 'Uch/thread.html') out = patch(out, 'Uchの裏タブ停止', 'setInterval(loadThread, 8000);',
+    "setInterval(() => { if (!document.hidden) loadThread(); }, 8000); document.addEventListener('visibilitychange', () => { if (!document.hidden) loadThread(); });");
   const extra = PLUS_PAGES.filter(([re]) => re.test(rel)).map(([, f]) => `<script src="/js/${f}" defer></script>`).join('');
   const head = '<link rel="stylesheet" href="/css/mixall-gh.css"><link rel="stylesheet" href="/css/plus.css"><script src="/js/plus-core.js"></script><script src="/js/plus-late.js" defer></script>' + extra;
   out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, (m) => head + m) : head + out;
@@ -159,6 +169,21 @@ cpSync('server/edgeone/mixall-config.js', join(FN, '_lib', 'mixall-config.js'));
 for (const name of ['archive-job.js', 'vault-restore.js', 'plus.js']) {
   writeFileSync(join(FN, '_lib', name), readFileSync(join('server', name), 'utf8').split("'./cloud/_lib/blobs.js'").join("'./blobs.js'").split("'./cloud/_lib/push.js'").join("'./push.js'"));
 }
+// GitHub に移した行（アーカイブ）の読み込みを、関数ごとに60秒覚えておく。
+// 元は読むたびに Supabase へ「消された行か」を問い合わせ、GitHub からも取り直していた（Supabase への問い合わせで一番多かった）
+function archiveCache(code) {
+  code = patch(code, 'アーカイブの記憶', 'async function __archiveRow(store, key) {', 'async function __archiveRowRaw(store, key) {');
+  return patch(code, 'アーカイブの記憶(削除)', 'async function __archiveTomb(store, key) {',
+    'async function __archiveRow(store, key) { const c = globalThis.__mxArchRows || (globalThis.__mxArchRows = new Map()); const k = store + "/" + key; const h = c.get(k); if (h && Date.now() - h.at < 60000) return h.row; const row = await __archiveRowRaw(store, key); if (c.size > 500) c.clear(); c.set(k, { at: Date.now(), row }); return row; }\n'
+    + 'async function __archiveTomb(store, key) { if (globalThis.__mxArchRows) globalThis.__mxArchRows.delete(store + "/" + key);');
+}
+(function walk(dir) {
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) { walk(full); continue; }
+    if (extname(name) === '.js') { const code = readFileSync(full, 'utf8'); const out = archiveCache(code); if (out !== code) writeFileSync(full, out); }
+  }
+})(FN);
 // 各関数の onRequest* を、設定値を足してから呼ぶ形に包む
 const HANDLER = /export (async )?function (onRequest\w*)\s*\(/g;
 let wrapped = 0;
@@ -196,3 +221,5 @@ writeFileSync(join(FN, 'api', 'plus.js'), extraApi('plus', 'plusApi', 'plusApi(c
 writeFileSync(join(FN, 'api', 'plus-cron.js'), extraApi('plus', 'plusCron', 'plusCron(ctx.request, ctx.env)'));
 
 console.log(`built ${OUT}/ (site=${SITE}, ${wrapped} functions)`);
+for (const label of ['Uchの裏タブ停止', 'アーカイブの記憶', 'アーカイブの記憶(削除)']) if (!patched[label]) console.warn(`⚠ 置き換えられませんでした: ${label}（友人のコードの形が変わった可能性）`);
+console.log('patched:', JSON.stringify(patched));

@@ -42,13 +42,14 @@ select cron.schedule('mixall-auto-compact',     '37 * * * *',   $$select public.
 -- MixAll + の機能（server/plus.js）: 期限切れのストーリー・QRログインの片付けと、返信リマインド
 select cron.schedule('mixall-plus-hourly',      '23 * * * *',   $$select public.mixall_cron_call2('plus-cron')$$);
 
--- 毎日の掃除（pg_cron の実行履歴と pg_net の応答記録）
+-- 毎時の掃除（pg_cron の実行履歴と pg_net の応答記録）。毎分のジョブで履歴が1日7000行ほど増えるので、成功分は3時間で消す
 create or replace function public.mixall_housekeeping() returns void language plpgsql security definer set search_path = public as $$
 begin
+  delete from cron.job_run_details where end_time < now() - interval '3 hours' and status = 'succeeded';
   delete from cron.job_run_details where end_time < now() - interval '2 days';
   delete from net._http_response where created < now() - interval '1 hour';
 end $$;
-select cron.schedule('mixall-housekeeping', '17 3 * * *', $$select public.mixall_housekeeping()$$);
+select cron.schedule('mixall-housekeeping', '17 * * * *', $$select public.mixall_housekeeping()$$);
 -- 毎日 03:30（日本時間）に kaikomziu/mixall-data が古い行を GitHub へ移して Supabase から消す（server/archive-job.js）。
 -- 消しただけではファイルが縮まないので、05:00（日本時間）に kv を詰め直す（数秒だけ kv がロックされる）
 select cron.schedule('mixall-kv-vacuum', '0 20 * * *', 'vacuum full public.kv');
