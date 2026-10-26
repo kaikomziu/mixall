@@ -7,8 +7,15 @@
 // - 各関数の入口で、設定値（kv の mixall-config/env）を context.env に足す（_lib/mixall-config.js）
 //   → EdgeOne に登録する環境変数は SUPABASE_URL と SUPABASE_SECRET_KEY だけ
 // - Supabase 版の追加 API（archive-job・vault-restore）も /api/ に置く
-import { cpSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+// 軽量化:
+// - 画面の JS・CSS（ページ内の <script> も）を圧縮する。トップレベルの名前は変えない（onclick="..." などから呼ばれるため）
+// - ＋の機能のファイルを2つにまとめる（plus-core.js = 先に読むもの、plus-late.js = defer）
+// - ?v= はファイルの中身から作る（変わっていないファイルは公開し直しても読み直さない）
+// - サービスワーカーは ?v= 付きのファイルを裏で読み直さず、古い版はキャッシュから消す
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, extname, dirname } from 'node:path';
+import { createHash } from 'node:crypto';
+import { transform } from 'esbuild';
 import { NAME, rename, seoTags, sitemap } from './lib/site-meta.mjs';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((pairs, value, index, all) => {
@@ -37,6 +44,9 @@ cpSync('supabase/edgeone/edgeone.json', join(OUT, 'edgeone.json'));
 // 元の middleware.js（Ghost投稿のリンクプレビュー用）は、入れると公開に失敗するか全ページが 545 になるので入れない（2026-10 時点）
 for (const rel of ['js/vault-restore.js', 'css/mixall-gh.css', 'css/plus.css', 'js/plus-ux.js', 'js/plus.js', 'js/plus-ghost.js', 'js/plus-coin.js', 'js/plus-account.js', 'js/plus-admin.js', 'js/plus-pocket.js', 'js/plus-qol.js', 'js/plus-bookmarks.js']) cpSync(join('overlay', rel), join(OUT, rel));
 // MixAll + で足している機能（overlay/js/plus*.js）。plus-ux.js と plus.js は fetch を包むので、ページのスクリプトより先に読む
+// まとめたファイル（元のファイルも残す。古いページがキャッシュから出たときに読めるように）
+const BUNDLES = { 'js/plus-core.js': ['js/plus-ux.js', 'js/plus.js'], 'js/plus-late.js': ['js/vault-restore.js', 'js/plus-qol.js', 'js/plus-bookmarks.js'] };
+for (const [out, parts] of Object.entries(BUNDLES)) writeFileSync(join(OUT, out), parts.map((f) => readFileSync(join('overlay', f), 'utf8')).join('\n;\n'));
 const PLUS_PAGES = [[/^ghost\//i, 'plus-ghost.js'], [/^coin\//i, 'plus-coin.js'], [/^account\//i, 'plus-account.js'], [/^admin\/index\.html$/i, 'plus-admin.js'], [/^pocket\/(room|thread)\.html$/i, 'plus-pocket.js']];
 
 const TEXT = new Set(['.html', '.js', '.css', '.json', '.webmanifest', '.txt', '.xml']);
@@ -48,10 +58,10 @@ function page(html, rel) {
   if (STANDALONE.has(rel)) return html;
   let out = rename(html);
   const extra = PLUS_PAGES.filter(([re]) => re.test(rel)).map(([, f]) => `<script src="/js/${f}" defer></script>`).join('');
-  const head = '<link rel="stylesheet" href="/css/mixall-gh.css"><link rel="stylesheet" href="/css/plus.css"><script src="/js/plus-ux.js"></script><script src="/js/plus.js"></script><script src="/js/vault-restore.js" defer></script><script src="/js/plus-qol.js" defer></script><script src="/js/plus-bookmarks.js" defer></script>' + extra;
+  const head = '<link rel="stylesheet" href="/css/mixall-gh.css"><link rel="stylesheet" href="/css/plus.css"><script src="/js/plus-core.js"></script><script src="/js/plus-late.js" defer></script>' + extra;
   out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, (m) => head + m) : head + out;
-  // サービスワーカーが古いJS/CSSを先に返すため、公開のたびにURLを変えて最新を読ませる
-  out = out.replace(/((?:src|href)="\/(?:js|css)\/[^"?#]+\.(?:js|css))(?=")/g, `$1?v=${BUILD_ID}`);
+  // サービスワーカーが古いJS/CSSを先に返すため、中身が変わったらURLも変える（版は圧縮のあとで中身から決める）
+  out = out.replace(/((?:src|href)="\/(?:js|css)\/[^"?#]+\.(?:js|css))(?=")/g, '$1?v=@@V@@');
   return seoTags(out, rel, SITE);
 }
 (function walk(dir) {
@@ -73,6 +83,74 @@ function page(html, rel) {
   }
 })(OUT);
 writeFileSync(join(OUT, 'sitemap.xml'), sitemap(SITE));
+
+// ---- 軽量化: 圧縮 → 版を付ける → サービスワーカー ----
+const files = [];
+(function walk(dir) {
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) { if (name !== 'cloud-functions') walk(full); continue; }
+    files.push([full, relative(OUT, full).replace(/\\/g, '/')]);
+  }
+})(OUT);
+const MIN = { minifyWhitespace: true, minifySyntax: true, minifyIdentifiers: true, charset: 'utf8', legalComments: 'none' };
+async function minify(code, loader) {
+  try { return (await transform(code, { ...MIN, loader })).code; } catch (_) { return null; }
+}
+let before = 0;
+let after = 0;
+for (const [full, rel] of files) {
+  const ext = extname(rel).toLowerCase();
+  if (rel.startsWith('js/vendor/') || rel === 'sw.js' || STANDALONE.has(rel) || !['.js', '.css', '.html'].includes(ext)) continue;
+  const text = readFileSync(full, 'utf8');
+  let out = text;
+  if (ext === '.html') {
+    // ページ内の <script>（src なし・JavaScript のもの）だけ圧縮する。失敗したらそのまま
+    const parts = [];
+    const re = /(<script\b(?![^>]*\bsrc=)(?![^>]*\btype=["']?(?!text\/javascript|module)[^"'\s>]+)[^>]*>)([\s\S]*?)(<\/script>)/gi;
+    let last = 0;
+    for (let m; (m = re.exec(text));) {
+      const min = m[2].trim() ? await minify(m[2], 'js') : null;
+      parts.push(text.slice(last, m.index), m[1], min !== null && !/<\/script/i.test(min) ? min.trim() : m[2], m[3]);
+      last = m.index + m[0].length;
+    }
+    out = parts.join('') + text.slice(last);
+  } else {
+    const min = await minify(text, ext.slice(1));
+    if (min !== null) out = min;
+  }
+  before += Buffer.byteLength(text); after += Buffer.byteLength(out);
+  if (out !== text) writeFileSync(full, out);
+}
+const version = (rel) => {
+  const f = join(OUT, rel);
+  return existsSync(f) ? createHash('sha256').update(readFileSync(f)).digest('hex').slice(0, 10) : BUILD_ID;
+};
+for (const [full, rel] of files) {
+  if (extname(rel) !== '.html') continue;
+  const html = readFileSync(full, 'utf8');
+  if (html.includes('@@V@@')) writeFileSync(full, html.replace(/\/((?:js|css)\/[^"?#]+)\?v=@@V@@/g, (m, p) => `/${p}?v=${version(p)}`));
+}
+// サービスワーカー: ?v= 付きのファイルは中身が変わらないので裏で読み直さない。新しい版を入れたら同じファイルの古い版は消す
+{
+  const swPath = join(OUT, 'sw.js');
+  let sw = readFileSync(swPath, 'utf8');
+  const from = "const refresh = fetch(request).then((response) => { if (response && response.ok) cache.put(request, response.clone()).catch(() => {}); return response; });";
+  if (!sw.includes(from)) throw new Error('sw.js の形が変わったので、build-edgeone.mjs の書き換えを見直してください');
+  sw = sw.replace(from, `const versioned = isStatic && url.searchParams.has('v');
+    if (versioned && cached) return cached;
+    const refresh = fetch(request).then((response) => {
+      if (response && response.ok) {
+        cache.put(request, response.clone()).catch(() => {});
+        if (versioned) cache.keys().then((keys) => keys.forEach((k) => { const u = new URL(k.url); if (u.pathname === url.pathname && u.search !== url.search) cache.delete(k); })).catch(() => {});
+      }
+      return response;
+    });`)
+    // キャッシュの名前を変えて、これまでに溜まった古い版を一度まとめて消す
+    .replace(/const CACHE_NAME = '([^']+)';/, "const CACHE_NAME = '$1-lite1';");
+  writeFileSync(swPath, sw);
+}
+console.log(`minified ${(before / 1024).toFixed(0)}KB -> ${(after / 1024).toFixed(0)}KB`);
 
 // サーバー
 const FN = join(OUT, 'cloud-functions');
