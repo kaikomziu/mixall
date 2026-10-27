@@ -22,7 +22,10 @@ mkdirSync(OUT, { recursive: true });
 for (const name of readdirSync(OUT)) rmSync(join(OUT, name), { recursive: true, force: true });
 
 const page = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${NAME} は移転しました</title><meta name="robots" content="noindex"><link rel="canonical" href="${SITE}/">
+<title>${NAME}</title><link rel="canonical" href="${SITE}/">
+<meta name="description" content="${NAME} は ${SITE.replace(/^https:\/\//, '')} に移転しました。掲示板・チャット・SNS・メールがひとつになった無料のWebサービスです。">
+<meta property="og:title" content="${NAME}"><meta property="og:site_name" content="${NAME}"><meta property="og:url" content="${SITE}/"><meta property="og:type" content="website">
+<meta property="og:image" content="${SITE}/ogp/00-mixall.jpg"><meta name="twitter:card" content="summary_large_image">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f1115;color:#e8e8ef;font-family:system-ui,sans-serif;text-align:center;padding:16px}a{color:#7cc4ff}</style>
 </head><body><main><h1 style="font-size:1.3rem">${NAME} は新しいアドレスに移りました</h1>
 <p id="msg">移動しています…</p><p><a id="go" href="${SITE}/">${SITE.replace(/^https:\/\//, '')}</a></p>
