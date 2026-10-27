@@ -1,0 +1,162 @@
+/* ===== MixAll + のデザイン（シンプル・わかりやすい・おしゃれ） =====
+   友人の style.css の上に重ねる。設定で「シンプル」デザインのときだけ効く（「カラフル」はそのまま）。
+   色はテーマの変数（--bg / --panel / --text / --accent …）だけを使うので、ダーク・ライト・カラー・画像・着せ替えのどれでも崩れない。 */
+
+/* 標準のダーク・ライトの色を少し落ち着いたものに（設定で色を選んだ人・着せ替えの人は、その色が上から当たる） */
+:root:not([data-design="colorful"]) {
+  --bg: #0d0f14;
+  --panel: #151821;
+  --panel-2: #1c202b;
+  --border: #262b37;
+  --text: #e9ebf0;
+  --text-dim: #969db0;
+  --accent: #7c8cff;
+  --accent-2: #5fd4b0;
+  --radius: 16px;
+  --mx-ease: cubic-bezier(.2, .7, .2, 1);
+  --mx-shadow: 0 1px 2px rgba(0, 0, 0, .18), 0 8px 24px rgba(0, 0, 0, .14);
+  --mx-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+html[data-theme="light"]:not([data-design="colorful"]) {
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --panel-2: #f1f3f8;
+  --border: #e3e6ee;
+  --text: #171a23;
+  --text-dim: #646b7d;
+  --accent: #4f5fe8;
+  --accent-2: #12a083;
+  --mx-shadow: 0 1px 2px rgba(20, 24, 40, .05), 0 8px 24px rgba(20, 24, 40, .06);
+}
+
+/* ---- 文字 ---- */
+html:not([data-design="colorful"]) body {
+  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Yu Gothic", Meiryo, system-ui, sans-serif;
+  line-height: 1.7;
+  letter-spacing: .01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+html:not([data-design="colorful"]) :is(h1, h2, h3) { line-height: 1.35; letter-spacing: .01em; }
+html:not([data-design="colorful"]) h2 { font-size: 1.2rem; }
+html:not([data-design="colorful"]) h3 { font-size: 1.02rem; }
+html:not([data-design="colorful"]) .muted { color: var(--text-dim); }
+html:not([data-design="colorful"]) ::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+
+/* ---- ヘッダー: すりガラス・1行・メニューは横にスクロール ---- */
+html:not([data-design="colorful"]) header.top {
+  gap: 14px;
+  padding: 10px 18px;
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  backdrop-filter: saturate(160%) blur(16px);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+html:not([data-design="colorful"]) header.top .brand { font-size: 1.12rem; font-weight: 800; letter-spacing: .01em; white-space: nowrap; }
+html:not([data-design="colorful"]) nav.services {
+  flex: 1 1 auto; min-width: 0; flex-wrap: nowrap; gap: 2px;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+html:not([data-design="colorful"]) nav.services::-webkit-scrollbar { display: none; }
+html:not([data-design="colorful"]) nav.services a {
+  flex: 0 0 auto; white-space: nowrap;
+  padding: 6px 12px; border: 0; border-radius: 10px;
+  color: var(--text-dim); font-size: .86rem; font-weight: 600;
+  transition: color .15s, background .15s;
+}
+html:not([data-design="colorful"]) nav.services a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
+html:not([data-design="colorful"]) nav.services a.active { color: var(--text); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+/* 右側の丸いボタン（ブックマーク・検索・設定）の見た目をそろえる。⌘ はキー操作（Ctrl+Shift+P）で開けるのでヘッダーからは外す */
+html:not([data-design="colorful"]) header.top :is(.mx-search-open, .mx-bm-open, .settings-widget button.gear) {
+  width: 36px; height: 36px; min-height: 0; padding: 0; flex: 0 0 auto;
+  display: inline-grid; place-items: center;
+  border: 0 !important; border-radius: 12px; background: transparent !important; box-shadow: none !important;
+  color: var(--text-dim); transition: color .15s, background .15s;
+}
+html:not([data-design="colorful"]) header.top :is(.mx-search-open, .mx-bm-open, .settings-widget button.gear):hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent) !important; }
+html:not([data-design="colorful"]) header.top .mx-bm-open.on { color: var(--accent); }
+html:not([data-design="colorful"]) header.top .mx-pal-open { display: none; }
+
+/* ---- 下のメニュー: 浮いた丸いバー ---- */
+html:not([data-design="colorful"]) .mixall-bottom-nav {
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border-color: color-mix(in srgb, var(--border) 70%, transparent);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--border) 50%, transparent), 0 -10px 30px rgba(0, 0, 0, .12);
+}
+@media (min-width: 700px) {
+  html:not([data-design="colorful"]) .mixall-bottom-nav { bottom: 12px; border-radius: 18px; border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent); box-shadow: var(--mx-shadow); }
+}
+html:not([data-design="colorful"]) .mixall-bottom-nav :is(a, button).active,
+html:not([data-design="colorful"]) .mixall-bottom-nav :is(a, button):hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: transparent; }
+
+/* ---- カード ---- */
+html:not([data-design="colorful"]) .card {
+  border-radius: var(--radius);
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
+  box-shadow: var(--mx-shadow);
+}
+html:not([data-design="colorful"]) a > .card { transition: transform .2s var(--mx-ease), border-color .2s, box-shadow .2s; }
+html:not([data-design="colorful"]) a:hover > .card { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+
+/* ---- ボタン: 主役（塗り）・控えめ（淡い色）・最小（枠だけ）の3段階 ---- */
+html:not([data-design="colorful"]) :is(button, a.button) {
+  border-radius: 10px;
+  transition: filter .15s, background .15s, border-color .15s, color .15s, transform .1s;
+}
+html:not([data-design="colorful"]) :is(button, a.button):not(.secondary):not(.ghost):not(.gear):not([class*="mixall-nav"]):not([class^="mx-"]):not([class*=" mx-"]) {
+  /* 文字色は背景色にする（ダークなら暗い字、ライトなら白い字になり、どのテーマでも読める） */
+  background: var(--accent); border-color: var(--accent); color: var(--bg);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .12) inset, 0 4px 14px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+html:not([data-design="colorful"]) :is(button, a.button):not(.secondary):not(.ghost):not(:disabled):hover { filter: brightness(1.08); }
+html:not([data-design="colorful"]) :is(button, a.button):not(:disabled):active { transform: translateY(1px); }
+html:not([data-design="colorful"]) :is(button, a.button).secondary {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: transparent; color: var(--accent);
+}
+html:not([data-design="colorful"]) :is(button, a.button).secondary:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+html:not([data-design="colorful"]) :is(button, a.button).ghost { border-color: color-mix(in srgb, var(--border) 90%, transparent); color: var(--text-dim); }
+html:not([data-design="colorful"]) :is(button, a.button).ghost:hover { color: var(--text); background: color-mix(in srgb, var(--text) 5%, transparent); }
+html:not([data-design="colorful"]) :is(button, a, input, select, textarea, summary):focus-visible { outline: none; box-shadow: var(--mx-ring); }
+
+/* ---- 入力欄 ---- */
+html:not([data-design="colorful"]) :is(input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="url"], input[type="number"], textarea, select) {
+  border-radius: 10px;
+  border-color: color-mix(in srgb, var(--border) 90%, transparent);
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+html:not([data-design="colorful"]) :is(input, textarea, select):focus { outline: none; border-color: var(--accent); box-shadow: var(--mx-ring); }
+html:not([data-design="colorful"]) ::placeholder { color: color-mix(in srgb, var(--text-dim) 75%, transparent); }
+
+/* ---- ホーム: 主役のボタン（ログイン・新規登録）を目立たせ、ほかは控えめに ---- */
+html:not([data-design="colorful"]) .home-hero {
+  padding: clamp(32px, 7vw, 64px) 20px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%),
+    radial-gradient(120% 140% at 100% 100%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 60%),
+    var(--panel);
+}
+html:not([data-design="colorful"]) .home-hero h1 { font-weight: 800; letter-spacing: -.02em; }
+html:not([data-design="colorful"]) .home-actions a:nth-child(n+3) { background: transparent; border-color: transparent; color: var(--text-dim); box-shadow: none; }
+html:not([data-design="colorful"]) .home-actions a:nth-child(n+3):hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
+html:not([data-design="colorful"]) .feature-grid { gap: 12px; }
+html:not([data-design="colorful"]) .feature-grid .card { padding: 18px 18px 16px; }
+html:not([data-design="colorful"]) .feature-grid h2 { font-size: 1.05rem; margin-bottom: 4px; }
+html:not([data-design="colorful"]) .feature-grid h2::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); vertical-align: middle; transform: translateY(-1px);
+}
+html:not([data-design="colorful"]) .feature-grid p { font-size: .86rem; line-height: 1.6; margin: 0; }
+
+/* ---- スマホ ---- */
+@media (max-width: 680px) {
+  html:not([data-design="colorful"]) header.top { padding: 8px 10px; gap: 6px 8px; }
+  html:not([data-design="colorful"]) nav.services a { padding: 6px 10px; font-size: .8rem; }
+  html:not([data-design="colorful"]) header.top :is(.mx-search-open, .mx-bm-open, .settings-widget button.gear) { width: 34px; height: 34px; }
+  html:not([data-design="colorful"]) .card { border-radius: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-design="colorful"]) :is(button, a.button, a > .card) { transition: none; }
+}
