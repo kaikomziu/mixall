@@ -122,6 +122,10 @@ html:not([data-design="colorful"]) :is(button, a.button).ghost:hover { color: va
 html:not([data-design="colorful"]) :is(button, a, input, select, textarea, summary):focus-visible { outline: none; box-shadow: var(--mx-ring); }
 
 /* ---- 入力欄 ---- */
+/* 友人の CSS は type="text" などにしか色を付けていないので、type の無い欄・数値・URL・検索欄も同じ見た目にそろえる */
+html:not([data-design="colorful"]) :is(input:not([type]), input[type="search"], input[type="url"], input[type="number"], input[type="tel"], input[type="date"], input[type="time"]) {
+  padding: 10px 12px; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); font: inherit;
+}
 html:not([data-design="colorful"]) :is(input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="url"], input[type="number"], textarea, select) {
   border-radius: 10px;
   border-color: color-mix(in srgb, var(--border) 90%, transparent);

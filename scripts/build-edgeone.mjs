@@ -61,8 +61,8 @@ const BUNDLES = {
   'js/plus-late.js': optional(['js/vault-restore.js', 'js/plus-qol.js', 'js/plus-bookmarks.js', 'js/plus-tools.js'])
 };
 for (const [out, parts] of Object.entries(BUNDLES)) writeFileSync(join(OUT, out), parts.map((f) => readFileSync(join('overlay', f), 'utf8')).join('\n;\n'));
-const PLUS_PAGES = [[/^ghost\//i, 'plus-ghost.js'], [/^coin\//i, 'plus-coin.js'], [/^account\//i, 'plus-account.js'], [/^admin\/index\.html$/i, 'plus-admin.js'], [/^pocket\/(room|thread)\.html$/i, 'plus-pocket.js'],
-  [/^index\.html$/i, 'plus-dash.js']]; // ＋広場（Plus/index.html）は plus-hub.js をページ内で読む
+const PLUS_PAGES = [[/^ghost\//i, 'plus-ghost.js'], [/^coin\//i, 'plus-coin.js'], [/^account\//i, 'plus-account.js'], [/^admin\/index\.html$/i, 'plus-admin.js'], [/^admin\/index\.html$/i, 'plus-admin-layout.js'], [/^pocket\/(room|thread)\.html$/i, 'plus-pocket.js'],
+  [/^index\.html$/i, 'plus-dash.js'], [/^create\//i, 'plus-create.js'], [/^lending\//i, 'plus-lending.js']]; // ＋広場（Plus/index.html）は plus-hub.js をページ内で読む
 
 const TEXT = new Set(['.html', '.js', '.css', '.json', '.webmanifest', '.txt', '.xml']);
 // 小窓の中の道具（Plus/tool.html）は自己完結のページなので、MixAll + の共通部品を入れない
@@ -77,16 +77,28 @@ function patch(text, label, from, to) {
   patched[label] = (patched[label] || 0) + 1;
   return text.split(from).join(to);
 }
+// 機能ごとの置き換えは scripts/patches/*.mjs に分けて書く（export const labels = [...]; export function apply({ kind, rel, text, patch }) → text）
+//   kind: 'page'（画面の HTML）/ 'script'（画面の JS）/ 'cloud'（サーバー関数。rel は cloud-functions/ からのパス）
+const PATCH_MODULES = [];
+for (const name of existsSync('scripts/patches') ? readdirSync('scripts/patches').filter((n) => n.endsWith('.mjs')).sort() : []) {
+  PATCH_MODULES.push(await import(new URL(`./patches/${name}`, import.meta.url)));
+}
+function applyPatches(kind, rel, text) {
+  for (const m of PATCH_MODULES) text = m.apply({ kind, rel, text, patch }) ?? text;
+  return text;
+}
 function page(html, rel) {
   if (STANDALONE.has(rel)) return html;
   let out = rename(html);
   // Uch のスレッド: 8秒ごとの読み込みを、タブが裏にある間は止める（表に戻ったらすぐ読む）
   if (rel === 'Uch/thread.html') out = patch(out, 'Uchの裏タブ停止', 'setInterval(loadThread, 8000);',
     "setInterval(() => { if (!document.hidden) loadThread(); }, 8000); document.addEventListener('visibilitychange', () => { if (!document.hidden) loadThread(); });");
+  out = applyPatches('page', rel, out);
   return pageTail(out, rel);
 }
 // 画面の JS の置き換え（2026-10-26 に確認してもらったもの）
 function script(code, rel) {
+  code = applyPatches('script', rel, code);
   // ぽけっと: 直接つなぐための接続確認（6〜9秒ごと）を、タブが裏にある間は止める（表に戻ると chat-rt.js 自身がすぐ再開する）
   if (rel === 'js/chat-rt.js') code = patch(code, 'ぽけっとの裏タブ停止', 'function schedule(ms) { if (timer) clearTimeout(timer); if (!cfg) return;', 'function schedule(ms) { if (timer) clearTimeout(timer); if (!cfg || document.hidden) return;');
   // 未読バッジの定期更新を30秒→60秒に（表に戻ったときはすぐ更新する）
@@ -222,7 +234,7 @@ let wrapped = 0;
     const full = join(dir, name);
     if (statSync(full).isDirectory()) { if (name !== '_lib') walk(full); continue; }
     if (extname(name) !== '.js') continue;
-    let code = site(readFileSync(full, 'utf8'));
+    let code = applyPatches('cloud', relative(FN, full).replace(/\\/g, '/'), site(readFileSync(full, 'utf8')));
     const names = [];
     code = code.replace(HANDLER, (m, isAsync, fn) => { names.push(fn); return `${isAsync || ''}function __mixall_${fn}(`; });
     if (!names.length) throw new Error(`${full} に onRequest がありません`);
@@ -251,5 +263,5 @@ writeFileSync(join(FN, 'api', 'plus.js'), extraApi('plus', 'plusApi', 'plusApi(c
 writeFileSync(join(FN, 'api', 'plus-cron.js'), extraApi('plus', 'plusCron', 'plusCron(ctx.request, ctx.env)'));
 
 console.log(`built ${OUT}/ (site=${SITE}, ${wrapped} functions)`);
-for (const label of ['Uchの裏タブ停止', '＋広場のリンク', 'ぽけっとの裏タブ停止', 'バッジ更新の間引き','アーカイブの記憶', 'アーカイブの記憶(削除)']) if (!patched[label]) console.warn(`⚠ 置き換えられませんでした: ${label}（友人のコードの形が変わった可能性）`);
+for (const label of [...PATCH_MODULES.flatMap((m) => m.labels || []), 'Uchの裏タブ停止', '＋広場のリンク', 'ぽけっとの裏タブ停止', 'バッジ更新の間引き','アーカイブの記憶', 'アーカイブの記憶(削除)']) if (!patched[label]) console.warn(`⚠ 置き換えられませんでした: ${label}（友人のコードの形が変わった可能性）`);
 console.log('patched:', JSON.stringify(patched));

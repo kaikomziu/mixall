@@ -1,0 +1,36 @@
+/* ===== 運営画面の並べ方（js/plus-admin-layout.js） ===== */
+main.mx-admin { max-width: 1240px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+main.mx-admin > #mxAdminPlus { display: contents; }
+main.mx-admin > *:not(.card):not(#mxAdminPlus) { grid-column: 1 / -1; }
+main.mx-admin .card { margin: 0; min-width: 0; }
+main.mx-admin .card:not(.mx-tab-on) { display: none !important; }
+main.mx-admin .card.mx-wide { grid-column: 1 / -1; }
+/* 表や長い一覧はカードの中で横にスクロール */
+main.mx-admin .card :is(table, pre) { max-width: 100%; }
+main.mx-admin .card table { display: block; overflow-x: auto; }
+
+.mx-admin-tabs { display: grid; gap: 10px; }
+.mx-atab-search { width: 100%; margin: 0 !important; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font: inherit; }
+.mx-atab-list { display: grid; gap: 4px; }
+.mx-atab-list button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 8px 12px !important; border-radius: 10px;
+  text-align: left; font-weight: 600; color: var(--text-dim) !important; background: transparent !important; border: 0 !important; box-shadow: none !important; }
+.mx-atab-list button b { flex: 1; font-weight: inherit; }
+.mx-atab-list button[hidden] { display: none !important; }
+.mx-atab-list button:hover { color: var(--text) !important; background: color-mix(in srgb, var(--text) 6%, transparent) !important; }
+.mx-atab-list button.on { color: var(--text) !important; background: color-mix(in srgb, var(--accent) 16%, transparent) !important; }
+.mx-atab-count { min-width: 22px; padding: 0 6px; border-radius: 999px; font-size: .72rem; text-align: center; background: color-mix(in srgb, var(--text) 8%, transparent); }
+
+/* PC: 左に縦のタブ */
+@media (min-width: 1000px) {
+  .mx-admin-tabs { position: fixed; top: 76px; left: max(16px, calc((100vw - 1240px - 232px) / 2)); width: 216px; max-height: calc(100vh - 100px); overflow-y: auto; }
+  main.mx-admin { padding-left: 248px; max-width: calc(1240px + 248px); }
+}
+/* タブレット・スマホ: 上に横スクロールのタブ、カードは1列 */
+@media (max-width: 999px) {
+  .mx-admin-tabs { position: sticky; top: 56px; z-index: 5; margin: 0 auto; max-width: 1240px; padding: 10px 12px 8px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .mx-atab-list { display: flex; overflow-x: auto; scrollbar-width: none; }
+  .mx-atab-list::-webkit-scrollbar { display: none; }
+  .mx-atab-list button { flex: 0 0 auto; width: auto; min-height: 36px; padding: 6px 12px !important; white-space: nowrap; }
+  main.mx-admin { grid-template-columns: minmax(0, 1fr); }
+}
