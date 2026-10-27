@@ -1,0 +1,88 @@
+/* css/plus-tools.css（MixAll +（二世代）・コマンドパレット / ⌘ボタン / 小窓のミニぽけっと。js/plus-tools.js 用） */
+
+/* ===== ヘッダーの「⌘」ボタン ===== */
+.mx-pal-open { display: inline-grid; place-items: center; flex: 0 0 auto; width: 36px; height: 36px; min-height: 0 !important; padding: 0 !important; border-radius: 50%;
+  color: inherit; font-size: 1.05rem; font-weight: 700; line-height: 1; background: transparent !important; border: 0 !important; box-shadow: none !important; cursor: pointer; }
+.mx-pal-open:hover { background: color-mix(in srgb, currentColor 10%, transparent) !important; }
+/* 検索ボタン（margin-left:auto で右へ寄る）の直前に置くので、右寄せはこちらが受け持つ */
+header.top .mx-pal-open { margin-left: auto; }
+header.top .mx-pal-open + .mx-search-open { margin-left: 0; }
+@media (max-width: 680px) {
+  header.top .mx-pal-open { grid-column: 2; grid-row: 1; justify-self: end; margin: 0 2px 0 0; width: 32px; height: 32px; font-size: .95rem; }
+}
+
+/* ===== コマンドパレット ===== */
+.mx-pal-layer { position: fixed; inset: 0; z-index: 1200; display: flex; justify-content: center; align-items: flex-start; padding: max(10vh, 16px) 12px 12px;
+  background: rgba(0, 0, 0, .45); animation: mx-pal-fade .14s ease-out; }
+.mx-pal { display: grid; grid-template-rows: auto 1fr auto; width: min(600px, 100%); max-height: min(70vh, 560px); border-radius: 16px; overflow: hidden;
+  color: var(--text, #e6e8ec); background: var(--panel, #171a21); border: 1px solid var(--border, #2a2f3a); box-shadow: 0 22px 60px rgba(0, 0, 0, .4); position: relative; }
+.mx-pal::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: var(--mx-grad, linear-gradient(135deg, #3d7bff, #9a5bff 58%, #ff4f8b)); }
+.mx-pal-bar { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border, #2a2f3a); }
+.mx-pal-mark { display: grid; place-items: center; width: 28px; height: 28px; flex: none; border-radius: 8px; color: #fff; font-weight: 800;
+  background: var(--mx-grad, linear-gradient(135deg, #3d7bff, #9a5bff 58%, #ff4f8b)); }
+.mx-pal-input { flex: 1; min-width: 0; margin: 0 !important; padding: 6px 2px !important; border: 0 !important; outline: none; box-shadow: none !important;
+  background: transparent !important; color: inherit; font-size: 1.02rem; }
+.mx-pal kbd { display: inline-block; min-width: 1.4em; padding: 1px 5px; border-radius: 5px; font: 600 .72rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center;
+  color: var(--text-dim, #9aa1ad); background: var(--panel-2, #1f232c); border: 1px solid var(--border, #2a2f3a); }
+.mx-pal-list { overflow-y: auto; padding: 6px; overscroll-behavior: contain; }
+.mx-pal-item { display: flex !important; align-items: center; gap: 10px; width: 100%; min-height: 0 !important; margin: 0 !important; padding: 8px 10px !important; border: 0 !important;
+  border-radius: 10px; text-align: left; color: inherit !important; background: transparent !important; box-shadow: none !important; font: inherit; cursor: pointer; }
+.mx-pal-item.on { background: var(--mx-grad-soft, rgba(91, 140, 255, .16)) !important; outline: 1px solid color-mix(in srgb, #8b6bff 35%, transparent); }
+.mx-pal-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 8px; font-size: 1.05rem; background: var(--panel-2, #1f232c); }
+.mx-pal-text { display: grid; min-width: 0; flex: 1; }
+.mx-pal-text b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mx-pal-text small { color: var(--text-dim, #9aa1ad); font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mx-pal-tag { flex: none; padding: 1px 7px; border-radius: 999px; font-size: .7rem; color: var(--text-dim, #9aa1ad); border: 1px solid var(--border, #2a2f3a); }
+.mx-pal-empty { margin: 0; padding: 18px; text-align: center; color: var(--text-dim, #9aa1ad); }
+.mx-pal-foot { display: flex; gap: 14px; flex-wrap: wrap; padding: 8px 14px; font-size: .75rem; color: var(--text-dim, #9aa1ad); border-top: 1px solid var(--border, #2a2f3a); }
+.mx-pal-foot kbd { margin-right: 2px; }
+@media (max-width: 480px) {
+  .mx-pal-layer { padding-top: 12px; }
+  .mx-pal { max-height: 78vh; }
+  .mx-pal-bar > kbd, .mx-pal-foot { display: none; }
+}
+@keyframes mx-pal-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .mx-pal-layer { animation: none; } }
+
+/* ===== ぽけっとのルーム画面の「🪟 小窓で開く」 ===== */
+.mx-room-float { white-space: nowrap; }
+
+/* ===== 小窓の中のミニぽけっと（html.mx-embed: /Pocket/room.html?mini=1 を iframe で開いたとき） ===== */
+html.mx-embed { --composer-h: 112px; }
+html.mx-embed body { padding: 0 !important; font-size: 14px; }
+/* ヘッダー・ナビ・下部メニュー・お知らせ・各種の設定カードを隠す（残すのはメッセージ一覧・スレッド・入力欄） */
+html.mx-embed header.top,
+html.mx-embed .mixall-bottom-nav,
+html.mx-embed .ghost-bottom-nav,
+html.mx-embed .mixall-nav-panel,
+html.mx-embed .mixall-nav-backdrop,
+html.mx-embed footer,
+html.mx-embed nav.services,
+html.mx-embed .mx-announce,
+html.mx-embed .mx-totop,
+html.mx-embed .mx-pal-open,
+html.mx-embed .mx-room-float,
+html.mx-embed .call-notice,
+html.mx-embed .call-missed,
+html.mx-embed #membersCard,
+html.mx-embed #roomCallCard,
+html.mx-embed #roomMinefieldCard,
+html.mx-embed #roomNicknameCard,
+html.mx-embed #roomNoteCard,
+html.mx-embed #roomAlbumCard,
+html.mx-embed #manageCard,
+html.mx-embed main > .card:has(#msgBody) > p.muted,
+html.mx-embed #searchChatButton,
+html.mx-embed #threadListButton,
+html.mx-embed #exportChatButton,
+html.mx-embed #renameRoomButton { display: none !important; }
+/* style.css の body:has(#messageList):has(.mixall-bottom-nav) main（下部メニュー分の余白）より強くするため :has(#msgBody) を重ねる */
+html.mx-embed body:has(#messageList):has(#msgBody) main { max-width: none !important; margin: 0 !important; padding: 6px 8px calc(var(--composer-h, 112px) + 8px) !important; }
+html.mx-embed main > .card { margin: 0 0 6px !important; padding: 8px !important; border-radius: 10px; }
+html.mx-embed main > .card:has(#messageList) { display: flex; flex-direction: column; height: calc(100dvh - var(--composer-h, 112px) - 20px); min-height: 90px; padding: 6px 8px !important; }
+html.mx-embed #roomTitle { margin: 0; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.mx-embed #messageList { flex: 1; min-height: 0; max-height: none; }
+/* 入力欄は小窓の一番下に固定（下部メニューは隠しているので、その分は上げない）。高さは js/plus-tools.js が --composer-h に入れる */
+html.mx-embed body:has(#messageList):has(#msgBody) main > .card:has(#msgBody) { bottom: 0 !important; max-width: none; padding: 6px 8px 8px !important; border-radius: 12px 12px 0 0; z-index: 90; }
+html.mx-embed body:has(#messageList) #msgBody { min-height: 38px; max-height: 80px; }
+html.mx-embed .chat-scroll-bottom { bottom: calc(var(--composer-h, 108px) + 10px); right: 10px; width: 38px; height: 38px; font-size: 1.2rem; }

@@ -268,19 +268,21 @@
   const MISSION_OF = [
     [/\/api\/pocket\b/, /"action"\s*:\s*"sendMessage"/, 'pocket'],
     [/\/api\/ghost\b/, /"action"\s*:\s*"createPost"/, 'ghost'],
-    [/\/api\/uch\b/, /"action"\s*:\s*"(addPost|createThread)"/, 'uch']
+    [/\/api\/uch\b/, /"action"\s*:\s*"(addPost|createThread)"/, 'uch'],
+    // 今日のお題: Ghost の投稿に「#今日のお題」が入っていたら（ghost のミッションと両方つく）
+    [/\/api\/ghost\b/, /"action"\s*:\s*"createPost"[\s\S]*#今日のお題|#今日のお題[\s\S]*"action"\s*:\s*"createPost"/, 'odai']
   ];
   function recordMission(url, init, res) {
     if (!res.ok || !init || typeof init.body !== 'string') return;
     const s = session();
     if (!s || !s.token) return;
-    const hit = MISSION_OF.find(([u, b]) => u.test(url) && b.test(init.body));
-    if (!hit) return;
     const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
-    const key = `mixall.mission:${s.email}:${hit[2]}`;
-    if (lsGet(key) === today) return;
-    lsSet(key, today);
-    plus('missionDone', { id: hit[2] }).catch(() => {});
+    for (const hit of MISSION_OF.filter(([u, b]) => u.test(url) && b.test(init.body))) {
+      const key = `mixall.mission:${s.email}:${hit[2]}`;
+      if (lsGet(key) === today) continue;
+      lsSet(key, today);
+      plus('missionDone', { id: hit[2] }).catch(() => {});
+    }
   }
 
   const baseFetch = window.fetch.bind(window);

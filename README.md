@@ -8,6 +8,7 @@
 | 部分 | 場所 |
 |---|---|
 | 公開 | `scripts/build-edgeone.mjs` で `edgeone-build/`（画面 `public/` + 関数 `cloud/` → `cloud-functions/`）→ EdgeOne Pages プロジェクト **mixall-plus**。EdgeOne の環境変数は SUPABASE_URL と SUPABASE_SECRET_KEY だけ（ほかは下の設定値を各関数が読む） |
+| ＋の新機能（2026-10-28） | ホームのマイダッシュボード（`plus-dash.js`）、＋広場 `/Plus/`（今日のお題・週間ランキング・ギャラリー・アバターメーカー。`overlay/plus/index.html`・`plus-hub.js`）、小窓の道具 `/Plus/tool.html?t=calc\|timer\|notes\|translate\|school`（電卓・タイマー・付箋・翻訳/辞書・時間割/単語帳）、コマンドパレット（Ctrl+Shift+P）とミニぽけっと（`plus-tools.js`）、着せ替えテーマ（Coinショップ・`plus-theme.js`）、運営画面の通報の受付箱と使用量パネル（`plus-admin.js`・`supabase/usage.sql`）。ランキングは plus-cron が6時間ごとに集計して kv `mixall-rank/weekly` に1行で保存 |
 | 軽量化 | `build-edgeone.mjs` が画面の JS・CSS・ページ内 `<script>` を esbuild で圧縮（トップレベルの名前は残す）、＋のファイルを `plus-core.js`・`plus-late.js` にまとめ、`?v=` をファイルの中身から作る。`sw.js` は `?v=` 付きのファイルを裏で読み直さず、古い版は消す |
 | Supabase 節約 | `build-edgeone.mjs` が友人のコードを置き換える（形が変わったらビルド時に⚠を出す）: GitHub に移した行の読み込みを関数ごとに60秒覚える / Uch スレッドの8秒更新とぽけっとの接続確認はタブが裏にある間止める / 未読バッジの更新を60秒ごとに。設定値（mixall-config）は5分覚える。cron の実行記録は毎時掃除（成功分は3時間） |
 | 旧URL | GitHub Pages `/mixall/` は `scripts/build-redirect.mjs` の案内ページ（端末だけにある以前のチャット本文を戻してから移る・通知だけ受け取るサービスワーカー） |

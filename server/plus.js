@@ -4,7 +4,8 @@
 //   お知らせバナー / 運営からの警告 / 運営向け統計 / QRで別の端末にログイン / ミュート / プロフィールの装飾・バッジ /
 //   ログインボーナス・デイリーミッション / Coinショップ / Ghostストーリー / Ghostの投票・リアクション /
 //   おすすめユーザー / ブックマークのメモ / 返信リマインド / 音声の文字起こし
-// MixAll + で新しく足したもの: サイト全体のブックマーク / ぽけっとのミニゲーム（サイコロ・おみくじ・じゃんけん…）
+// MixAll + で新しく足したもの: サイト全体のブックマーク / ぽけっとのミニゲーム（サイコロ・おみくじ・じゃんけん…）/
+//   ダッシュボード / 今日のお題 / 週間ランキング / 着せ替えテーマ / 翻訳・辞書 / 通報の受付箱 / 使用量パネル
 // データは v27c と同じ kv テーブル（getStore）。v27c のデータ（アカウント・セッション・Coin・Ghost投稿・通知）は v27c と同じ形で読み書きする。
 // EdgeOne 版は cloud-functions/api/plus.js、Supabase 版は server/edge-router.js から呼ぶ。
 import crypto from 'node:crypto';
@@ -23,7 +24,8 @@ const V = {
 const S = {
   PROFILE: 'mixall-profile-extras', DAILY: 'mixall-daily', TRANSFER: 'mixall-transfers', MUTES: 'mixall-mutes',
   STORIES: 'mixall-stories', POLLS: 'mixall-polls', REACTIONS: 'mixall-reactions', NOTES: 'mixall-bookmark-notes',
-  REMIND: 'mixall-reply-reminders', WARNINGS: 'mixall-warnings', BOOKMARKS: 'mixall-bookmarks'
+  REMIND: 'mixall-reply-reminders', WARNINGS: 'mixall-warnings', BOOKMARKS: 'mixall-bookmarks',
+  ODAI: 'mixall-odai', RANK: 'mixall-rank'
 };
 
 // ---- 保存（v27c の getJSON / setJSON と同じ使い方） ----
@@ -144,7 +146,8 @@ async function adminStats() {
 const MISSIONS = [
   { id: 'pocket', label: 'ぽけっとでメッセージを送る', reward: 5 },
   { id: 'ghost', label: 'Ghostに投稿する', reward: 5 },
-  { id: 'uch', label: 'Uchに書き込む', reward: 5 }
+  { id: 'uch', label: 'Uchに書き込む', reward: 5 },
+  { id: 'odai', label: '今日のお題に投稿する', reward: 10 }
 ];
 const ALL_MISSIONS_BONUS = 10;
 const bonusFor = (streak) => 10 + Math.min(streak, 7) * 2;
@@ -185,7 +188,20 @@ const SHOP = [
   { id: 'title-night', type: 'title', name: '称号「夜ふかし」', price: 30, label: '🌙 夜ふかし' },
   { id: 'title-legend', type: 'title', name: '称号「レジェンド」', price: 300, label: '👑 レジェンド' },
   { id: 'story-galaxy', type: 'storyBg', name: 'ストーリー背景: ギャラクシー', price: 40, preview: 'linear-gradient(160deg,#0b0d2e,#5b3dff,#ff4f8b)' },
-  { id: 'story-sunrise', type: 'storyBg', name: 'ストーリー背景: 朝焼け', price: 40, preview: 'linear-gradient(160deg,#ffcc4d,#ff7a59,#8b6bff)' }
+  { id: 'story-sunrise', type: 'storyBg', name: 'ストーリー背景: 朝焼け', price: 40, preview: 'linear-gradient(160deg,#ffcc4d,#ff7a59,#8b6bff)' },
+  // 着せ替えテーマ（サイト全体の色。自分の画面だけに効く）
+  { id: 'theme-sakura', type: 'theme', name: 'テーマ: さくら', price: 80, preview: 'linear-gradient(135deg,#fff0f6,#ffc2dc,#ff7ab6)', scheme: 'light',
+    vars: { '--bg': '#fff5f9', '--panel': '#ffffff', '--panel-2': '#ffe8f1', '--border': 'rgba(214,52,120,.22)', '--text': '#3a2230', '--text-dim': '#86606f', '--accent': '#e0457f', '--accent-2': '#c2378f' } },
+  { id: 'theme-deepsea', type: 'theme', name: 'テーマ: 深海', price: 80, preview: 'linear-gradient(135deg,#02121f,#0a3550,#0fb5c9)', scheme: 'dark',
+    vars: { '--bg': '#020d17', '--panel': '#06202f', '--panel-2': '#0a2d40', '--border': 'rgba(79,220,255,.22)', '--text': '#dff6ff', '--text-dim': '#8fb6c6', '--accent': '#38d3f2', '--accent-2': '#3dffb8' } },
+  { id: 'theme-matcha', type: 'theme', name: 'テーマ: 抹茶', price: 80, preview: 'linear-gradient(135deg,#f4f1e1,#b8c98a,#5f7d35)', scheme: 'light',
+    vars: { '--bg': '#f3f1e4', '--panel': '#fbfaf2', '--panel-2': '#e6ead0', '--border': 'rgba(80,110,40,.25)', '--text': '#2b3320', '--text-dim': '#66704f', '--accent': '#5f8a2c', '--accent-2': '#a0682b' } },
+  { id: 'theme-retro', type: 'theme', name: 'テーマ: レトロゲーム', price: 120, preview: 'linear-gradient(135deg,#1a1033,#3b1e6e,#ffcc4d)', scheme: 'dark',
+    vars: { '--bg': '#140c29', '--panel': '#21143f', '--panel-2': '#2d1b56', '--border': 'rgba(255,204,77,.3)', '--text': '#fff4d6', '--text-dim': '#c9b98f', '--accent': '#ffcc4d', '--accent-2': '#ff5c9a' } },
+  { id: 'theme-neon', type: 'theme', name: 'テーマ: ネオン', price: 150, preview: 'linear-gradient(135deg,#050508,#3dffb8,#ff3df0)', scheme: 'dark',
+    vars: { '--bg': '#050508', '--panel': '#0e0e16', '--panel-2': '#161624', '--border': 'rgba(61,255,184,.28)', '--text': '#f0fff9', '--text-dim': '#9fb8ae', '--accent': '#3dffb8', '--accent-2': '#ff3df0' } },
+  { id: 'theme-paper', type: 'theme', name: 'テーマ: 原稿用紙', price: 60, preview: 'linear-gradient(135deg,#fffdf6,#f1e6c8,#b5522e)', scheme: 'light',
+    vars: { '--bg': '#f7f2e3', '--panel': '#fffdf6', '--panel-2': '#f1e9d2', '--border': 'rgba(181,82,46,.25)', '--text': '#2f2418', '--text-dim': '#7a6a52', '--accent': '#b5522e', '--accent-2': '#3d6f8a' } }
 ];
 const SHOP_BY_ID = Object.fromEntries(SHOP.map((x) => [x.id, x]));
 async function cosmeticsOf(email) {
@@ -492,9 +508,104 @@ function playGame(kind, arg) {
   throw Object.assign(new Error('不明なゲームです'), { status: 400 });
 }
 
+// ---- 今日のお題（日替わり。運営がその日だけ差し替えられる） ----
+const ODAI = [
+  '最近ハマっているもの', '今日のごはん', 'お気に入りの場所', '子どものころの夢', '最近笑ったこと', 'おすすめの曲', '休みの日の過ごし方',
+  '好きな季節とその理由', 'いま一番ほしいもの', '自分の推し', '最近撮った写真', '朝のルーティン', 'もし1日だけ魔法が使えたら', '好きなお菓子',
+  '最近がんばったこと', '行ってみたい国', '人生で一番おいしかったもの', 'おすすめのアプリ・ゲーム', '小さな幸せ', '今年やりたいこと',
+  'ペット・好きな動物', '最近読んだ本・マンガ', '自分の部屋の自慢', 'はまっている飲み物', '雨の日の過ごし方', 'あるあるネタ',
+  '今日の空', '最近覚えた言葉', '好きなキャラクター', '寝る前にすること', 'マイブームのお店', '得意料理', '尊敬している人',
+  '昔の自分に言いたいこと', '好きな言葉', '最近の失敗談', 'おすすめの動画', '文房具のこだわり', '学校・仕事の小ネタ', '理想の休日'
+];
+const ODAI_TAG = '#今日のお題';
+async function todayOdai() {
+  const day = jstDay();
+  const o = await getJSON(S.ODAI, 'override');
+  if (o && o.day === day && o.text) return { day, text: o.text, tag: ODAI_TAG, custom: true };
+  const n = Math.floor(Date.parse(`${day}T00:00:00Z`) / 86400000);
+  return { day, text: ODAI[n % ODAI.length], tag: ODAI_TAG, custom: false };
+}
+
+// ---- 週間ランキング（直近7日。6時間ごとに作り直して1行に保存し、見るときはその1行だけ読む） ----
+async function computeRanking() {
+  const since = Date.now() - 7 * 86400000;
+  const people = new Map();
+  const add = (email, field, n = 1) => {
+    if (!email || String(email).startsWith('official:')) return;
+    const r = people.get(email) || { posts: 0, likes: 0, uch: 0 };
+    r[field] += n; people.set(email, r);
+  };
+  for (const key of await listKeys(V.GHOST_POSTS)) {
+    if (key.includes(':')) continue;
+    const p = await getJSON(V.GHOST_POSTS, key);
+    if (!p || p.deleted || Date.parse(p.createdAt) < since) continue;
+    add(p.authorEmail, 'posts');
+    const reacted = await getJSON(S.REACTIONS, `post:${p.id || key}`);
+    const plusReactions = reacted ? Object.values(reacted).reduce((a, l) => a + (Array.isArray(l) ? l.length : 0), 0) : 0;
+    add(p.authorEmail, 'likes', (Array.isArray(p.likes) ? p.likes.length : 0) + plusReactions);
+  }
+  for (const key of await listKeys(V.UCH_THREADS)) {
+    const t = await getJSON(V.UCH_THREADS, key);
+    for (const post of (t && t.posts) || []) if (!post.deleted && Date.parse(post.createdAt) >= since) add(post.authorEmail, 'uch');
+  }
+  const rows = [];
+  for (const key of await listKeys(V.ACCOUNTS)) {
+    const a = await getJSON(V.ACCOUNTS, key);
+    if (!a || a.deleted || a.isBot) continue;
+    const extras = (await getJSON(S.PROFILE, key)) || {};
+    if (extras.rankOptOut) continue;
+    const daily = (await getJSON(S.DAILY, key)) || {};
+    const coins = Number(await getJSON(V.COINS, key)) || 0;
+    const act = people.get(key) || { posts: 0, likes: 0, uch: 0 };
+    rows.push({ name: a.displayName || key.split('@')[0], handle: a.ghostHandle || '', streak: Number(daily.streak) || 0, coins, ...act });
+  }
+  const top = (field) => rows.filter((r) => r[field] > 0).sort((a, b) => b[field] - a[field]).slice(0, 10).map((r) => ({ name: r.name, handle: r.handle, value: r[field] }));
+  const result = { at: new Date().toISOString(), boards: { posts: top('posts'), likes: top('likes'), uch: top('uch'), streak: top('streak'), coins: top('coins') } };
+  await setJSON(S.RANK, 'weekly', result);
+  return result;
+}
+async function ranking(force) {
+  const r = await getJSON(S.RANK, 'weekly');
+  if (!force && r && Date.now() - Date.parse(r.at) < 6 * 3600 * 1000) return r;
+  return computeRanking();
+}
+
+// ---- 翻訳・辞書（Gemini。1人1時間に30回まで。関数ごとの数え方なので目安） ----
+const askCount = new Map();
+async function askGemini(prompt) {
+  let lastError = 'Gemini の APIキーが設定されていません';
+  for (const key of await geminiKeys()) {
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 800 } }),
+        signal: AbortSignal.timeout(30000)
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) { lastError = data?.error?.message || `Gemini ${r.status}`; continue; }
+      return (data?.candidates?.[0]?.content?.parts || []).map((x) => x.text || '').join('').trim();
+    } catch (e) { lastError = e.message; }
+  }
+  throw Object.assign(new Error(lastError), { status: 502 });
+}
+const LANGS = { ja: '日本語', en: '英語', zh: '中国語（簡体字）', ko: '韓国語', es: 'スペイン語', fr: 'フランス語' };
+
+// ---- 運営: 使用量パネル（supabase/usage.sql の RPC） ----
+async function usageDetail() {
+  try {
+    const { url, key } = kvConfig();
+    const headers = { apikey: key, 'Content-Type': 'application/json' };
+    if (key.startsWith('eyJ')) headers.Authorization = `Bearer ${key}`;
+    const r = await fetch(`${url}/rest/v1/rpc/mixall_usage_detail`, { method: 'POST', headers, body: '{}', signal: AbortSignal.timeout(8000) });
+    return r.ok ? await r.json() : null;
+  } catch (_) { return null; }
+}
+
 export async function plusCron(request, env) {
   if (!env.CRON_SECRET || request.headers.get('x-cron-secret') !== env.CRON_SECRET) return reply(403, { error: 'forbidden' });
   await cleanup();
+  const rank = await getJSON(S.RANK, 'weekly');
+  if (!rank || Date.now() - Date.parse(rank.at) > 6 * 3600 * 1000) await computeRanking().catch((e) => console.error('[plus-cron] ranking', e?.message));
   return reply(200, { ok: true, reminders: await replyReminders() });
 }
 
@@ -696,7 +807,7 @@ async function handle(action, p) {
   if (action === 'equip') {
     const prof = (await getJSON(S.PROFILE, email)) || {};
     const type = String(p.type || '');
-    if (!['frame', 'nameColor', 'title', 'storyBg'].includes(type)) return reply(400, { error: '不正な種類です' });
+    if (!['frame', 'nameColor', 'title', 'storyBg', 'theme'].includes(type)) return reply(400, { error: '不正な種類です' });
     const id = p.id ? String(p.id) : null;
     if (id && (!(prof.owned || []).includes(id) || SHOP_BY_ID[id]?.type !== type)) return reply(400, { error: '持っていないアイテムです' });
     prof.equipped = { ...(prof.equipped || {}), [type]: id };
@@ -793,6 +904,77 @@ async function handle(action, p) {
     if (text) notes[id] = { text, at: Date.now() }; else delete notes[id];
     await setJSON(S.NOTES, email, notes);
     return reply(200, { notes });
+  }
+
+  // ---- ダッシュボード（ホーム。1回の呼び出しでまとめて返す） ----
+  if (action === 'dashboard') {
+    const [rec, coins, odai, rank] = await Promise.all([getDaily(email), getJSON(V.COINS, email), todayOdai(), getJSON(S.RANK, 'weekly')]);
+    const top3 = (b) => (rank && rank.boards && rank.boards[b] ? rank.boards[b].slice(0, 3) : []);
+    return reply(200, { daily: dailyView(rec), coins: Number(coins) || 0, odai, rank: { posts: top3('posts'), likes: top3('likes'), at: rank ? rank.at : null } });
+  }
+
+  // ---- 今日のお題 ----
+  if (action === 'odai') return reply(200, await todayOdai());
+  if (action === 'setOdai') {
+    if (!isOperator(info)) return reply(403, { error: '運営のみ操作できます' });
+    const text = String(p.text || '').trim().slice(0, 60);
+    if (text) await setJSON(S.ODAI, 'override', { day: jstDay(), text, by: email }); else await deleteKey(S.ODAI, 'override');
+    return reply(200, await todayOdai());
+  }
+
+  // ---- 週間ランキング ----
+  if (action === 'ranking') {
+    const extras = (await getJSON(S.PROFILE, email)) || {};
+    return reply(200, { ...(await ranking(Boolean(p.refresh) && isOperator(info))), optOut: Boolean(extras.rankOptOut) });
+  }
+  if (action === 'rankOptOut') {
+    const extras = (await getJSON(S.PROFILE, email)) || {};
+    extras.rankOptOut = Boolean(p.on);
+    await setJSON(S.PROFILE, email, extras);
+    return reply(200, { optOut: extras.rankOptOut, note: '次の集計（6時間以内）から反映されます' });
+  }
+
+  // ---- 着せ替えテーマ（自分の画面に使う色） ----
+  if (action === 'myTheme') {
+    const eq = ((await getJSON(S.PROFILE, email)) || {}).equipped || {};
+    const t = eq.theme && SHOP_BY_ID[eq.theme];
+    return reply(200, { theme: t ? { id: t.id, name: t.name, vars: t.vars, scheme: t.scheme } : null });
+  }
+
+  // ---- 翻訳・辞書 ----
+  if (action === 'translate') {
+    const text = String(p.text || '').trim().slice(0, 1500);
+    if (!text) return reply(400, { error: '文字を入れてください' });
+    const hour = Math.floor(Date.now() / 3600000);
+    const c = askCount.get(email);
+    const n = c && c.hour === hour ? c.n + 1 : 1;
+    if (n > 30) return reply(429, { error: '1時間に30回までです。少し待ってからもう一度どうぞ' });
+    askCount.set(email, { hour, n });
+    const mode = p.mode === 'explain' ? 'explain' : 'translate';
+    const to = LANGS[p.to] ? p.to : 'ja';
+    const prompt = mode === 'explain'
+      ? `次の言葉・文の意味を、中学生にもわかる日本語でやさしく説明してください。読み方（あれば）、意味、短い例文を、全体で200字以内で。前置きは不要です。\n---\n${text}`
+      : `次の文章を${LANGS[to]}に自然に翻訳してください。訳文だけを返してください。\n---\n${text}`;
+    return reply(200, { mode, to, text: await askGemini(prompt) });
+  }
+
+  // ---- 運営: 通報の受付箱・使用量パネル ----
+  if (action === 'reports') {
+    if (!isOperator(info)) return reply(403, { error: '運営のみ見られます' });
+    const items = [];
+    for (const key of await listKeys(V.ADMIN_AUDIT, 'report:')) {
+      const r = await getJSON(V.ADMIN_AUDIT, key);
+      if (r && r.kind === 'report') items.push(r);
+    }
+    items.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    const warned = {};
+    // 警告のキーは「相手のアドレス:ID」なので、中身を読まずに数える
+    for (const key of await listKeys(S.WARNINGS)) { const to = key.slice(0, key.lastIndexOf(':')); if (to) warned[to] = (warned[to] || 0) + 1; }
+    return reply(200, { items: items.slice(0, 200), warned });
+  }
+  if (action === 'usage') {
+    if (!isOperator(info)) return reply(403, { error: '運営のみ見られます' });
+    return reply(200, { db: await dbUsage(), detail: await usageDetail() });
   }
 
   // ---- サイト全体のブックマーク（本人だけ） ----

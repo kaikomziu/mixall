@@ -1,12 +1,13 @@
 // js/plus-coin.js（MixAll +（二世代）・Coin ページ）
 // 以前の GitHub 版（js/coin-plus.js・js/coin-shop.js）から移したもの:
 //   ログインボーナスとデイリーミッションのカード / Coinショップ（Ghost の装飾と交換）
+// 着せ替えテーマ（type 'theme'）も交換できる。付け替えたら js/plus-theme.js（window.MixAllTheme）ですぐ反映する。
 (function () {
   'use strict';
   if (!window.MixAllPlus) return;
   const { esc, session, toast } = window.MixAllPlus;
   const plus = (a, b, m) => window.MixAllPlus.api(a, b, m);
-  const TYPE_LABEL = { frame: 'アイコンの枠', nameColor: '名前の色', title: '称号', storyBg: 'ストーリーの背景' };
+  const TYPE_LABEL = { frame: 'アイコンの枠', nameColor: '名前の色', title: '称号', storyBg: 'ストーリーの背景', theme: '着せ替えテーマ' };
 
   function setBalance(n) {
     const el = document.getElementById('balance');
@@ -53,10 +54,21 @@
   }
 
   // ---------- Coinショップ ----------
+  // 着せ替えテーマをすぐ画面に反映する（plus-theme.js が読み込まれていなければ次のページから反映）
+  function applyTheme(it) {
+    if (!window.MixAllTheme) return;
+    window.MixAllTheme.apply(it ? { id: it.id, name: it.name, vars: it.vars, scheme: it.scheme } : null);
+  }
   function preview(it) {
     if (it.type === 'title') return `<span class="mx-shop-title">${esc(it.label)}</span>`;
     if (it.type === 'nameColor') return `<span class="mx-shop-name" style="background-image:${esc(it.preview)}">なまえ</span>`;
     if (it.type === 'frame') return `<span class="mx-shop-frame" style="background:${esc(it.preview)}"><i></i></span>`;
+    if (it.type === 'theme') {
+      // テーマの色で小さな画面の見本を描く（背景はグラデーションの preview）
+      const v = it.vars || {};
+      const c = (k) => esc(v[k] || '');
+      return `<span class="mx-shop-theme" style="background:${esc(it.preview)}"><i style="background:${c('--panel')};border-color:${c('--border')}"><b style="background:${c('--text')}"></b><b style="background:${c('--text-dim')}"></b><u style="background:${c('--accent')}"></u></i></span>`;
+    }
     return `<span class="mx-shop-bg" style="background:${esc(it.preview)}"></span>`;
   }
   async function renderShop() {
@@ -64,10 +76,16 @@
     if (!el) return;
     let d;
     try { d = await plus('shop', {}, 'GET'); } catch (e) { el.innerHTML = `<p class="muted">${esc(e.message)}</p>`; return; }
+    // 装備中のテーマを画面とそろえる（ほかの端末で付け替えた場合など）
+    if (window.MixAllTheme && 'theme' in d.equipped) {
+      const th = d.items.find((x) => x.type === 'theme' && x.id === d.equipped.theme) || null;
+      const cur = window.MixAllTheme.current();
+      if ((cur && cur.id) !== (th && th.id)) applyTheme(th);
+    }
     const groups = {};
     d.items.forEach((it) => { (groups[it.type] = groups[it.type] || []).push(it); });
     el.innerHTML = `<div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">🛍️ Coinショップ</h2><strong class="mx-shop-balance">${d.balance.toLocaleString('ja-JP')} Mcコイン</strong></div>
-      <p class="muted">Ghost のプロフィールや投稿に表示される装飾と交換できます。買ったものはいつでも付け替えられます。</p>
+      <p class="muted">Ghost のプロフィールや投稿に表示される装飾や、サイト全体の色を変える着せ替えテーマと交換できます。買ったものはいつでも付け替えられます。</p>
       ${Object.entries(groups).map(([type, items]) => `<h3>${TYPE_LABEL[type] || type}</h3><div class="mx-shop-grid">${items.map((it) => {
         const owned = d.owned.includes(it.id); const on = d.equipped[type] === it.id;
         const btn = owned
@@ -81,8 +99,22 @@
       try { const r = await plus('buy', { id: it.id }); toast(`${it.name} を手に入れました！`); setBalance(r.balance); } catch (e) { toast(e.message, { kind: 'error' }); }
       renderShop();
     }; });
-    el.querySelectorAll('[data-equip]').forEach((b) => { b.onclick = async () => { try { await plus('equip', { type: b.dataset.type, id: b.dataset.equip }); toast('付け替えました'); } catch (e) { toast(e.message, { kind: 'error' }); } renderShop(); }; });
-    el.querySelectorAll('[data-unequip]').forEach((b) => { b.onclick = async () => { try { await plus('equip', { type: b.dataset.unequip, id: null }); toast('外しました'); } catch (e) { toast(e.message, { kind: 'error' }); } renderShop(); }; });
+    el.querySelectorAll('[data-equip]').forEach((b) => { b.onclick = async () => {
+      try {
+        await plus('equip', { type: b.dataset.type, id: b.dataset.equip });
+        if (b.dataset.type === 'theme') applyTheme(d.items.find((x) => x.id === b.dataset.equip) || null);
+        toast('付け替えました');
+      } catch (e) { toast(e.message, { kind: 'error' }); }
+      renderShop();
+    }; });
+    el.querySelectorAll('[data-unequip]').forEach((b) => { b.onclick = async () => {
+      try {
+        await plus('equip', { type: b.dataset.unequip, id: null });
+        if (b.dataset.unequip === 'theme') applyTheme(null);
+        toast('外しました');
+      } catch (e) { toast(e.message, { kind: 'error' }); }
+      renderShop();
+    }; });
   }
 
   function boot() {

@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>道具 - MixAll +</title>
+<script src="/js/settings.js"></script>
+<style>
+/* テーマ色は settings.js が html に付ける。style.css は読まないので、ダーク/ライトの値はここで持つ */
+:root { --bg: #0f1115; --panel: #171a21; --panel-2: #1f232c; --border: #2a2f3a; --text: #e6e8ec; --text-dim: #9aa1ad; --accent: #5b8cff; --danger: #ff6b6b;
+  --grad: linear-gradient(135deg, #3d7bff, #9a5bff 58%, #ff4f8b); color-scheme: dark; }
+html[data-theme="light"] { --bg: #f4f5f7; --panel: #ffffff; --panel-2: #f0f1f4; --border: #dcdfe6; --text: #1c1f26; --text-dim: #666d7a; --accent: #3763d6; --danger: #d43f3f; color-scheme: light; }
+* { box-sizing: border-box; }
+html { font-size: calc(15px * var(--font-scale, 1)); -webkit-text-size-adjust: 100%; }
+body { margin: 0; padding: 8px; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
+  color: var(--text, #e6e8ec); background: var(--bg, #0f1115); line-height: 1.5; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; padding: 6px 10px; border-radius: 9px; border: 1px solid var(--border, #2a2f3a); background: var(--panel-2, #1f232c); min-height: 34px; touch-action: manipulation; }
+button:hover { border-color: var(--accent, #5b8cff); }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { color: #fff; border-color: transparent; background: var(--grad); font-weight: 700; }
+button.ghost { background: transparent; border-color: transparent; }
+button.danger { color: var(--danger, #ff6b6b); }
+input, select, textarea { width: 100%; padding: 7px 9px; border-radius: 9px; border: 1px solid var(--border, #2a2f3a); background: var(--panel, #171a21); min-height: 34px; }
+textarea { resize: vertical; }
+input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent, #5b8cff) 70%, transparent); outline-offset: 1px; }
+a { color: var(--accent, #5b8cff); }
+.muted { color: var(--text-dim, #9aa1ad); font-size: .85rem; }
+.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.row > .grow { flex: 1; min-width: 0; }
+.card { background: var(--panel, #171a21); border: 1px solid var(--border, #2a2f3a); border-radius: 12px; padding: 10px; margin-bottom: 8px; }
+.err { color: var(--danger, #ff6b6b); font-size: .85rem; min-height: 1em; }
+.hidden { display: none !important; }
+
+/* 上の小さな帯（道具名・一覧へ） */
+.bar { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.bar h1 { flex: 1; margin: 0; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabs { display: flex; gap: 4px; padding: 3px; border-radius: 11px; background: var(--panel-2, #1f232c); margin-bottom: 8px; }
+.tabs button { flex: 1; border: 0; background: transparent; min-height: 30px; padding: 4px 6px; font-size: .9rem; }
+.tabs button.on { background: var(--panel, #171a21); box-shadow: 0 1px 4px rgba(0,0,0,.2); font-weight: 700; }
+
+/* 一覧 */
+.tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.tool-grid button { display: grid; gap: 2px; justify-items: start; text-align: left; padding: 12px; border-radius: 12px; background: var(--panel, #171a21); }
+.tool-grid b { font-size: 1rem; }
+.tool-grid .ic { font-size: 1.6rem; line-height: 1; }
+
+/* 電卓 */
+.calc-screen { background: var(--panel, #171a21); border: 1px solid var(--border, #2a2f3a); border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; }
+.calc-screen input { border: 0; background: transparent; padding: 2px 0; text-align: right; font-size: 1.25rem; font-variant-numeric: tabular-nums; min-height: 0; }
+.calc-screen input:focus { outline: none; }
+.calc-out { text-align: right; font-size: 1.6rem; font-weight: 700; min-height: 1.6em; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.calc-out.preview { color: var(--text-dim, #9aa1ad); font-weight: 500; font-size: 1.15rem; }
+.calc-out.error { color: var(--danger, #ff6b6b); font-size: 1rem; }
+.keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.keys button { min-height: 44px; font-size: 1.1rem; border-radius: 11px; }
+.keys .op { color: var(--accent, #5b8cff); font-weight: 700; }
+.keys .fn { color: var(--text-dim, #9aa1ad); }
+.keys .eq { grid-column: span 2; }
+.hist { list-style: none; margin: 0; padding: 0; max-height: 160px; overflow-y: auto; }
+.hist li button { width: 100%; display: flex; justify-content: space-between; gap: 8px; text-align: left; border: 0; background: transparent; padding: 4px 6px; min-height: 0; }
+.hist li button span:first-child { color: var(--text-dim, #9aa1ad); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.unit-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; }
+.unit-res { font-size: 1.3rem; font-weight: 700; text-align: center; padding: 8px; overflow-wrap: anywhere; }
+.unit-all { list-style: none; margin: 0; padding: 0; columns: 2 150px; column-gap: 12px; font-size: .88rem; }
+.unit-all li { display: flex; justify-content: space-between; gap: 6px; padding: 2px 0; border-bottom: 1px dashed var(--border, #2a2f3a); break-inside: avoid; }
+.unit-all li span:last-child { color: var(--text-dim, #9aa1ad); }
+
+/* タイマー */
+.big-time { font-size: clamp(2.4rem, 16vw, 4.4rem); font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: .02em; line-height: 1.15; margin: 6px 0; }
+.big-time.alarm { animation: flash .5s steps(2) infinite; }
+@keyframes flash { 50% { color: var(--danger, #ff6b6b); } }
+@media (prefers-reduced-motion: reduce) { .big-time.alarm { animation: none; color: var(--danger, #ff6b6b); } }
+.progress { height: 6px; border-radius: 99px; background: var(--panel-2, #1f232c); overflow: hidden; margin-bottom: 8px; }
+.progress i { display: block; height: 100%; width: 0; background: var(--grad); transition: width .25s linear; }
+.time-in { display: flex; gap: 4px; align-items: center; justify-content: center; }
+.time-in input { width: 70px; text-align: center; }
+.presets { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin: 8px 0; }
+.presets button { min-width: 52px; }
+.ctrls { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.ctrls button { min-width: 84px; min-height: 40px; }
+.laps { list-style: none; margin: 8px 0 0; padding: 0; max-height: 220px; overflow-y: auto; font-variant-numeric: tabular-nums; }
+.laps li { display: grid; grid-template-columns: 3em 1fr 1fr; gap: 6px; padding: 4px 6px; border-bottom: 1px solid var(--border, #2a2f3a); }
+.laps li span:last-child { text-align: right; color: var(--text-dim, #9aa1ad); }
+
+/* 付箋 */
+.colors { display: flex; gap: 5px; }
+.colors button { width: 26px; height: 26px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid transparent; }
+.colors button.on { border-color: var(--text, #e6e8ec); }
+.notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; }
+.note { display: flex; flex-direction: column; border-radius: 10px; color: #222; box-shadow: 0 2px 8px rgba(0,0,0,.25); overflow: hidden; }
+.note-head { display: flex; align-items: center; gap: 2px; padding: 2px 4px; background: rgba(0,0,0,.06); }
+.note-head .dots { display: flex; gap: 3px; flex: 1; }
+.note-head .dots button { width: 14px; height: 14px; min-height: 0; padding: 0; border-radius: 50%; border: 1px solid rgba(0,0,0,.25); }
+.note-head > button { min-height: 0; width: 26px; height: 26px; padding: 0; border: 0; background: transparent; color: #444; }
+.note textarea { flex: 1; min-height: 110px; border: 0; border-radius: 0; background: transparent; color: #222; resize: vertical; padding: 8px; }
+.note textarea:focus { outline: none; }
+.note small { padding: 0 8px 4px; color: rgba(0,0,0,.5); font-size: .7rem; }
+
+/* 翻訳 */
+.tr-out { white-space: pre-wrap; overflow-wrap: anywhere; min-height: 3em; }
+
+/* 時間割 */
+.tt-wrap { overflow-x: auto; }
+.tt { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; min-width: 300px; }
+.tt th { font-size: .8rem; font-weight: 700; color: var(--text-dim, #9aa1ad); padding: 2px; }
+.tt th.today { color: #fff; background: var(--grad); border-radius: 8px; }
+.tt th.per { width: 46px; }
+.tt th.per button { width: 100%; padding: 2px; min-height: 0; border: 0; background: transparent; color: inherit; font-size: .72rem; line-height: 1.25; }
+.tt th.per.now button { color: var(--accent, #5b8cff); font-weight: 800; }
+.tt td button { width: 100%; height: 44px; padding: 2px; font-size: .78rem; line-height: 1.2; overflow: hidden; word-break: break-all; background: var(--panel, #171a21); }
+.tt td.today button { border-color: color-mix(in srgb, var(--accent, #5b8cff) 55%, var(--border, #2a2f3a)); }
+.tt td.now button { color: #fff; border-color: transparent; background: var(--grad); font-weight: 700; }
+.tt td.sel button { outline: 2px solid var(--accent, #5b8cff); }
+.now-line { font-size: .9rem; margin: 6px 0; }
+
+/* 単語帳 */
+.flash { display: grid; place-items: center; min-height: 150px; padding: 16px; border-radius: 14px; text-align: center; cursor: pointer; user-select: none;
+  background: var(--panel, #171a21); border: 1px solid var(--border, #2a2f3a); font-size: 1.35rem; font-weight: 700; overflow-wrap: anywhere; white-space: pre-wrap; }
+.flash.back { background: color-mix(in srgb, var(--accent, #5b8cff) 14%, var(--panel, #171a21)); }
+.flash small { display: block; font-size: .72rem; font-weight: 500; color: var(--text-dim, #9aa1ad); margin-bottom: 4px; }
+.cards { list-style: none; margin: 6px 0 0; padding: 0; max-height: 240px; overflow-y: auto; }
+.cards li { display: flex; gap: 6px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border, #2a2f3a); font-size: .9rem; }
+.cards li .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cards li.known .t { color: var(--text-dim, #9aa1ad); }
+.cards li button { min-height: 0; padding: 2px 7px; }
+details summary { cursor: pointer; font-weight: 700; font-size: .9rem; padding: 4px 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  'use strict';
+  // ===== 共通 =====
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const load = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (_) { return d; } };
+  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (_) { return false; } };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const session = () => load('netrify_session', null);
+  const app = $('#app');
+  const TOOLS = { calc: ['🧮', '電卓・単位変換'], timer: ['⏱️', 'タイマー'], notes: ['🗒️', '付箋'], translate: ['🌐', '翻訳・辞書'], school: ['🏫', '時間割・単語帳'] };
+  let current = null; // { stop(), storage(key) }
+
+  function show(t) {
+    if (current && current.stop) current.stop();
+    current = null;
+    const u = new URL(location.href);
+    if (TOOLS[t]) u.searchParams.set('t', t); else u.searchParams.delete('t');
+    if (t !== 'translate') u.searchParams.delete('q');
+    try { history.replaceState(null, '', u.pathname + u.search); } catch (_) { /* ignore */ }
+    document.title = TOOLS[t] ? `${TOOLS[t][1]} - MixAll +` : '道具 - MixAll +';
+    app.innerHTML = '';
+    if (!TOOLS[t]) { renderIndex(); return; }
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.innerHTML = `<h1>${TOOLS[t][0]} ${esc(TOOLS[t][1])}</h1><button type="button" class="ghost" data-home title="道具の一覧">☰ 一覧</button>`;
+    bar.querySelector('[data-home]').onclick = () => show('');
+    app.appendChild(bar);
+    const box = document.createElement('div');
+    app.appendChild(box);
+    current = VIEWS[t](box) || null;
+  }
+  function renderIndex() {
+    app.innerHTML = `<div class="bar"><h1>🧰 道具</h1></div><div class="tool-grid">${Object.entries(TOOLS).map(([k, [ic, name]]) =>
+      `<button type="button" data-t="${k}"><span class="ic" aria-hidden="true">${ic}</span><b>${esc(name)}</b></button>`).join('')}</div>`;
+    $$('[data-t]', app).forEach((b) => { b.onclick = () => show(b.dataset.t); });
+  }
+  // 別の小窓・タブで同じ道具を使ったとき、表示を合わせる
+  window.addEventListener('storage', (e) => { if (current && current.storage) current.storage(e.key); });
+  const tabs = (box, key, list, onChange) => {
+    let on = load(key, list[0][0]);
+    if (!list.some(([k]) => k === on)) on = list[0][0];
+    const el = document.createElement('div');
+    el.className = 'tabs'; el.setAttribute('role', 'tablist');
+    el.innerHTML = list.map(([k, label]) => `<button type="button" role="tab" data-k="${k}">${esc(label)}</button>`).join('');
+    const set = (k) => { on = k; save(key, k); $$('button', el).forEach((b) => { b.classList.toggle('on', b.dataset.k === k); b.setAttribute('aria-selected', b.dataset.k === k); }); onChange(k); };
+    $$('button', el).forEach((b) => { b.onclick = () => set(b.dataset.k); });
+    box.appendChild(el);
+    return () => set(on);
+  };
+
+  // =================================================================
+  // 電卓（eval を使わず、自前で式を読む）
+  // =================================================================
+  function tokenize(src) {
+    const s = String(src).normalize('NFKC').replace(/[×✕xX]/g, '*').replace(/÷/g, '/').replace(/[−ー–—]/g, '-').replace(/,/g, '').replace(/[πΠ]/g, 'π');
+    const re = /\s*(\d+\.?\d*(?:e[+-]?\d+)?|\.\d+(?:e[+-]?\d+)?|[-+*/%()√^π])/y;
+    const out = [];
+    let m;
+    re.lastIndex = 0;
+    while (re.lastIndex < s.length) {
+      const at = re.lastIndex;
+      if (!/\S/.test(s.slice(at))) break;
+      m = re.exec(s);
+      if (!m) throw new Error(`読めない文字があります: 「${s.slice(at).trim()[0]}」`);
+      out.push(m[1]);
+    }
+    return out;
+  }
+  function calcEval(src) {
+    const tk = tokenize(src);
+    if (!tk.length) return null;
+    let i = 0;
+    const peek = () => tk[i];
+    const isNum = (t) => t !== undefined && /^[\d.]/.test(t);
+    // 足し算・引き算（「100+10%」は 100 の 10% を足す = 110）
+    function expr() {
+      let v = term().v;
+      while (peek() === '+' || peek() === '-') {
+        const op = tk[i++];
+        const r = term();
+        const add = r.pct ? v * r.raw / 100 : r.v;
+        v = op === '+' ? v + add : v - add;
+      }
+      return v;
+    }
+    function term() {
+      let f = power();
+      let v = f.v, n = 1;
+      for (;;) {
+        const t = peek();
+        let op = null;
+        if (t === '*' || t === '/') { op = t; i++; }
+        else if (t === '(' || t === '√' || t === 'π' || isNum(t)) op = '*'; // 2(3+4)・2π などは掛け算
+        else break;
+        const r = power().v;
+        if (op === '/' && r === 0) throw new Error('0 では割れません');
+        v = op === '*' ? v * r : v / r;
+        n++;
+      }
+      return n === 1 ? f : { v, pct: false };
+    }
+    function power() {
+      const b = unary();
+      if (peek() === '^') { i++; const e = power(); return { v: Math.pow(b.v, e.v), pct: false }; }
+      return b;
+    }
+    function unary() {
+      const t = peek();
+      if (t === '-') { i++; const u = unary(); return { v: -u.v, pct: u.pct, raw: -u.raw }; }
+      if (t === '+') { i++; return unary(); }
+      if (t === '√') { i++; const u = unary(); if (u.v < 0) throw new Error('負の数の √ は計算できません'); return { v: Math.sqrt(u.v), pct: false }; }
+      return postfix();
+    }
+    function postfix() {
+      let v = primary(), raw = v, pct = false;
+      while (peek() === '%') { i++; raw = v; v /= 100; pct = true; }
+      return { v, pct, raw };
+    }
+    function primary() {
+      const t = tk[i++];
+      if (isNum(t)) { const n = Number(t); if (!isFinite(n)) throw new Error('数が大きすぎます'); return n; }
+      if (t === 'π') return Math.PI;
+      if (t === '(') {
+        const v = expr();
+        if (peek() === ')') i++; else if (peek() !== undefined) throw new Error('かっこが閉じていません');
+        return v;
+      }
+      throw new Error(t === undefined ? '式が途中で終わっています' : '式が正しくありません');
+    }
+    const v = expr();
+    if (i < tk.length) throw new Error(tk[i] === ')' ? 'かっこの数が合いません' : '式が正しくありません');
+    if (!isFinite(v)) throw new Error('計算できません');
+    return v;
+  }
+  function fmt(v, opt) {
+    if (v == null || !isFinite(v)) return '';
+    const r = Number(v.toPrecision(12));
+    if (r !== 0 && (Math.abs(r) >= 1e15 || Math.abs(r) < 1e-9)) return r.toExponential(6).replace(/\.?0+e/, 'e');
+    return opt && opt.plain ? String(r) : r.toLocaleString('ja-JP', { maximumFractionDigits: 10 });
+  }
+
+  const UNITS = {
+    length: ['長さ', [['mm', 0.001], ['cm', 0.01], ['m', 1], ['km', 1000], ['in（インチ）', 0.0254], ['ft（フィート）', 0.3048], ['yd（ヤード）', 0.9144], ['mi（マイル）', 1609.344], ['海里', 1852], ['寸', 1 / 33], ['尺', 10 / 33], ['間', 60 / 33], ['里', 2160 * 60 / 33]]], // 1里 = 36町 = 2160間 ≒ 3927m
+    weight: ['重さ', [['mg', 0.001], ['g', 1], ['kg', 1000], ['t（トン）', 1e6], ['oz（オンス）', 28.349523125], ['lb（ポンド）', 453.59237], ['匁', 3.75], ['斤', 600], ['貫', 3750]]],
+    temp: ['温度', [['℃（摂氏）'], ['℉（華氏）'], ['K（ケルビン）']]],
+    area: ['面積', [['cm²', 1e-4], ['m²', 1], ['a（アール）', 100], ['ha', 1e4], ['km²', 1e6], ['ft²', 0.09290304], ['ac（エーカー）', 4046.8564224], ['畳（1.62m²）', 1.62], ['坪', 400 / 121], ['反', 120000 / 121], ['町', 1200000 / 121]]],
+    volume: ['体積', [['mL', 0.001], ['L', 1], ['cm³', 0.001], ['m³', 1000], ['小さじ', 0.005], ['大さじ', 0.015], ['カップ（200mL）', 0.2], ['合', 2401 / 13310], ['升', 24010 / 13310], ['斗', 240100 / 13310], ['US gal（ガロン）', 3.785411784], ['US fl oz', 0.0295735295625]]],
+    speed: ['速さ', [['m/s', 1], ['km/h', 1 / 3.6], ['mph', 0.44704], ['ノット', 1852 / 3600], ['ft/s', 0.3048], ['マッハ（約340m/s）', 340]]],
+    data: ['データ量', [['bit', 0.125], ['B', 1], ['KB', 1e3], ['MB', 1e6], ['GB', 1e9], ['TB', 1e12], ['KiB', 1024], ['MiB', 1024 ** 2], ['GiB', 1024 ** 3], ['TiB', 1024 ** 4]]]
+  };
+  function convert(cat, v, from, to) {
+    if (cat === 'temp') {
+      const c = from === 0 ? v : from === 1 ? (v - 32) * 5 / 9 : v - 273.15;
+      return to === 0 ? c : to === 1 ? c * 9 / 5 + 32 : c + 273.15;
+    }
+    const list = UNITS[cat][1];
+    return v * list[from][1] / list[to][1];
+  }
+
+  function viewCalc(box) {
+    let timer = null;
+    const show2 = tabs(box, 'mixall.tool.calc.tab', [['calc', '電卓'], ['unit', '単位変換']], (k) => {
+      $('.p-calc', box).classList.toggle('hidden', k !== 'calc');
+      $('.p-unit', box).classList.toggle('hidden', k !== 'unit');
+      if (k === 'calc' && !matchMedia('(pointer: coarse)').matches) $('#cx', box).focus();
+    });
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `
+      <div class="p-calc">
+        <div class="calc-screen"><input id="cx" aria-label="式" autocomplete="off" spellcheck="false" placeholder="0"><div class="calc-out preview" id="co" aria-live="polite"></div></div>
+        <div class="keys">
+          <button type="button" class="fn" data-k="C">C</button><button type="button" class="fn" data-k="BS" aria-label="1文字消す">⌫</button><button type="button" class="fn" data-k="(">(</button><button type="button" class="fn" data-k=")">)</button>
+          <button type="button" class="fn" data-k="√">√</button><button type="button" class="fn" data-k="%">%</button><button type="button" class="fn" data-k="PM" aria-label="符号を反転">±</button><button type="button" class="op" data-k="÷">÷</button>
+          <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" class="op" data-k="×">×</button>
+          <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button><button type="button" class="op" data-k="−">−</button>
+          <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" class="op" data-k="+">+</button>
+          <button type="button" data-k="0">0</button><button type="button" data-k=".">.</button><button type="button" class="primary eq" data-k="=">=</button>
+        </div>
+        <div class="card" style="margin-top:8px"><div class="row"><b class="grow" style="font-size:.9rem">履歴</b><button type="button" class="ghost" id="chc" style="min-height:0;padding:2px 8px;font-size:.8rem">消す</button></div><ul class="hist" id="ch"></ul></div>
+        <p class="muted">キーボードでも入力できます（Enter で計算・Esc で消去）。「100+10%」は 110、「2(3+4)」は 14 になります。</p>
+      </div>
+      <div class="p-unit hidden">
+        <div class="row" style="margin-bottom:6px"><select id="ucat" aria-label="種類" class="grow">${Object.entries(UNITS).map(([k, [n]]) => `<option value="${k}">${esc(n)}</option>`).join('')}</select></div>
+        <input id="uv" inputmode="decimal" aria-label="値" value="1" style="margin-bottom:6px">
+        <div class="unit-row"><select id="uf" aria-label="変換元"></select><button type="button" id="usw" aria-label="入れ替え" title="入れ替え">⇄</button><select id="ut" aria-label="変換先"></select></div>
+        <div class="unit-res" id="ur" aria-live="polite"></div>
+        <details open><summary>ほかの単位では</summary><ul class="unit-all" id="ua"></ul></details>
+      </div>`;
+    box.appendChild(wrap);
+
+    // ----- 電卓 -----
+    const cx = $('#cx', box), co = $('#co', box), ch = $('#ch', box);
+    if (matchMedia('(pointer: coarse)').matches) cx.setAttribute('inputmode', 'none'); // スマホではボタンで入力する
+    let hist = load('mixall.tool.calc.hist', []);
+    if (!Array.isArray(hist)) hist = [];
+    let justDone = false;
+    const renderHist = () => {
+      ch.innerHTML = hist.length ? hist.map((h, i) => `<li><button type="button" data-i="${i}"><span>${esc(h.e)} =</span><b>${esc(h.r)}</b></button></li>`).join('') : '<li class="muted" style="padding:4px 6px">まだありません</li>';
+      $$('button', ch).forEach((b) => { b.onclick = () => { cx.value = hist[b.dataset.i].e; justDone = false; preview(); cx.focus(); }; });
+    };
+    function preview() {
+      co.className = 'calc-out preview';
+      try { const v = calcEval(cx.value); co.textContent = v == null ? '' : `= ${fmt(v)}`; } catch (_) { co.textContent = ''; }
+    }
+    function equals() {
+      const e = cx.value.trim();
+      if (!e) return;
+      try {
+        const v = calcEval(e);
+        if (v == null) return;
+        co.className = 'calc-out'; co.textContent = fmt(v);
+        hist.unshift({ e, r: fmt(v) }); hist = hist.slice(0, 30); save('mixall.tool.calc.hist', hist); renderHist();
+        cx.value = fmt(v, { plain: true }); justDone = true;
+      } catch (err) { co.className = 'calc-out error'; co.textContent = err.message; }
+    }
+    function insert(t) {
+      if (justDone && /[\d.√(π]/.test(t)) cx.value = ''; // 計算のあとに数字を押したら新しい式
+      justDone = false;
+      const a = cx.selectionStart == null ? cx.value.length : cx.selectionStart, b = cx.selectionEnd == null ? a : cx.selectionEnd;
+      cx.value = cx.value.slice(0, a) + t + cx.value.slice(b);
+      const p = a + t.length;
+      try { cx.setSelectionRange(p, p); } catch (_) { /* ignore */ }
+      preview();
+    }
+    function toggleSign() {
+      justDone = false;
+      const v = cx.value;
+      const m = v.match(/(\(-)?(\d+\.?\d*|\.\d+)(\))?$/);
+      if (!m) { if (!v) cx.value = '-'; preview(); return; }
+      const start = v.length - m[0].length;
+      cx.value = v.slice(0, start) + (m[1] && m[3] ? m[2] : `(-${m[2]})`);
+      preview();
+    }
+    $$('.keys button', box).forEach((b) => {
+      b.addEventListener('click', () => {
+        const k = b.dataset.k;
+        if (k === 'C') { cx.value = ''; co.textContent = ''; justDone = false; }
+        else if (k === 'BS') { const a = cx.selectionStart, e = cx.selectionEnd; if (a !== e && a != null) { cx.value = cx.value.slice(0, a) + cx.value.slice(e); } else if (a) { cx.value = cx.value.slice(0, a - 1) + cx.value.slice(a); try { cx.setSelectionRange(a - 1, a - 1); } catch (_) { /* ignore */ } } else cx.value = cx.value.slice(0, -1); justDone = false; preview(); }
+        else if (k === '=') equals();
+        else if (k === 'PM') toggleSign();
+        else insert(k);
+        if (!matchMedia('(pointer: coarse)').matches) cx.focus();
+      });
+    });
+    cx.addEventListener('input', () => { justDone = false; preview(); });
+    cx.addEventListener('keydown', (e) => {
+      if (e.isComposing) return;
+      if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); equals(); }
+      else if (e.key === 'Escape') { e.preventDefault(); cx.value = ''; co.textContent = ''; }
+      else if (justDone && e.key.length === 1 && /[\d.]/.test(e.key)) { cx.value = ''; justDone = false; }
+    });
+    $('#chc', box).onclick = () => { hist = []; save('mixall.tool.calc.hist', hist); renderHist(); };
+    renderHist();
+
+    // ----- 単位変換 -----
+    const ucat = $('#ucat', box), uv = $('#uv', box), uf = $('#uf', box), ut = $('#ut', box), ur = $('#ur', box), ua = $('#ua', box);
+    const us = load('mixall.tool.unit', { cat: 'length', from: 2, to: 3 });
+    function fillUnits(keep) {
+      const list = UNITS[ucat.value][1];
+      const opts = list.map(([n], i) => `<option value="${i}">${esc(n)}</option>`).join('');
+      uf.innerHTML = opts; ut.innerHTML = opts;
+      uf.value = keep && list[us.from] ? us.from : 0;
+      ut.value = keep && list[us.to] ? us.to : Math.min(1, list.length - 1);
+    }
+    function calcUnit() {
+      const cat = ucat.value, list = UNITS[cat][1];
+      let v;
+      try { v = calcEval(uv.value); } catch (_) { v = null; }
+      save('mixall.tool.unit', { cat, from: Number(uf.value), to: Number(ut.value) });
+      if (v == null) { ur.textContent = '数を入れてください'; ua.innerHTML = ''; return; }
+      const name = (i) => list[i][0].replace(/（.*?）/, '');
+      ur.textContent = `${fmt(v)} ${name(uf.value)} = ${fmt(convert(cat, v, Number(uf.value), Number(ut.value)))} ${name(ut.value)}`;
+      ua.innerHTML = list.map((u, i) => `<li><span>${esc(fmt(convert(cat, v, Number(uf.value), i)))}</span><span>${esc(u[0])}</span></li>`).join('');
+    }
+    ucat.value = UNITS[us.cat] ? us.cat : 'length';
+    fillUnits(true);
+    ucat.onchange = () => { fillUnits(false); calcUnit(); };
+    uv.oninput = calcUnit; uf.onchange = calcUnit; ut.onchange = calcUnit;
+    $('#usw', box).onclick = () => { const a = uf.value; uf.value = ut.value; ut.value = a; calcUnit(); };
+    calcUnit();
+    show2();
+    return { stop() { clearInterval(timer); } };
+  }
+
+  // =================================================================
+  // タイマー・ストップウォッチ（開始時刻を保存して、読み直しても続きから動く）
+  // =================================================================
+  const TKEY = 'mixall.tool.timer', SKEY = 'mixall.tool.stopwatch';
+  const two = (n) => String(n).padStart(2, '0');
+  function clock(ms, cs) {
+    ms = Math.max(0, ms);
+    const total = cs ? Math.floor(ms / 10) : Math.ceil(ms / 1000) * 100;
+    const s = Math.floor(total / 100), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return `${h ? `${h}:${two(m)}` : two(m)}:${two(sec)}${cs ? `.${two(total % 100)}` : ''}`;
+  }
+  let audioCtx = null;
+  function unlockAudio() {
+    try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (_) { audioCtx = null; }
+  }
+  function beep(times) {
+    unlockAudio();
+    if (!audioCtx) return;
+    const t0 = audioCtx.currentTime + 0.05;
+    for (let i = 0; i < times; i++) {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = i % 2 ? 1046 : 880;
+      const at = t0 + i * 0.22;
+      g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.35, at + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.18);
+      o.connect(g); g.connect(audioCtx.destination); o.start(at); o.stop(at + 0.2);
+    }
+  }
+  // 小窓の中のタイトルは見えないので、外側のページのタイトルも点滅させる（同じサイトのときだけ）
+  let blink = null;
+  function startBlink() {
+    stopBlink();
+    const docs = [document];
+    try { if (window.top !== window && window.top.document) docs.push(window.top.document); } catch (_) { /* 別サイトの中 */ }
+    const orig = docs.map((d) => d.title);
+    let n = 0;
+    blink = { docs, orig, id: setInterval(() => { n++; docs.forEach((d, i) => { try { d.title = n % 2 ? '⏰ 時間です！' : orig[i]; } catch (_) { /* ignore */ } }); if (n > 40) stopBlink(); }, 800) };
+  }
+  function stopBlink() {
+    if (!blink) return;
+    clearInterval(blink.id);
+    blink.docs.forEach((d, i) => { try { d.title = blink.orig[i]; } catch (_) { /* ignore */ } });
+    blink = null;
+  }
+
+  function viewTimer(box) {
+    let tickId = null, rafId = 0, ringId = null;
+    const def = { dur: 180000, remain: 180000, endAt: 0, running: false, done: false };
+    let T = Object.assign({}, def, load(TKEY, {}));
+    let S = Object.assign({ acc: 0, startAt: 0, running: false, laps: [] }, load(SKEY, {}));
+    const saveT = () => save(TKEY, T), saveS = () => save(SKEY, S);
+    const showTab = tabs(box, 'mixall.tool.timer.tab', [['timer', 'タイマー'], ['sw', 'ストップウォッチ']], (k) => {
+      $('.p-timer', box).classList.toggle('hidden', k !== 'timer');
+      $('.p-sw', box).classList.toggle('hidden', k !== 'sw');
+    });
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `
+      <div class="p-timer">
+        <div class="big-time" id="td" role="timer" aria-live="off">00:00</div>
+        <div class="progress"><i id="tp"></i></div>
+        <div class="time-in"><input id="tm" type="number" min="0" max="999" inputmode="numeric" aria-label="分"><span>分</span><input id="ts" type="number" min="0" max="59" inputmode="numeric" aria-label="秒"><span>秒</span></div>
+        <div class="presets">${[1, 3, 5, 10, 25].map((m) => `<button type="button" data-m="${m}">${m}分</button>`).join('')}</div>
+        <div class="ctrls"><button type="button" class="primary" id="tgo">スタート</button><button type="button" id="tadd">＋1分</button><button type="button" id="treset">リセット</button></div>
+        <p class="muted" id="tmsg" style="text-align:center"></p>
+        <p class="muted" style="text-align:center" id="tnotif"></p>
+      </div>
+      <div class="p-sw hidden">
+        <div class="big-time" id="sd">00:00.00</div>
+        <div class="ctrls"><button type="button" class="primary" id="sgo">スタート</button><button type="button" id="slap">ラップ</button><button type="button" id="sreset">リセット</button></div>
+        <ul class="laps" id="sl"></ul>
+      </div>`;
+    box.appendChild(wrap);
+    const td = $('#td', box), tp = $('#tp', box), tm = $('#tm', box), ts = $('#ts', box), tgo = $('#tgo', box), tmsg = $('#tmsg', box);
+    const sd = $('#sd', box), sgo = $('#sgo', box), sl = $('#sl', box);
+
+    // ----- 通知の許可 -----
+    function notifLine() {
+      const el = $('#tnotif', box);
+      if (!('Notification' in window)) { el.textContent = ''; return; }
+      if (Notification.permission === 'default') {
+        el.innerHTML = '<button type="button" class="ghost" id="tperm" style="font-size:.85rem">🔔 終わったら通知で知らせる</button>';
+        $('#tperm', box).onclick = () => { try { Notification.requestPermission().then(notifLine, notifLine); } catch (_) { notifLine(); } };
+      } else el.textContent = Notification.permission === 'granted' ? '🔔 終わったら通知でも知らせます' : '';
+    }
+
+    // ----- タイマー -----
+    const remainNow = () => (T.running ? Math.max(0, T.endAt - Date.now()) : T.remain);
+    function inputsFrom(ms) { const s = Math.round(ms / 1000); tm.value = Math.floor(s / 60); ts.value = s % 60; }
+    function readInputs() { return (Math.max(0, Math.min(999, parseInt(tm.value, 10) || 0)) * 60 + Math.max(0, Math.min(59, parseInt(ts.value, 10) || 0))) * 1000; }
+    function drawTimer() {
+      const r = remainNow();
+      td.textContent = clock(r);
+      tp.style.width = `${T.dur ? Math.min(100, 100 - (r / T.dur) * 100) : 0}%`;
+      tgo.textContent = T.running ? '一時停止' : (T.remain > 0 && T.remain < T.dur ? '再開' : 'スタート');
+      tm.disabled = ts.disabled = T.running;
+      td.classList.toggle('alarm', Boolean(ringId));
+      if (T.done && !T.running) tmsg.textContent = ringId ? '⏰ 時間です！（画面を押すと止まります）' : '終了しました';
+      else if (T.running) tmsg.textContent = `終了予定 ${new Date(T.endAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+      else tmsg.textContent = '';
+    }
+    function finish(late) {
+      T.running = false; T.remain = 0; T.done = true; saveT();
+      if (!late) ring();
+      drawTimer();
+    }
+    function ring() {
+      stopRing();
+      let n = 0;
+      beep(6);
+      ringId = setInterval(() => { n++; if (n >= 8) { stopRing(); drawTimer(); return; } beep(6); }, 1800);
+      startBlink();
+      try {
+        if ('Notification' in window && Notification.permission === 'granted') new Notification('⏰ タイマー終了', { body: `${clock(T.dur)} のタイマーが終わりました`, tag: 'mixall-timer' });
+      } catch (_) { /* ignore */ }
+    }
+    function stopRing() { if (ringId) { clearInterval(ringId); ringId = null; } stopBlink(); }
+    function tick() {
+      if (T.running && Date.now() >= T.endAt) finish(Date.now() - T.endAt > 60000); // ずっと前に終わっていたら鳴らさない
+      drawTimer();
+    }
+    tgo.onclick = () => {
+      unlockAudio(); stopRing();
+      if (T.running) { T.remain = remainNow(); T.running = false; }
+      else {
+        if (!(T.remain > 0 && T.remain < T.dur) || T.done) { T.dur = readInputs(); T.remain = T.dur; }
+        if (T.remain <= 0) { tmsg.textContent = '時間を入れてください'; return; }
+        T.endAt = Date.now() + T.remain; T.running = true; T.done = false;
+      }
+      saveT(); drawTimer();
+    };
+    $('#tadd', box).onclick = () => {
+      unlockAudio(); stopRing();
+      if (T.running) { T.endAt += 60000; T.dur += 60000; }
+      else if (T.done || T.remain <= 0) { T.dur = 60000; T.remain = 60000; T.endAt = Date.now() + 60000; T.running = true; T.done = false; inputsFrom(60000); }
+      else { T.remain += 60000; T.dur += 60000; inputsFrom(T.dur); }
+      saveT(); drawTimer();
+    };
+    $('#treset', box).onclick = () => { stopRing(); T.running = false; T.done = false; T.remain = T.dur; saveT(); inputsFrom(T.dur); drawTimer(); };
+    $$('.presets button', box).forEach((b) => {
+      b.onclick = () => {
+        unlockAudio(); stopRing();
+        T.dur = Number(b.dataset.m) * 60000; T.remain = T.dur; T.endAt = Date.now() + T.dur; T.running = true; T.done = false;
+        inputsFrom(T.dur); saveT(); drawTimer();
+      };
+    });
+    [tm, ts].forEach((el) => el.addEventListener('change', () => { if (!T.running) { T.dur = readInputs(); T.remain = T.dur; T.done = false; saveT(); drawTimer(); } }));
+    const stopOnTouch = () => { if (ringId) { stopRing(); drawTimer(); } };
+    document.addEventListener('pointerdown', stopOnTouch);
+    document.addEventListener('keydown', stopOnTouch);
+
+    // ----- ストップウォッチ -----
+    const elapsed = () => S.acc + (S.running ? Date.now() - S.startAt : 0);
+    function drawSw() {
+      sd.textContent = clock(elapsed(), true);
+      sgo.textContent = S.running ? 'ストップ' : (S.acc ? '再開' : 'スタート');
+      $('#slap', box).disabled = !S.running;
+    }
+    function drawLaps() {
+      sl.innerHTML = S.laps.map((t, i) => `<li><span>#${i + 1}</span><span>${clock(t - (i ? S.laps[i - 1] : 0), true)}</span><span>${clock(t, true)}</span></li>`).reverse().join('');
+    }
+    function loop() { drawSw(); if (S.running) rafId = requestAnimationFrame(loop); }
+    sgo.onclick = () => {
+      if (S.running) { S.acc = elapsed(); S.running = false; }
+      else { S.startAt = Date.now(); S.running = true; }
+      saveS(); cancelAnimationFrame(rafId); loop();
+    };
+    $('#slap', box).onclick = () => { if (!S.running) return; S.laps.push(elapsed()); S.laps = S.laps.slice(-200); saveS(); drawLaps(); };
+    $('#sreset', box).onclick = () => { S = { acc: 0, startAt: 0, running: false, laps: [] }; saveS(); cancelAnimationFrame(rafId); drawSw(); drawLaps(); };
+
+    inputsFrom(T.dur);
+    notifLine();
+    tick();
+    tickId = setInterval(tick, 250);
+    drawLaps(); loop();
+    showTab();
+    return {
+      stop() { clearInterval(tickId); cancelAnimationFrame(rafId); stopRing(); document.removeEventListener('pointerdown', stopOnTouch); document.removeEventListener('keydown', stopOnTouch); },
+      storage(key) {
+        if (key === TKEY) { T = Object.assign({}, def, load(TKEY, {})); if (!T.running) inputsFrom(T.dur); drawTimer(); }
+        if (key === SKEY) { S = Object.assign({ acc: 0, startAt: 0, running: false, laps: [] }, load(SKEY, {})); cancelAnimationFrame(rafId); drawLaps(); loop(); }
+      }
+    };
+  }
+
+  // =================================================================
+  // 付箋
+  // =================================================================
+  const NKEY = 'mixall.tool.notes';
+  const NOTE_COLORS = ['#fff59d', '#ffcc80', '#f8bbd0', '#b3e5fc', '#c5e1a5', '#e1bee7'];
+  function viewNotes(box) {
+    let notes = load(NKEY, []);
+    if (!Array.isArray(notes)) notes = [];
+    let color = load('mixall.tool.notes.color', NOTE_COLORS[0]);
+    let saveId = null;
+    box.innerHTML = `<div class="row"><button type="button" class="primary" id="nadd">＋ 付箋を追加</button><div class="colors" id="ncol" role="radiogroup" aria-label="新しい付箋の色">${NOTE_COLORS.map((c) =>
+      `<button type="button" role="radio" data-c="${c}" style="background:${c}" aria-label="色 ${c}"></button>`).join('')}</div><span class="muted grow" id="nst" style="text-align:right;font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span></div><div class="notes" id="nl"></div>`;
+    const nl = $('#nl', box), nst = $('#nst', box);
+    const persist = () => { if (save(NKEY, notes)) nst.textContent = '保存しました'; else nst.textContent = '保存できませんでした'; };
+    const later = () => { clearTimeout(saveId); nst.textContent = '…'; saveId = setTimeout(persist, 400); };
+    function drawColors() { $$('#ncol button', box).forEach((b) => { b.classList.toggle('on', b.dataset.c === color); b.setAttribute('aria-checked', b.dataset.c === color); }); }
+    function draw() {
+      nl.innerHTML = notes.length ? notes.map((n, i) => `
+        <div class="note" style="background:${esc(n.color)}" data-id="${esc(n.id)}">
+          <div class="note-head"><div class="dots">${NOTE_COLORS.map((c) => `<button type="button" data-col="${c}" style="background:${c}" aria-label="色を変える"></button>`).join('')}</div>
+            <button type="button" data-mv="-1" aria-label="前へ" title="前へ" ${i ? '' : 'disabled'}>◀</button><button type="button" data-mv="1" aria-label="後ろへ" title="後ろへ" ${i < notes.length - 1 ? '' : 'disabled'}>▶</button><button type="button" data-del aria-label="削除" title="削除">✕</button></div>
+          <textarea aria-label="付箋 ${i + 1}" placeholder="メモを入力">${esc(n.text)}</textarea>
+          <small>${esc(new Date(n.at || Date.now()).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }))}</small>
+        </div>`).join('') : '<p class="muted">付箋はまだありません。「＋ 付箋を追加」で作れます。</p>';
+      $$('.note', nl).forEach((el) => {
+        const n = notes.find((x) => x.id === el.dataset.id);
+        $('textarea', el).addEventListener('input', (e) => { n.text = e.target.value; n.at = Date.now(); later(); });
+        $$('[data-col]', el).forEach((b) => { b.onclick = () => { n.color = b.dataset.col; el.style.background = n.color; persist(); }; });
+        $$('[data-mv]', el).forEach((b) => {
+          b.onclick = () => {
+            const i = notes.indexOf(n), j = i + Number(b.dataset.mv);
+            if (j < 0 || j >= notes.length) return;
+            notes.splice(i, 1); notes.splice(j, 0, n); persist(); draw();
+          };
+        });
+        $('[data-del]', el).onclick = () => {
+          if (n.text.trim() && !confirm('この付箋を削除しますか？')) return;
+          notes = notes.filter((x) => x !== n); persist(); draw();
+        };
+      });
+    }
+    $$('#ncol button', box).forEach((b) => { b.onclick = () => { color = b.dataset.c; save('mixall.tool.notes.color', color); drawColors(); }; });
+    $('#nadd', box).onclick = () => {
+      notes.unshift({ id: uid(), text: '', color, at: Date.now() }); persist(); draw();
+      const t = $('.note textarea', nl); if (t) t.focus();
+    };
+    drawColors(); draw();
+    return {
+      stop() { if (saveId) { clearTimeout(saveId); persist(); } },
+      storage(key) {
+        if (key !== NKEY) return;
+        const a = document.activeElement;
+        if (a && a.tagName === 'TEXTAREA' && nl.contains(a)) return; // 書いている途中は上書きしない
+        const v = load(NKEY, []); notes = Array.isArray(v) ? v : []; draw();
+      }
+    };
+  }
+
+  // =================================================================
+  // 翻訳・辞書（/api/plus の translate）
+  // =================================================================
+  const LANGS = [['ja', '日本語'], ['en', '英語'], ['zh', '中国語'], ['ko', '韓国語'], ['es', 'スペイン語'], ['fr', 'フランス語']];
+  function viewTranslate(box) {
+    const s = session();
+    const q = new URLSearchParams(location.search).get('q') || '';
+    box.innerHTML = `
+      ${s && s.token ? '' : '<div class="card">翻訳を使うには <a href="/login/" target="_top">ログイン</a> してください。</div>'}
+      <textarea id="trin" rows="4" placeholder="翻訳したい文や、意味を知りたい言葉を入力" aria-label="入力"></textarea>
+      <div class="row" style="margin:6px 0">
+        <label class="muted" for="trto">翻訳先</label>
+        <select id="trto" style="width:auto;flex:1;min-width:110px">${LANGS.map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select>
+        <button type="button" class="primary" id="trgo">翻訳</button><button type="button" id="trex">意味を調べる</button>
+      </div>
+      <div class="err" id="trerr"></div>
+      <div class="card"><div class="row" style="margin-bottom:4px"><b class="grow muted" id="trlabel">結果</b><button type="button" class="ghost" id="trcopy" style="min-height:0;padding:2px 8px;font-size:.8rem" disabled>コピー</button></div><div class="tr-out" id="trout" aria-live="polite"></div></div>
+      <p class="muted">Ctrl＋Enter で翻訳します。</p>`;
+    const inp = $('#trin', box), to = $('#trto', box), out = $('#trout', box), err = $('#trerr', box), copy = $('#trcopy', box);
+    const saved = load('mixall.tool.tr.to', '');
+    to.value = LANGS.some(([k]) => k === saved) ? saved : 'en';
+    to.onchange = () => save('mixall.tool.tr.to', to.value);
+    let busy = false;
+    async function run(mode) {
+      const text = inp.value.trim();
+      err.textContent = '';
+      if (!text) { err.textContent = '文字を入力してください'; inp.focus(); return; }
+      const ss = session();
+      if (!ss || !ss.token) { err.innerHTML = 'ログインしてください（<a href="/login/" target="_top">ログイン</a>）'; return; }
+      if (busy) return;
+      busy = true;
+      $$('#trgo, #trex', box).forEach((b) => { b.disabled = true; });
+      $('#trlabel', box).textContent = mode === 'explain' ? '意味' : `翻訳（${LANGS.find(([k]) => k === to.value)[1]}）`;
+      out.textContent = '考えています…';
+      try {
+        const r = await fetch('/api/plus', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'translate', token: ss.token, text, mode, to: to.value }) });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error || `エラー (${r.status})`);
+        out.textContent = d.text || '（結果がありませんでした）';
+        copy.disabled = !d.text;
+      } catch (e) {
+        out.textContent = ''; copy.disabled = true;
+        err.textContent = e && e.message ? e.message : '通信に失敗しました';
+      } finally {
+        busy = false;
+        $$('#trgo, #trex', box).forEach((b) => { b.disabled = false; });
+      }
+    }
+    $('#trgo', box).onclick = () => run('translate');
+    $('#trex', box).onclick = () => run('explain');
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !e.isComposing) { e.preventDefault(); run('translate'); } });
+    copy.onclick = async () => {
+      try { await navigator.clipboard.writeText(out.textContent); copy.textContent = 'コピーしました'; } catch (_) { copy.textContent = 'コピーできませんでした'; }
+      setTimeout(() => { copy.textContent = 'コピー'; }, 1500);
+    };
+    if (q) { inp.value = q; if (s && s.token) run('translate'); } else inp.focus();
+    return null;
+  }
+
+  // =================================================================
+  // 時間割・単語帳
+  // =================================================================
+  const SCH = 'mixall.tool.timetable', CARDS = 'mixall.tool.cards';
+  const DAYS = ['月', '火', '水', '木', '金', '土'];
+  const DEF_TIMES = [['8:50', '9:40'], ['9:50', '10:40'], ['10:50', '11:40'], ['11:50', '12:40'], ['13:30', '14:20'], ['14:30', '15:20']];
+  const mins = (t) => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(t || '')); return m ? Number(m[1]) * 60 + Number(m[2]) : -1; };
+  function viewSchool(box) {
+    let tickId = null;
+    const showTab = tabs(box, 'mixall.tool.school.tab', [['tt', '時間割'], ['cards', '単語帳']], (k) => {
+      $('.p-tt', box).classList.toggle('hidden', k !== 'tt');
+      $('.p-cards', box).classList.toggle('hidden', k !== 'cards');
+    });
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `
+      <div class="p-tt">
+        <div class="now-line" id="ttnow"></div>
+        <div class="tt-wrap"><table class="tt" id="tt"></table></div>
+        <div class="card hidden" id="tted" style="margin-top:6px"></div>
+        <label class="muted row" style="margin-top:4px"><input type="checkbox" id="ttsat" style="width:auto;min-height:0"> 土曜日も表示</label>
+      </div>
+      <div class="p-cards hidden"></div>`;
+    box.appendChild(wrap);
+
+    // ----- 時間割 -----
+    let S = Object.assign({ sat: false, cells: {}, times: DEF_TIMES }, load(SCH, {}));
+    if (!Array.isArray(S.times) || S.times.length !== 6) S.times = DEF_TIMES.map((x) => x.slice());
+    let sel = null; // 'd-p' か 'time-p'
+    const tt = $('#tt', box), ted = $('#tted', box);
+    const persist = () => save(SCH, S);
+    function nowInfo() {
+      const d = new Date(), wd = d.getDay() - 1, m = d.getHours() * 60 + d.getMinutes();
+      const per = S.times.findIndex(([a, b]) => mins(a) >= 0 && m >= mins(a) && m < mins(b));
+      const next = S.times.findIndex(([a]) => mins(a) > m);
+      return { wd: wd >= 0 && wd < (S.sat ? 6 : 5) ? wd : -1, per, next };
+    }
+    function draw() {
+      const days = S.sat ? 6 : 5, n = nowInfo();
+      let h = `<thead><tr><th class="per"></th>${DAYS.slice(0, days).map((d, i) => `<th class="${i === n.wd ? 'today' : ''}">${d}</th>`).join('')}</tr></thead><tbody>`;
+      for (let p = 0; p < 6; p++) {
+        h += `<tr><th class="per${n.wd >= 0 && p === n.per ? ' now' : ''}"><button type="button" data-time="${p}" title="時刻を変える">${p + 1}限<br>${esc(S.times[p][0])}</button></th>`;
+        for (let d = 0; d < days; d++) {
+          const k = `${d}-${p}`, cls = [d === n.wd ? 'today' : '', d === n.wd && p === n.per ? 'now' : '', sel === k ? 'sel' : ''].join(' ').trim();
+          h += `<td class="${cls}"><button type="button" data-cell="${k}" aria-label="${DAYS[d]}曜 ${p + 1}限 ${esc(S.cells[k] || '空き')}">${esc(S.cells[k] || '')}</button></td>`;
+        }
+        h += '</tr>';
+      }
+      tt.innerHTML = `${h}</tbody>`;
+      $$('[data-cell]', tt).forEach((b) => { b.onclick = () => edit(b.dataset.cell); });
+      $$('[data-time]', tt).forEach((b) => { b.onclick = () => edit(`time-${b.dataset.time}`); });
+      const line = $('#ttnow', box);
+      if (n.wd < 0) line.textContent = '今日は授業がない日です';
+      else if (n.per >= 0) line.innerHTML = `いまは <b>${n.per + 1}限</b>（${esc(S.cells[`${n.wd}-${n.per}`] || '未入力')}）・${esc(S.times[n.per][1])} まで`;
+      else if (n.next >= 0) line.innerHTML = `次は <b>${n.next + 1}限</b>（${esc(S.cells[`${n.wd}-${n.next}`] || '未入力')}）・${esc(S.times[n.next][0])} から`;
+      else line.textContent = '今日の授業は終わりました';
+      $('#ttsat', box).checked = S.sat;
+    }
+    function edit(k) {
+      sel = k;
+      ted.classList.remove('hidden');
+      if (k.startsWith('time-')) {
+        const p = Number(k.slice(5));
+        ted.innerHTML = `<b>${p + 1}限の時刻</b><div class="row" style="margin-top:6px"><input type="time" id="tta" value="${esc(S.times[p][0].padStart(5, '0'))}" class="grow"><span>〜</span><input type="time" id="ttb" value="${esc(S.times[p][1].padStart(5, '0'))}" class="grow"></div><div class="row" style="margin-top:6px"><button type="button" class="primary" id="ttok">保存</button><button type="button" id="ttno">閉じる</button></div>`;
+        $('#ttok', ted).onclick = () => {
+          const t = (v) => v.replace(/^0(\d):/, '$1:');
+          S.times[p] = [t($('#tta', ted).value || S.times[p][0]), t($('#ttb', ted).value || S.times[p][1])]; persist(); close();
+        };
+      } else {
+        const [d, p] = k.split('-').map(Number);
+        ted.innerHTML = `<b>${DAYS[d]}曜 ${p + 1}限</b><input id="ttv" maxlength="30" placeholder="科目（空欄で消す）" style="margin-top:6px" value="${esc(S.cells[k] || '')}"><div class="row" style="margin-top:6px"><button type="button" class="primary" id="ttok">保存</button><button type="button" id="ttno">閉じる</button></div>`;
+        const v = $('#ttv', ted);
+        const ok = () => { const s = v.value.trim(); if (s) S.cells[k] = s; else delete S.cells[k]; persist(); close(); };
+        $('#ttok', ted).onclick = ok;
+        v.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); ok(); } });
+        v.focus(); v.select();
+      }
+      $('#ttno', ted).onclick = close;
+      draw();
+    }
+    function close() { sel = null; ted.classList.add('hidden'); ted.innerHTML = ''; draw(); }
+    $('#ttsat', box).onchange = (e) => { S.sat = e.target.checked; persist(); close(); };
+
+    // ----- 単語帳 -----
+    const cbox = $('.p-cards', box);
+    let C = load(CARDS, null);
+    if (!C || !Array.isArray(C.decks) || !C.decks.length) C = { decks: [{ id: uid(), name: '単語帳1', cards: [] }], cur: '' };
+    let study = { order: [], i: 0, back: false };
+    let opt = Object.assign({ shuffle: false, hideKnown: true, reverse: false }, load('mixall.tool.cards.opt', {}));
+    const saveC = () => save(CARDS, C);
+    const deck = () => C.decks.find((d) => d.id === C.cur) || C.decks[0];
+    function buildOrder() {
+      const list = deck().cards.filter((c) => !(opt.hideKnown && c.known)).map((c) => c.id);
+      if (opt.shuffle) for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+      study = { order: list, i: 0, back: false };
+    }
+    function drawCards() {
+      const dk = deck();
+      C.cur = dk.id;
+      const known = dk.cards.filter((c) => c.known).length;
+      const card = dk.cards.find((c) => c.id === study.order[study.i]);
+      const face = card ? (study.back !== opt.reverse ? card.back : card.front) : '';
+      cbox.innerHTML = `
+        <div class="row" style="margin-bottom:6px"><select id="cdk" class="grow" aria-label="単語帳">${C.decks.map((d) => `<option value="${esc(d.id)}"${d.id === dk.id ? ' selected' : ''}>${esc(d.name)}（${d.cards.length}）</option>`).join('')}</select>
+          <button type="button" id="cnew" title="単語帳を作る">＋</button><button type="button" id="cren" title="名前を変える">✎</button><button type="button" id="cdel" class="danger" title="単語帳を削除">🗑</button></div>
+        <div class="flash${study.back ? ' back' : ''}" id="cfl" role="button" tabindex="0" aria-label="カードをめくる">${card
+          ? `<div><small>${study.back !== opt.reverse ? '裏' : '表'}・${study.i + 1} / ${study.order.length}（押すとめくる）</small>${esc(face)}</div>`
+          : `<div class="muted" style="font-size:1rem;font-weight:500">${dk.cards.length ? (study.order.length ? 'おわり！ もう一度は「最初から」' : 'すべて覚えました 🎉') : '下の「カードを追加」から作りましょう'}</div>`}</div>
+        <div class="ctrls" style="margin:8px 0"><button type="button" id="cng" ${card ? '' : 'disabled'}>まだ</button><button type="button" class="primary" id="cok" ${card ? '' : 'disabled'}>覚えた ✓</button><button type="button" id="crs">最初から</button></div>
+        <div class="row muted" style="justify-content:center;gap:12px">
+          <label class="row" style="gap:3px"><input type="checkbox" id="osh" style="width:auto;min-height:0"${opt.shuffle ? ' checked' : ''}>シャッフル</label>
+          <label class="row" style="gap:3px"><input type="checkbox" id="ohk" style="width:auto;min-height:0"${opt.hideKnown ? ' checked' : ''}>覚えたカードを除く</label>
+          <label class="row" style="gap:3px"><input type="checkbox" id="orv" style="width:auto;min-height:0"${opt.reverse ? ' checked' : ''}>裏から出す</label>
+        </div>
+        <p class="muted" style="text-align:center;margin:4px 0">覚えた ${known} / ${dk.cards.length}</p>
+        <details class="card"><summary>カードを追加</summary>
+          <div class="row" style="margin-top:6px"><input id="cf" placeholder="表（例: apple）" class="grow" maxlength="200"><input id="cb" placeholder="裏（例: りんご）" class="grow" maxlength="400"><button type="button" class="primary" id="cadd">追加</button></div>
+          <textarea id="cbulk" rows="3" placeholder="まとめて追加: 1行に1枚「表,裏」または「表=裏」（タブ区切りも可）" style="margin-top:6px"></textarea>
+          <button type="button" id="cbulkgo" style="margin-top:4px">まとめて追加</button>
+        </details>
+        <details class="card"><summary>カードの一覧（${dk.cards.length}）</summary><ul class="cards">${dk.cards.map((c) => `<li class="${c.known ? 'known' : ''}" data-id="${esc(c.id)}"><span class="t">${c.known ? '✓ ' : ''}${esc(c.front)} — ${esc(c.back)}</span><button type="button" data-k title="覚えた印">${c.known ? '戻す' : '✓'}</button><button type="button" data-x class="danger" title="削除">✕</button></li>`).join('') || '<li class="muted">まだありません</li>'}</ul></details>`;
+      const flip = () => { if (card) { study.back = !study.back; drawCards(); const f = $('#cfl', cbox); if (f) f.focus(); } };
+      const fl = $('#cfl', cbox);
+      fl.onclick = flip;
+      fl.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } };
+      const next = () => { study.i++; study.back = false; drawCards(); };
+      $('#cng', cbox).onclick = next;
+      $('#cok', cbox).onclick = () => { card.known = true; saveC(); next(); };
+      $('#crs', cbox).onclick = () => { buildOrder(); drawCards(); };
+      $('#cdk', cbox).onchange = (e) => { C.cur = e.target.value; saveC(); buildOrder(); drawCards(); };
+      $('#cnew', cbox).onclick = () => { const n = (prompt('新しい単語帳の名前', `単語帳${C.decks.length + 1}`) || '').trim(); if (!n) return; const d = { id: uid(), name: n.slice(0, 40), cards: [] }; C.decks.push(d); C.cur = d.id; saveC(); buildOrder(); drawCards(); };
+      $('#cren', cbox).onclick = () => { const n = (prompt('単語帳の名前', dk.name) || '').trim(); if (!n) return; dk.name = n.slice(0, 40); saveC(); drawCards(); };
+      $('#cdel', cbox).onclick = () => {
+        if (!confirm(`「${dk.name}」を削除しますか？（カード ${dk.cards.length} 枚も消えます）`)) return;
+        C.decks = C.decks.filter((d) => d !== dk);
+        if (!C.decks.length) C.decks.push({ id: uid(), name: '単語帳1', cards: [] });
+        C.cur = C.decks[0].id; saveC(); buildOrder(); drawCards();
+      };
+      [['#osh', 'shuffle'], ['#ohk', 'hideKnown'], ['#orv', 'reverse']].forEach(([s, k]) => { $(s, cbox).onchange = (e) => { opt[k] = e.target.checked; save('mixall.tool.cards.opt', opt); buildOrder(); drawCards(); }; });
+      const add = (f, b) => { f = f.trim(); b = b.trim(); if (!f || !b) return false; dk.cards.push({ id: uid(), front: f.slice(0, 200), back: b.slice(0, 400), known: false }); return true; };
+      const reopen = () => { const d = $$('details', cbox)[0]; if (d) d.open = true; };
+      $('#cadd', cbox).onclick = () => {
+        if (!add($('#cf', cbox).value, $('#cb', cbox).value)) { $('#cf', cbox).focus(); return; }
+        saveC(); buildOrder(); drawCards(); reopen(); $('#cf', cbox).focus();
+      };
+      $('#cb', cbox).addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); $('#cadd', cbox).click(); } });
+      $('#cbulkgo', cbox).onclick = () => {
+        let n = 0;
+        $('#cbulk', cbox).value.split(/\r?\n/).forEach((line) => { const m = line.split(/\t|=|,|，|、/); if (m.length >= 2 && add(m[0], m.slice(1).join(','))) n++; });
+        if (!n) { alert('「表,裏」の形で1行ずつ入れてください'); return; }
+        saveC(); buildOrder(); drawCards(); reopen();
+      };
+      $$('.cards li[data-id]', cbox).forEach((li) => {
+        const c = dk.cards.find((x) => x.id === li.dataset.id);
+        $('[data-k]', li).onclick = () => { c.known = !c.known; saveC(); buildOrder(); drawCards(); $$('details', cbox)[1].open = true; };
+        $('[data-x]', li).onclick = () => { dk.cards = dk.cards.filter((x) => x !== c); saveC(); buildOrder(); drawCards(); $$('details', cbox)[1].open = true; };
+      });
+    }
+
+    draw();
+    buildOrder(); drawCards();
+    tickId = setInterval(() => { if (!sel) draw(); }, 30000);
+    showTab();
+    return {
+      stop() { clearInterval(tickId); },
+      storage(key) {
+        if (key === SCH && !sel) { S = Object.assign({ sat: false, cells: {}, times: DEF_TIMES }, load(SCH, {})); draw(); }
+        if (key === CARDS) { const a = document.activeElement; if (a && cbox.contains(a) && /INPUT|TEXTAREA/.test(a.tagName)) return; const v = load(CARDS, null); if (v && Array.isArray(v.decks) && v.decks.length) { C = v; buildOrder(); drawCards(); } }
+      }
+    };
+  }
+
+  // 小窓の中で Ctrl（⌘）＋Shift＋P を押したら、外側のページのコマンドパレットを開く
+  document.addEventListener('keydown', (e) => {
+    if (!((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey && (e.code === 'KeyP' || String(e.key).toLowerCase() === 'p'))) return;
+    try { if (window.top !== window && window.top.MixAllTools) { e.preventDefault(); window.top.MixAllTools.open(); } } catch (_) { /* 別サイトの中 */ }
+  }, true);
+
+  const VIEWS = { calc: viewCalc, timer: viewTimer, notes: viewNotes, translate: viewTranslate, school: viewSchool };
+  show(new URLSearchParams(location.search).get('t') || '');
+})();
+</script>
+</body>
+</html>
