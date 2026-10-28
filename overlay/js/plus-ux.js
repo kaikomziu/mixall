@@ -7,6 +7,8 @@
 (function () {
   'use strict';
   if (window.MixAllUX) return;
+  // ログイン中かどうかを最初に html へ印付けしておく（css/plus-tidy.css がホームの見た目を切り替える。読み込み途中のちらつき防止）
+  try { if (localStorage.getItem('netrify_session')) document.documentElement.classList.add('mx-signed'); } catch (_) { /* ignore */ }
 
   // ---------- トースト ----------
   const TOAST_KEY = 'mixall.pendingToasts';

@@ -58,7 +58,7 @@ writeFileSync(join(OUT, 'css/plus.css'), ['plus.css', ...readdirSync('overlay/cs
 const optional = (list) => list.filter((f) => existsSync(join('overlay', f)));
 const BUNDLES = {
   'js/plus-core.js': optional(['js/plus-ux.js', 'js/plus.js', 'js/plus-theme.js']),
-  'js/plus-late.js': optional(['js/vault-restore.js', 'js/plus-qol.js', 'js/plus-bookmarks.js', 'js/plus-tools.js'])
+  'js/plus-late.js': optional(['js/vault-restore.js', 'js/plus-qol.js', 'js/plus-bookmarks.js', 'js/plus-tools.js', 'js/plus-tidy.js'])
 };
 for (const [out, parts] of Object.entries(BUNDLES)) writeFileSync(join(OUT, out), parts.map((f) => readFileSync(join('overlay', f), 'utf8')).join('\n;\n'));
 const PLUS_PAGES = [[/^ghost\//i, 'plus-ghost.js'], [/^coin\//i, 'plus-coin.js'], [/^account\//i, 'plus-account.js'], [/^admin\/index\.html$/i, 'plus-admin.js'], [/^admin\/index\.html$/i, 'plus-admin-layout.js'], [/^pocket\/(room|thread)\.html$/i, 'plus-pocket.js'],

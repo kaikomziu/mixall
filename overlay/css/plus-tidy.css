@@ -1,0 +1,134 @@
+/* ===== 画面の整理（js/plus-tidy.js） ===== */
+
+/* ---- ヘッダーの「メニュー」ボタン ---- */
+header.top .mx-menu-open {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: 0 0 auto;
+  height: 36px; min-height: 0; padding: 0 12px !important; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 90%, transparent) !important;
+  background: transparent !important; color: var(--text) !important; box-shadow: none !important;
+  font-size: .86rem; font-weight: 700; cursor: pointer;
+}
+header.top .mx-menu-open svg { width: 18px; height: 18px; }
+header.top .mx-menu-open:hover,
+header.top .mx-menu-open[aria-expanded="true"] { background: color-mix(in srgb, var(--accent) 14%, transparent) !important; }
+
+/* ---- 同じメニューを2か所に出さない ----
+   PC: ヘッダーのリンク＋「メニュー」で足りるので、下部メニューを隠す
+   スマホ: 下部メニューがあるので、ヘッダーの横スクロールのリンク列を隠す（Ghost の画面など下部メニューが無いときは残す） */
+@media (min-width: 900px) {
+  /* 「UIの編集」中は並べ替えられるように出す */
+  html.mx-has-menu:not(.mx-editing) :is(.mixall-bottom-nav, .mixall-nav-panel, .mixall-nav-backdrop) { display: none !important; }
+  html.mx-has-menu body:has(.mixall-bottom-nav) { padding-bottom: 24px; }
+}
+@media (max-width: 899px) {
+  html.mx-has-menu body:has(.mixall-bottom-nav):not(:has(.ghost-bottom-nav)) header.top nav.services { display: none; }
+  html.mx-has-menu body:has(.mixall-bottom-nav):not(:has(.ghost-bottom-nav)) header.top .mx-menu-open { margin-right: auto; }
+  header.top .mx-menu-open { width: 36px; padding: 0 !important; }
+  header.top .mx-menu-open span { display: none; }
+}
+/* style.css はスマホでヘッダーを3列の grid にしていて、ボタンが増えると2行目に落ちるので、1行の flex にする */
+@media (max-width: 680px) {
+  html.mx-has-menu header.top { display: flex; align-items: center; gap: 4px 6px; }
+  html.mx-has-menu header.top nav.services { flex: 1 1 auto; min-width: 0; width: auto; }
+  html.mx-has-menu header.top > :is(.mx-bm-open, .mx-search-open, .settings-widget) { flex: 0 0 auto; }
+}
+
+/* ---- 「メニュー」の一覧 ---- */
+.mx-menu {
+  position: fixed; inset: 0; z-index: 200; display: flex; justify-content: center; align-items: flex-start;
+  padding: 64px 16px 16px; background: rgba(0, 0, 0, .38);
+  animation: mx-menu-in .14s ease-out;
+}
+.mx-menu[hidden] { display: none; }
+@keyframes mx-menu-in { from { opacity: 0; } }
+.mx-menu-inner {
+  width: min(1080px, 100%); max-height: calc(100vh - 80px); overflow: auto;
+  padding: 12px 18px 16px; border-radius: 18px;
+  background: var(--panel); border: 1px solid var(--border); box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
+}
+.mx-menu-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.mx-menu-head b { font-size: 1rem; }
+.mx-menu .mx-menu-close {
+  width: 34px; height: 34px; min-height: 0; padding: 0 !important; border-radius: 10px; font-size: 1.3rem; line-height: 1;
+  border: 0 !important; background: transparent !important; color: var(--text-dim) !important; box-shadow: none !important;
+}
+.mx-menu .mx-menu-close:hover { color: var(--text) !important; background: color-mix(in srgb, var(--text) 8%, transparent) !important; }
+.mx-menu-grid { columns: 4 200px; column-gap: 20px; }
+.mx-menu-grid section { break-inside: avoid; margin: 0 0 14px; }
+.mx-menu-grid h3 { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; font-size: .76rem; font-weight: 700; color: var(--text-dim); letter-spacing: .04em; }
+.mx-menu-grid h3 svg { width: 15px; height: 15px; }
+.mx-menu-grid a {
+  display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 6px 10px; border-radius: 10px;
+  color: var(--text); text-decoration: none; font-size: .9rem; line-height: 1.35;
+}
+.mx-menu-grid a svg { width: 17px; height: 17px; flex: 0 0 auto; color: var(--text-dim); }
+.mx-menu-grid a:hover, .mx-menu-grid a:focus-visible { background: color-mix(in srgb, var(--text) 7%, transparent); outline: none; }
+.mx-menu-grid a.on { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.mx-menu-grid a.on svg { color: var(--accent); }
+.mx-menu-sub { margin: 4px 0 4px 12px; padding-left: 6px; border-left: 2px solid color-mix(in srgb, var(--border) 80%, transparent); }
+.mx-menu-sub p { margin: 6px 10px 2px; font-size: .72rem; color: var(--text-dim); }
+.mx-menu-sub a { font-size: .86rem; min-height: 30px; }
+html.mx-menu-shown { overflow: hidden; }
+@media (max-width: 640px) {
+  .mx-menu { padding: 0; align-items: stretch; }
+  .mx-menu-inner { width: 100%; max-height: none; border-radius: 0; border: 0; padding: 12px 14px calc(16px + env(safe-area-inset-bottom)); }
+  .mx-menu-grid { columns: 2 140px; column-gap: 10px; }
+}
+
+/* ---- 設定（⚙）のタブ ---- */
+.settings-panel .mx-set-tabs {
+  position: sticky; top: -1px; z-index: 2; display: flex; gap: 3px; margin: 0 0 10px; padding: 4px; border-radius: 12px;
+  background: var(--panel-2, var(--panel)); border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+.settings-panel .mx-set-tabs button {
+  flex: 1 1 0; min-height: 30px; padding: 4px 6px !important; border-radius: 9px; font-size: .8rem; font-weight: 700; white-space: nowrap;
+  border: 0 !important; background: transparent !important; color: var(--text-dim) !important; box-shadow: none !important;
+}
+.settings-panel .mx-set-tabs button.on { background: var(--panel) !important; color: var(--text) !important; box-shadow: 0 1px 3px rgba(0, 0, 0, .18) !important; }
+.settings-panel .mx-set-pane[hidden] { display: none !important; }
+.settings-panel .mx-set-pane > h4:first-child { margin-top: 0; }
+
+/* ---- ホーム（ログイン中）: 大きな案内を1行のあいさつに ---- */
+html.mx-signed .home-hero { padding: 16px 20px !important; text-align: left; }
+html.mx-signed .home-hero > :not(.mx-hello) { display: none !important; }
+html.mx-signed main > section.card:has(> a[href="/account/"]):not(.home-hero) { display: none; }
+.mx-hello { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; }
+.mx-hello p { margin: 0; flex: 1 1 auto; font-size: 1.05rem; }
+.mx-hello-links { display: flex; flex-wrap: wrap; gap: 4px; }
+.mx-hello-links a { padding: 5px 10px; border-radius: 9px; font-size: .84rem; font-weight: 600; color: var(--text-dim); text-decoration: none; }
+.mx-hello-links a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 7%, transparent); }
+/* サービス一覧は名前だけの小さなタイルに（説明はタイルを指すと出る） */
+.mx-services-title { margin: 22px 0 10px; font-size: 1.05rem; }
+html.mx-signed #services.feature-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+html.mx-signed #services.feature-grid .card { padding: 12px 14px !important; }
+html.mx-signed #services.feature-grid h2 { margin: 0; font-size: .95rem; }
+html.mx-signed #services.feature-grid p { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---- カードのタブ（アカウント設定） ---- */
+.mx-ctabs {
+  position: sticky; top: 60px; z-index: 5; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
+  margin: 0 0 14px; padding: 5px; border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent); border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.mx-ctabs::-webkit-scrollbar { display: none; }
+.mx-ctabs[hidden], .mx-ctabs button[hidden] { display: none !important; }
+.mx-ctabs button {
+  flex: 1 0 auto; min-height: 36px; padding: 6px 14px !important; border-radius: 10px; font-weight: 700; font-size: .88rem; white-space: nowrap;
+  border: 0 !important; background: transparent !important; color: var(--text-dim) !important; box-shadow: none !important;
+}
+.mx-ctabs button:hover { color: var(--text) !important; }
+.mx-ctabs button.on { background: color-mix(in srgb, var(--accent) 16%, transparent) !important; color: var(--text) !important; }
+main.mx-ctabs-on > .card.mx-ctab-off { display: none !important; }
+
+/* ---- 折りたたみカード（Uch・ぽけっと） ---- */
+.mx-fold > .mx-fold-head { display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer; user-select: none; }
+.mx-fold > .mx-fold-head::after {
+  content: ""; margin-left: auto; width: 8px; height: 8px; flex: 0 0 auto;
+  border-right: 2px solid var(--text-dim); border-bottom: 2px solid var(--text-dim);
+  transform: rotate(-45deg); transition: transform .15s;
+}
+.mx-fold.open > .mx-fold-head { margin-bottom: 10px; }
+.mx-fold.open > .mx-fold-head::after { transform: rotate(45deg); }
+.mx-fold:not(.open) > :not(.mx-fold-head) { display: none !important; }
+.mx-fold:not(.open) { padding-top: 14px; padding-bottom: 14px; }
